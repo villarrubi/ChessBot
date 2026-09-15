@@ -433,6 +433,12 @@ internal sealed class MainForm : Form
         config["id"] = "launcher-cycle-" + stamp;
         config["candidate_version"] = string.IsNullOrWhiteSpace(version.Text) ? "launcher-nnue-" + stamp : version.Text.Trim();
         config["source_pgns"] = new JsonArray();
+        string activeNetwork = Path.Combine(root, "data", "networks", "nnue-active.nnue");
+        if (File.Exists(activeNetwork))
+        {
+            config["reference"] = "data/networks/nnue-active.nnue";
+            config["reference_kind"] = "nnue";
+        }
 
         JsonObject budgets = ObjectAt(config, "budgets");
         budgets["selfplay_games"] = EvenCount(selfplayGames.Value);
@@ -466,6 +472,8 @@ internal sealed class MainForm : Form
         evaluation["depth"] = (int)searchDepth.Value;
         evaluation["benchmark_depth"] = Math.Min(12, (int)searchDepth.Value + 1);
         evaluation["max_plies"] = (int)maxPlies.Value;
+        evaluation["minimum_lower_score"] = 0.5;
+        evaluation["minimum_independent_samples"] = Math.Max(4, EvenCount(evaluationGames.Value) / 2);
 
         string configDirectory = Path.Combine(root, "build", "launcher-configs");
         Directory.CreateDirectory(configDirectory);
