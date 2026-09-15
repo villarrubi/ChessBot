@@ -56,6 +56,18 @@ class Cycle:
         self.budgets = self.config.get("budgets", {})
         self.max_seconds = float(self.budgets.get("max_seconds", 3600))
         self.max_bytes = int(float(self.budgets.get("max_storage_mb", 1024)) * 1024 * 1024)
+        if self.config.get("schema_version") != 1 or not self.config.get("id"):
+            raise ValueError("config requires schema_version 1 and a non-empty id")
+        selfplay_games = int(self.budgets.get("selfplay_games", 0))
+        evaluation_games = int(self.budgets.get("evaluation_games", 16))
+        if selfplay_games < 0 or selfplay_games % 2:
+            raise ValueError("selfplay_games must be a nonnegative even number")
+        if evaluation_games < 2 or evaluation_games % 2:
+            raise ValueError("evaluation_games must be a positive even number")
+        if self.max_seconds <= 0 or self.max_bytes <= 0:
+            raise ValueError("time and storage budgets must be positive")
+        if int(self.budgets.get("threads", 1)) < 1:
+            raise ValueError("threads must be positive")
 
     def remaining(self) -> float:
         return self.max_seconds - (time.monotonic() - self.started)
@@ -109,8 +121,6 @@ class Cycle:
         selfplay = self.config.get("selfplay", {})
         selfplay_games = int(self.budgets.get("selfplay_games", 0))
         if selfplay.get("enabled", selfplay_games > 0) and selfplay_games:
-            if selfplay_games % 2:
-                raise ValueError("selfplay_games must be even")
             match = self.output / "selfplay"
             options = json.dumps(self.options(reference_kind, reference))
             command = [python, str(ROOT / "tools" / "match_runner.py"), "--engine-a",
@@ -188,18 +198,17 @@ class Cycle:
             command.extend(["--promote-to", str((ROOT / promotion).resolve())])
         self.run("candidate_evaluation", command)
         decision = json.loads((evaluation / "decision.json").read_text(encoding="utf-8"))
-        return {"decision": decision["decision"], "candidate": candidate,
-                "decision_report": evaluation / "decision.json", "engine": engine,
-                "reference": reference, "openings": openings}
+        return {"decision": decision["decision"], "engine": engine}
 
     def manifest(self, status: str, result: dict[str, Any] | None,
                  error: str | None = None) -> dict[str, Any]:
         files = []
         if self.output.exists():
-            for path in sorted(self.output.rglob("*")):
-                if path.is_file() and path.name != "manifest.json":
-                    files.append({"path": str(path.relative_to(self.output)),
-                                  "bytes": path.stat().st_size, "sha256": digest(path)})
+            paths = (path for path in sorted(self.output.rglob("*"))
+                     if path.is_file() and path.name != "manifest.json")
+            files.extend({"path": str(path.relative_to(self.output)),
+                          "bytes": path.stat().st_size, "sha256": digest(path)}
+                         for path in paths)
         engine_version = None
         if result:
             run = subprocess.run([str(result["engine"]), "--help"], capture_output=True,

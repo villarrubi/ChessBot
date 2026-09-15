@@ -27,21 +27,14 @@ class OpeningBook {
     void load(const std::string &path);
     void clear();
     std::optional<BookSelection> select(Board board, BookPolicy policy, std::uint64_t seed) const;
-    bool empty() const {
-        return entries_.empty();
-    }
-    const std::string &path() const {
-        return path_;
-    }
     const std::string &version() const {
         return version_;
     }
 
   private:
     std::unordered_map<std::string, std::vector<BookMove>> entries_;
-    std::string path_, version_ = "unversioned";
+    std::string version_ = "unversioned";
 };
 
-std::string bookPositionKey(const Board &board);
 std::string_view bookPolicyName(BookPolicy policy);
 } // namespace chessbot

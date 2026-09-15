@@ -34,9 +34,6 @@ class Move {
     explicit operator bool() const {
         return value_ != 0;
     }
-    std::uint32_t value() const {
-        return value_;
-    }
     std::string uci() const;
     bool operator==(const Move &) const = default;
 };

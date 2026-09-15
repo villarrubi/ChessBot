@@ -346,10 +346,14 @@ def statistics(games: list[dict[str, Any]], sprt: tuple[float, float, float, flo
     sample_rate = sum(samples) / len(samples)
     variance = sum((sample - sample_rate) ** 2 for sample in samples) / max(1, len(samples) - 1)
     margin = 1.96 * math.sqrt(variance / len(samples)) if len(samples) >= 2 else 1.0
-    clamp_probability = lambda value: min(0.999, max(0.001, value))
+    def clamp_probability(value: float) -> float:
+        return min(0.999, max(0.001, value))
+
     confidence = [clamp_probability(sample_rate - margin),
                   clamp_probability(sample_rate + margin)]
-    elo = lambda value: 400 * math.log10(value / (1 - value))
+
+    def elo(value: float) -> float:
+        return 400 * math.log10(value / (1 - value))
     result = {"games": len(scores), "wins": scores.count(1.0), "draws": scores.count(0.5),
               "losses": scores.count(0.0), "score": sum(scores), "score_rate": round(rate, 5),
               "score_confidence95": [round(value, 5) for value in confidence],
@@ -361,7 +365,9 @@ def statistics(games: list[dict[str, Any]], sprt: tuple[float, float, float, flo
                                     "normal approximation over individual game scores")}
     if sprt:
         elo0, elo1, alpha, beta = sprt
-        probability = lambda value: 1 / (1 + 10 ** (-value / 400))
+        def probability(value: float) -> float:
+            return 1 / (1 + 10 ** (-value / 400))
+
         p0, p1 = probability(elo0), probability(elo1)
         llr = sum(score * math.log(p1 / p0) + (1 - score) * math.log((1 - p1) / (1 - p0))
                   for score in samples)

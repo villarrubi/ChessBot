@@ -29,7 +29,7 @@ def load_rows(path: Path) -> list[dict[str, object]]:
 
 
 def load_parameters(path: Path) -> dict[str, int | str]:
-    parameters: dict[str, int | str] = {name: 1000 for name in COMPONENTS}
+    parameters: dict[str, int | str] = dict.fromkeys(COMPONENTS, 1000)
     parameters["calibration"] = 1000
     parameters["version"] = "hce-default-v1"
     for raw_line in path.read_text(encoding="utf-8").splitlines():

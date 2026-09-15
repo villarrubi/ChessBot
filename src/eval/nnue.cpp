@@ -108,23 +108,33 @@ NnueAccumulator NnueNetwork::refresh(const Board &board) const {
 
 void NnueNetwork::updateAfterMove(NnueAccumulator &accumulator, const Board &after, Move move,
                                   const StateInfo &state) const {
+    applyMoveDelta(accumulator, after, move, state, 1);
+}
+
+void NnueNetwork::updateBeforeUnmake(NnueAccumulator &accumulator, const Board &after, Move move,
+                                     const StateInfo &state) const {
+    applyMoveDelta(accumulator, after, move, state, -1);
+}
+
+void NnueNetwork::applyMoveDelta(NnueAccumulator &accumulator, const Board &after, Move move,
+                                 const StateInfo &state, int direction) const {
     if (accumulator.size != hiddenSize_)
         throw std::invalid_argument("NNUE: accumulator belongs to another network");
     const Color movingColor = opposite(after.sideToMove());
-    addFeature(accumulator, {move.moving(), movingColor}, move.from(), -1);
+    addFeature(accumulator, {move.moving(), movingColor}, move.from(), -direction);
     if (state.captured.type != None) {
         const Square capturedSquare =
             move.has(EnPassant) ? move.to() + (movingColor == White ? -8 : 8) : move.to();
-        addFeature(accumulator, state.captured, capturedSquare, -1);
+        addFeature(accumulator, state.captured, capturedSquare, -direction);
     }
     const PieceType placed = move.promotion() == None ? move.moving() : move.promotion();
-    addFeature(accumulator, {placed, movingColor}, move.to(), 1);
+    addFeature(accumulator, {placed, movingColor}, move.to(), direction);
     if (move.has(Castle)) {
         const bool kingSide = move.to() > move.from();
         const Square rookFrom = (movingColor == White ? 0 : 56) + (kingSide ? 7 : 0);
         const Square rookTo = move.from() + (kingSide ? 1 : -1);
-        addFeature(accumulator, {Rook, movingColor}, rookFrom, -1);
-        addFeature(accumulator, {Rook, movingColor}, rookTo, 1);
+        addFeature(accumulator, {Rook, movingColor}, rookFrom, -direction);
+        addFeature(accumulator, {Rook, movingColor}, rookTo, direction);
     }
 }
 

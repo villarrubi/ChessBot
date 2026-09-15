@@ -32,6 +32,8 @@ class NnueNetwork {
     NnueAccumulator refresh(const Board &board) const;
     void updateAfterMove(NnueAccumulator &accumulator, const Board &after, Move move,
                          const StateInfo &state) const;
+    void updateBeforeUnmake(NnueAccumulator &accumulator, const Board &after, Move move,
+                            const StateInfo &state) const;
     Score evaluate(const Board &board, const NnueAccumulator &accumulator) const;
     Score evaluate(const Board &board) const {
         return evaluate(board, refresh(board));
@@ -46,5 +48,7 @@ class NnueNetwork {
 
     static int feature(Piece piece, Square square);
     void addFeature(NnueAccumulator &accumulator, Piece piece, Square square, int sign) const;
+    void applyMoveDelta(NnueAccumulator &accumulator, const Board &after, Move move,
+                        const StateInfo &state, int direction) const;
 };
 } // namespace chessbot

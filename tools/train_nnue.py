@@ -79,14 +79,14 @@ def loss_values(prediction: torch.Tensor, outcomes: torch.Tensor, teachers: torc
                                                                                      dict[str, float]]:
     outcome_loss = nn.functional.binary_cross_entropy_with_logits(prediction * WDL_SLOPE,
                                                                    outcomes)
-    teacher_mask = searched if searched.any() else torch.ones_like(searched)
+    if target == "search" and not searched.any():
+        raise ValueError("search target requires search_score_cp labels")
+    teacher_mask = searched if target == "search" else torch.ones_like(searched)
     teacher_loss = nn.functional.smooth_l1_loss(prediction[teacher_mask] / 400,
                                                 teachers[teacher_mask] / 400)
     if target == "result":
         total = outcome_loss
     elif target == "search":
-        if not searched.any():
-            raise ValueError("search target requires search_score_cp labels")
         total = teacher_loss
     else:
         total = outcome_loss + teacher_weight * teacher_loss
@@ -134,7 +134,7 @@ def quantized_metrics(network: QuantizedNetwork, rows: list[dict[str, Any]], tar
     outcome = np.asarray(outcomes)
     teacher = np.asarray(teachers)
     mask = np.asarray(searched, dtype=bool)
-    if not mask.any():
+    if target != "search":
         mask = np.ones(len(rows), dtype=bool)
     probability = 1 / (1 + np.exp(-prediction * WDL_SLOPE))
     clipped = np.clip(probability, 1e-7, 1 - 1e-7)

@@ -6,9 +6,10 @@ import csv
 import json
 import random
 import subprocess
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import chess
 import chess.pgn

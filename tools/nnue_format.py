@@ -22,6 +22,27 @@ class QuantizedNetwork:
     output_bias: int
     output_weights: list[int]
 
+    def validate(self) -> None:
+        if not self.version or any(character.isspace() for character in self.version):
+            raise ValueError("NNUE: version must be one non-empty token")
+        if not 1 <= self.hidden_size <= MAX_HIDDEN:
+            raise ValueError("NNUE: hidden size must be between 1 and 64")
+        if not 1 <= self.input_quant <= 32768 or not 1 <= self.output_quant <= 32768:
+            raise ValueError("NNUE: quantization must be between 1 and 32768")
+        if len(self.hidden_bias) != self.hidden_size:
+            raise ValueError("NNUE: invalid hidden bias count")
+        if len(self.input_weights) != INPUT_SIZE * self.hidden_size:
+            raise ValueError("NNUE: invalid input weight count")
+        if len(self.output_weights) != self.hidden_size:
+            raise ValueError("NNUE: invalid output weight count")
+        if (any(not -32768 <= value <= 32767 for value in self.input_weights) or
+                any(not -32768 <= value <= 32767 for value in self.output_weights)):
+            raise ValueError("NNUE: weight outside int16 range")
+        if any(not -100_000_000 <= value <= 100_000_000 for value in self.hidden_bias):
+            raise ValueError("NNUE: hidden bias outside supported range")
+        if not -10_000_000_000 <= self.output_bias <= 10_000_000_000:
+            raise ValueError("NNUE: output bias outside supported range")
+
     def evaluate(self, board: chess.Board) -> int:
         accumulator = list(self.hidden_bias)
         for square, piece in board.piece_map().items():
@@ -87,11 +108,14 @@ def read_network(path: Path) -> QuantizedNetwork:
     index = _take(tokens, index, "END")
     if index != len(tokens):
         raise ValueError("NNUE: trailing data")
-    return QuantizedNetwork(version, hidden, input_quant, output_quant, hidden_bias,
-                            input_weights, output_bias, output_weights)
+    network = QuantizedNetwork(version, hidden, input_quant, output_quant, hidden_bias,
+                               input_weights, output_bias, output_weights)
+    network.validate()
+    return network
 
 
 def write_network(path: Path, network: QuantizedNetwork) -> None:
+    network.validate()
     def values(name: str, sequence: list[int]) -> str:
         return name + " " + " ".join(str(value) for value in sequence)
 

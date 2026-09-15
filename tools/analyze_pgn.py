@@ -222,7 +222,9 @@ def main() -> None:
         args.depth = 4
     if args.multipv < 1 or args.multipv > 10:
         parser.error("multipv must be between 1 and 10")
-    if args.depth is not None and args.depth < 1 or args.movetime_ms is not None and args.movetime_ms < 1 or args.nodes is not None and args.nodes < 1:
+    if ((args.depth is not None and args.depth < 1) or
+            (args.movetime_ms is not None and args.movetime_ms < 1) or
+            (args.nodes is not None and args.nodes < 1)):
         parser.error("search limits must be positive")
     thresholds = (args.inaccuracy, args.mistake, args.blunder)
     if not (0 <= thresholds[0] <= thresholds[1] <= thresholds[2]):

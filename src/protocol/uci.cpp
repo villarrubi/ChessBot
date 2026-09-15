@@ -226,8 +226,7 @@ void UciProtocol::writeInfo(const SearchResult &result, int hashFull) {
             std::to_string(result.aspirationResearches) + " null_cutoffs " +
             std::to_string(result.nullMoveCutoffs) + "/" + std::to_string(result.nullMoveAttempts) +
             " lmr_researches " + std::to_string(result.lmrResearches) + "/" +
-            std::to_string(result.lmrReductions) + " futility " +
-            std::to_string(result.futilityPrunes) + " hash_mb " +
+            std::to_string(result.lmrReductions) + " hash_mb " +
             std::to_string(engine_.hashSize()));
     }
 }

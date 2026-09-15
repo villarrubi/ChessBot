@@ -112,7 +112,7 @@ class Searcher {
     std::uint64_t nodes_ = 0, qnodes_ = 0, ttHits_ = 0, betaCutoffs_ = 0;
     std::uint64_t firstMoveCutoffs_ = 0, generatedMoves_ = 0, aspirationResearches_ = 0;
     std::uint64_t nullMoveAttempts_ = 0, nullMoveCutoffs_ = 0, lmrReductions_ = 0;
-    std::uint64_t lmrResearches_ = 0, futilityPrunes_ = 0;
+    std::uint64_t lmrResearches_ = 0;
     int selectiveDepth_ = 0, maximumBranching_ = 0, nullDepth_ = 0;
 
     bool optimized() const {
@@ -122,17 +122,15 @@ class Searcher {
         return network_ ? network_->evaluate(board_, accumulator_)
                         : evaluate(board_, evaluationMode_, evaluationParameters_);
     }
-    void makeMove(Move move, StateInfo &state, NnueAccumulator &previous) {
-        if (network_)
-            previous = accumulator_;
+    void makeMove(Move move, StateInfo &state) {
         board_.makeMove(move, state);
         if (network_)
             network_->updateAfterMove(accumulator_, board_, move, state);
     }
-    void unmakeMove(Move move, const StateInfo &state, const NnueAccumulator &previous) {
-        board_.unmakeMove(move, state);
+    void unmakeMove(Move move, const StateInfo &state) {
         if (network_)
-            accumulator_ = previous;
+            network_->updateBeforeUnmake(accumulator_, board_, move, state);
+        board_.unmakeMove(move, state);
     }
     void clearPv() {
         for (auto &row : pv_)
@@ -151,7 +149,6 @@ class Searcher {
         result_.nullMoveCutoffs = nullMoveCutoffs_;
         result_.lmrReductions = lmrReductions_;
         result_.lmrResearches = lmrResearches_;
-        result_.futilityPrunes = futilityPrunes_;
         result_.maximumBranching = maximumBranching_;
         result_.selectiveDepth = selectiveDepth_;
         result_.timeMs = timer_.elapsedMs();
@@ -226,8 +223,7 @@ class Searcher {
             if (contains(excluded, move))
                 continue;
             StateInfo state;
-            NnueAccumulator previous;
-            makeMove(move, state, previous);
+            makeMove(move, state);
             Score score;
             if (optimized() && searched > 0) {
                 score = -negamax(depth - 1, -alpha - 1, -alpha, 1, true);
@@ -235,7 +231,7 @@ class Searcher {
                     score = -negamax(depth - 1, -beta, -alpha, 1, true);
             } else
                 score = -negamax(depth - 1, -beta, -alpha, 1, true);
-            unmakeMove(move, state, previous);
+            unmakeMove(move, state);
             if (stopped())
                 return {};
             ++searched;
@@ -362,8 +358,7 @@ class Searcher {
         for (const Move move : moves) {
             const bool isQuiet = quiet(move);
             StateInfo state;
-            NnueAccumulator previous;
-            makeMove(move, state, previous);
+            makeMove(move, state);
             const bool givesCheck = board_.inCheck(board_.sideToMove());
             const int childDepth = depth - 1;
             Score score;
@@ -386,7 +381,7 @@ class Searcher {
                     score = -negamax(childDepth, -beta, -alpha, ply + 1, true);
             } else
                 score = -negamax(childDepth, -beta, -alpha, ply + 1, true);
-            unmakeMove(move, state, previous);
+            unmakeMove(move, state);
             if (stopped())
                 return 0;
             const int moveIndex = searched++;
@@ -447,10 +442,9 @@ class Searcher {
         int searched = 0;
         for (const Move move : moves) {
             StateInfo state;
-            NnueAccumulator previous;
-            makeMove(move, state, previous);
+            makeMove(move, state);
             const Score score = -quiescence(-beta, -alpha, ply + 1);
-            unmakeMove(move, state, previous);
+            unmakeMove(move, state);
             if (stopped())
                 return 0;
             if (score > alpha) {

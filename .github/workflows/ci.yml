@@ -55,6 +55,7 @@ jobs:
       - if: runner.os == 'Windows' && matrix.config == 'Release'
         run: python tools/test_tuning.py --engine build/Release/chessbot.exe
       - run: python tools/check_format.py
+      - run: ruff check tools
 
   sanitizers:
     runs-on: ubuntu-latest

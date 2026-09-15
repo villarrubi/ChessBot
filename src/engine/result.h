@@ -28,7 +28,6 @@ struct SearchResult {
     std::uint64_t nullMoveCutoffs = 0;
     std::uint64_t lmrReductions = 0;
     std::uint64_t lmrResearches = 0;
-    std::uint64_t futilityPrunes = 0;
     int maximumBranching = 0;
     std::vector<Move> principalVariation;
     std::vector<RootVariation> variations;

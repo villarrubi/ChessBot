@@ -145,23 +145,30 @@ def main() -> None:
                    for index in range(0, len(game_scores) - 1, 2)]
     samples = pair_scores if len(pair_scores) >= 2 else game_scores
     score_rate = score_a / len(game_scores)
-    variance = (sum((sample - score_rate) ** 2 for sample in samples) /
+    sample_rate = sum(samples) / len(samples)
+    variance = (sum((sample - sample_rate) ** 2 for sample in samples) /
                 (len(samples) - 1)) if len(samples) >= 2 else 0.0
     margin = 1.96 * math.sqrt(variance / max(1, len(samples)))
-    confidence = [max(0.001, score_rate - margin), min(0.999, score_rate + margin)]
-    elo = lambda rate: 400 * math.log10(rate / (1 - rate))
+    def clamp_probability(value: float) -> float:
+        return min(0.999, max(0.001, value))
+
+    def elo(rate: float) -> float:
+        return 400 * math.log10(rate / (1 - rate))
+
+    confidence = [clamp_probability(sample_rate - margin),
+                  clamp_probability(sample_rate + margin)]
     summary = {
         "games": len(games),
         "results": {result: sum(g.headers["Result"] == result for g in games)
                     for result in ("1-0", "0-1", "1/2-1/2", "*")},
-        "paired_colors": args.games > 1,
+        "paired_colors": args.games > 1 and args.games % 2 == 0,
         "score_a": score_a,
         "score_b": len(games) - score_a,
         "wdl_a": {"wins": game_scores.count(1.0), "draws": game_scores.count(0.5),
                   "losses": game_scores.count(0.0)},
         "score_rate_a": round(score_rate, 4),
         "score_confidence95": [round(value, 4) for value in confidence],
-        "elo_estimate": round(elo(min(0.999, max(0.001, score_rate))), 1),
+        "elo_estimate": round(elo(clamp_probability(score_rate)), 1),
         "elo_confidence95": [round(elo(value), 1) for value in confidence],
         "confidence_method": "normal approximation over paired-opening scores",
         "depth": args.depth,

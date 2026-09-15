@@ -52,17 +52,11 @@ class Engine {
         evaluationMode_ = mode;
         table_.clear();
     }
-    EvaluationMode evaluationMode() const {
-        return evaluationMode_;
-    }
     void setEvaluationFile(const std::string &path) {
         stop();
         evaluationParameters_ =
             path.empty() ? EvaluationParameters{} : loadEvaluationParameters(path);
         table_.clear();
-    }
-    const EvaluationParameters &evaluationParameters() const {
-        return evaluationParameters_;
     }
     void setNnueFile(const std::string &path) {
         stop();
@@ -80,15 +74,6 @@ class Engine {
             throw std::invalid_argument("NNUE requires a loaded NNUEFile");
         nnueEnabled_ = enabled;
         table_.clear();
-    }
-    bool nnueEnabled() const {
-        return nnueEnabled_;
-    }
-    const NnueNetwork &network() const {
-        return network_;
-    }
-    int moveOverhead() const {
-        return moveOverheadMs_;
     }
     void setOwnBook(bool enabled) {
         stop();

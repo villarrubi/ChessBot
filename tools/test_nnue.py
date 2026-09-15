@@ -54,6 +54,13 @@ def main() -> None:
         network_path = Path(directory) / "fixture.nnue"
         write_network(network_path, fixture())
         network = read_network(network_path)
+        invalid = fixture()
+        invalid.input_quant = 0
+        try:
+            write_network(Path(directory) / "invalid.nnue", invalid)
+            raise AssertionError("invalid quantization was accepted")
+        except ValueError:
+            pass
         checked = 0
         for board in positions():
             run = subprocess.run([str(engine_path), "eval", "--fen", board.fen(),

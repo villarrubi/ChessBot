@@ -195,10 +195,10 @@
       "output_weights": 0
     },
     "memory_bytes": 49352,
-    "network": "build\\phase9-training-v2\\candidate.nnue",
+    "network": "build\\phase9-clean-training\\candidate.nnue",
     "network_sha256": "d108fd11efc5c81bf9de5313897eb65600fdb74c89ac28904c6587d49ad6cc87",
-    "checkpoint": "build\\phase9-training-v2\\checkpoint.pt",
+    "checkpoint": "build\\phase9-clean-training\\checkpoint.pt",
     "checkpoint_sha256": "cfcee98794f2ec5bc0f327b964702c554ca80910f69986af0c67f9a783c83aaa"
   },
-  "engine_commit": "33aafae9d30cd702cc5eaa8ea5fbc81920de2626"
+  "engine_commit": "218a8f359b04d3e3a9befabdffee4ad64af7df81"
 }

@@ -11,7 +11,7 @@ import chess
 import chess.pgn
 import chess.polyglot
 
-from match_runner import load_openings
+from match_runner import load_openings, statistics
 
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -53,6 +53,12 @@ with tempfile.TemporaryDirectory() as directory:
     assert len(load_openings(root / "tests" / "positions" / "analysis_sample.pgn")) == 1
     assert len(load_openings(epd)) == len(load_openings(fen)) == len(load_openings(uci)) == 1
     assert load_openings(polyglot)[0].moves == ["e2e4"]
+
+    decisive = [{"result": "0-1", "engine_a_color": "white",
+                 "opening": {"id": str(index), "start_fen": "startpos", "moves_uci": []}}
+                for index in range(8)]
+    extreme = statistics(decisive, None, paired=False)
+    assert extreme["score_rate"] == 0 and extreme["elo_confidence95"][0] == -1199.83
 
     # A/F: free paired game, both engines think from move one without a book.
     free = run(temporary / "free", "--games", "2", "--depth", "1", "--max-plies", "4",

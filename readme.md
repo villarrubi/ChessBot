@@ -243,8 +243,7 @@ ChessBot/
 │   ├── eval/         # Evaluación manual, NNUE y desglose
 │   ├── engine/       # API, límites y resultados
 │   ├── protocol/     # UCI
-│   ├── openings/     # Libro y base de aperturas
-│   └── learning/     # Exportación de características e inferencia
+│   └── openings/     # Libro y base de aperturas
 ├── tests/            # Reglas, PERFT, búsqueda y regresiones
 ├── tools/            # Scripts Python de análisis y experimentos
 ├── data/
@@ -259,7 +258,7 @@ ChessBot/
 
 Ya están disponibles `compare_engines.py`, `match_runner.py`, `analyze_pgn.py`, `explain_analysis.py`, `generate_dataset.py`, `tune_eval.py`, `train_nnue.py`, `evaluate_candidate.py` y `learning_cycle.py`.
 
-FEN se usa para posiciones; PGN con metadatos JSON, para partidas; CSV/Parquet y posteriormente shards binarios, para entrenamiento. El binario, la búsqueda, el evaluador, el libro, las redes y los datasets se versionan de forma independiente.
+FEN se usa para posiciones; PGN con metadatos JSON, para partidas; y CSV/Parquet o shards binarios opcionales, para entrenamiento. El binario, la búsqueda, el evaluador, el libro, las redes y los datasets se versionan de forma independiente.
 
 ## Calidad y alcance
 

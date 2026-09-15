@@ -47,7 +47,6 @@ class MoveList {
 
 MoveList pseudoLegalMoveList(const Board &board);
 MoveList legalMoveList(Board &board);
-std::vector<Move> pseudoLegalMoves(const Board &board);
 std::vector<Move> legalMoves(Board &board);
 std::uint64_t perft(Board &board, int depth);
 std::vector<std::pair<Move, std::uint64_t>> perftDivide(Board &board, int depth);

@@ -95,10 +95,6 @@ MoveList legalMoveList(Board &board) {
     candidates.resize(count);
     return candidates;
 }
-std::vector<Move> pseudoLegalMoves(const Board &board) {
-    const auto moves = pseudoLegalMoveList(board);
-    return {moves.begin(), moves.end()};
-}
 std::vector<Move> legalMoves(Board &board) {
     const auto moves = legalMoveList(board);
     return {moves.begin(), moves.end()};

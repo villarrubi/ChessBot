@@ -36,8 +36,9 @@ void checkMove(NnueNetwork &network, Board board, std::string_view moveName) {
     network.updateAfterMove(incremental, board, selected, state);
     CHECK(incremental == network.refresh(board));
     CHECK(network.evaluate(board, incremental) == network.evaluate(board));
+    network.updateBeforeUnmake(incremental, board, selected, state);
     board.unmakeMove(selected, state);
-    incremental = original;
+    CHECK(incremental == original);
     CHECK(incremental == network.refresh(board));
 }
 } // namespace
@@ -71,14 +72,12 @@ TEST_CASE(
     std::mt19937 randomizer(19);
     std::vector<Move> played;
     std::vector<StateInfo> states;
-    std::vector<NnueAccumulator> previousAccumulators;
     for (int ply = 0; ply < 80; ++ply) {
         auto moves = legalMoveList(board);
         if (moves.empty())
             break;
         const auto move = moves[randomizer() % moves.size()];
         StateInfo state;
-        previousAccumulators.push_back(accumulator);
         board.makeMove(move, state);
         network.updateAfterMove(accumulator, board, move, state);
         played.push_back(move);
@@ -86,12 +85,11 @@ TEST_CASE(
         CHECK(accumulator == network.refresh(board));
     }
     while (!played.empty()) {
+        network.updateBeforeUnmake(accumulator, board, played.back(), states.back());
         board.unmakeMove(played.back(), states.back());
-        accumulator = previousAccumulators.back();
         CHECK(accumulator == network.refresh(board));
         played.pop_back();
         states.pop_back();
-        previousAccumulators.pop_back();
     }
     CHECK(board.fen() == StartFen);
     std::filesystem::remove(path);

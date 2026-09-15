@@ -28,7 +28,7 @@ Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con A
 | Ciclo de fase 10 | 1.406 muestras, 18 artefactos con SHA-256 y rechazo seguro sin cambiar la referencia activa |
 | Formato C++ | Conforme a clang-format 21.1.8 |
 | Instalación Python y `pip check` | Extras de desarrollo instalados, dependencias consistentes |
-| GitHub Actions | Windows/Linux Debug/Release y ASan/UBSan: 5/5 jobs correctos en la ejecución `34995362488` |
+| GitHub Actions | Windows/Linux Debug/Release y ASan/UBSan: 5/5 jobs correctos en la ejecución `34999479369` |
 
 Los fixtures cubren posición inicial, Kiwipete, final de torres y peones, enroques, promociones, clavadas, jaque doble, jaque descubierto y en passant legal/ilegal. La herramienta incorpora también sus reflejos con colores invertidos.
 
@@ -107,7 +107,7 @@ El candidato `hce-texel-phase8-v1` redujo la entropía cruzada de validación de
 
 ## Validación remota y limitación local
 
-La ejecución [GitHub Actions 34995362488](https://github.com/villarrubi/ChessBot/actions/runs/34995362488) completó correctamente los cinco jobs: Windows y Ubuntu en Debug/Release, más el job Linux con AddressSanitizer y UndefinedBehaviorSanitizer. Incluyó las pruebas de reglas, CLI, UCI, análisis, runner, ajuste y formato que corresponden a cada configuración.
+La ejecución [GitHub Actions 34999479369](https://github.com/villarrubi/ChessBot/actions/runs/34999479369) completó correctamente los cinco jobs: Windows y Ubuntu en Debug/Release, más el job Linux con AddressSanitizer y UndefinedBehaviorSanitizer. Incluyó reglas, CLI, UCI, análisis, runner, ajuste, equivalencia NNUE y formato.
 
 La compilación local con MSVC AddressSanitizer sigue sin poder enlazarse porque esta máquina no tiene `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`. Esta limitación del entorno local queda cubierta por el job ASan/UBSan de Linux.
 
@@ -125,9 +125,9 @@ de apertura y no pasó táctica, por lo que fue rechazado.
 `phase10-cycle-v1` ejecutó partidas → datos → entrenamiento → candidato → evaluación bajo límites
 de 300 segundos, 50 MB y un hilo. Generó 1.406 filas separadas en 1.113 de entrenamiento y 293 de
 validación. La red `768×16×1` ocupó 24.680 bytes; pasó PERFT, las tres posiciones tácticas y produjo
-pérdida 0,91153, Brier 0,08825 y ECE 0,08178. El benchmark midió 109.061 NPS frente a 389.153 de
+pérdida 0,91096, Brier 0,08806 y ECE 0,07148. El benchmark midió 165.007 NPS frente a 382.026 de
 HCE y la campaña mínima terminó 0–1–1. Las puertas de rendimiento y fuerza la rechazaron. El ciclo
-terminó en 3,875 segundos, conservó 18 artefactos y no ejecutó la promoción.
+terminó en 4,766 segundos, conservó 18 artefactos y no ejecutó la promoción.
 
 Los escenarios A–F continúan cubiertos por `test_match_runner.py`; G y H, incluida una búsqueda
 restringida adicional para una jugada ausente de MultiPV, por `test_analysis.py`. `test_nnue.py`

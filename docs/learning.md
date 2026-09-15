@@ -85,8 +85,8 @@ son opcionales; sirven para datasets grandes sin cambiar el formato que consume 
 `CHESSBOT_NNUE 1` es un formato de texto portable y versionado. Guarda sesgos y pesos enteros,
 factores de cuantización y arquitectura. `nnue_format.py` implementa la referencia Python;
 `test_nnue.py` exige igualdad exacta con C++ en posiciones fijas y aleatorias. La búsqueda conserva
-un acumulador por nodo: quita y añade las características afectadas por cada movimiento y restaura
-la copia anterior al deshacer. Las pruebas cubren capturas, en passant, enroques, promociones y
+un acumulador: quita y añade las características afectadas por cada movimiento y aplica el delta
+inverso al deshacer. Las pruebas cubren capturas, en passant, enroques, promociones y
 secuencias aleatorias.
 
 Para evaluar un candidato neuronal frente a HCE:
@@ -131,7 +131,7 @@ registro del comando de la etapa fallida y finalmente `engine.log` si el problem
 una partida.
 
 La campaña `nnue-phase9-v1` perdió 0–16 y quedó rechazada. La ejecución registrada de fase 10 creó
-1.406 muestras, entrenó una red `768×16×1`, pasó PERFT y táctica, pero logró solo el 28,0 % del NPS
+1.406 muestras, entrenó una red `768×16×1`, pasó PERFT y táctica, pero logró solo el 43,2 % del NPS
 de HCE en su benchmark y 0–1–1 en la prueba corta. Se rechazó sin modificar `hce-active.params`.
 Los datos resumidos están en `data/networks/phase9-experiment-v1.json` y
 `data/training/phase10-experiment-v1.json`.

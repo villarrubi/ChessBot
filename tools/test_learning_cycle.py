@@ -8,12 +8,24 @@ import sys
 import tempfile
 from pathlib import Path
 
+import torch
+
+from train_nnue import loss_values
+
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--engine", type=Path, required=True)
 args = parser.parse_args()
 root = Path(__file__).resolve().parents[1]
 engine = args.engine.resolve(strict=True)
+
+prediction = torch.tensor([0.0, 0.0])
+outcomes = torch.tensor([0.5, 0.5])
+teachers = torch.tensor([0.0, 800.0])
+searched = torch.tensor([True, False])
+_, mixed = loss_values(prediction, outcomes, teachers, searched, "mixed", 1.0)
+_, search = loss_values(prediction, outcomes, teachers, searched, "search", 1.0)
+assert mixed["teacher_loss"] == 0.75 and search["teacher_loss"] == 0.0
 
 with tempfile.TemporaryDirectory(prefix="chessbot-cycle-") as directory:
     temporary = Path(directory)

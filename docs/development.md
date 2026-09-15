@@ -25,6 +25,7 @@ CMake detecta la instalación de Visual Studio. La entrega se ha compilado con V
 .\.venv\Scripts\python.exe tools/test_tuning.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_nnue.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/check_format.py --clang-format .venv/Scripts/clang-format.exe
+.\.venv\Scripts\ruff.exe check tools
 ```
 
 El modificador `--fix` de `check_format.py` aplica el formato. Solo procesa C++ propio y excluye el código de terceros. El paquete del formateador está fijado a 21.1.8 para evitar diferencias entre máquinas.
@@ -48,6 +49,7 @@ python tools/test_match_runner.py --engine build/chessbot
 python tools/test_tuning.py --engine build/chessbot
 python tools/test_nnue.py --engine build/chessbot
 python tools/check_format.py
+ruff check tools
 ```
 
 ## Sanitizadores

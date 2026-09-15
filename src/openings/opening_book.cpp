@@ -40,8 +40,6 @@ std::uint64_t mix(std::uint64_t value) {
     value = (value ^ (value >> 27)) * 0x94D049BB133111EBULL;
     return value ^ (value >> 31);
 }
-} // namespace
-
 std::string bookPositionKey(const Board &board) {
     std::istringstream input(board.fen());
     std::string result, field;
@@ -53,6 +51,8 @@ std::string bookPositionKey(const Board &board) {
     }
     return result;
 }
+} // namespace
+
 std::string_view bookPolicyName(BookPolicy policy) {
     switch (policy) {
     case BookPolicy::Best:
@@ -68,7 +68,6 @@ std::string_view bookPolicyName(BookPolicy policy) {
 }
 void OpeningBook::clear() {
     entries_.clear();
-    path_.clear();
     version_ = "unversioned";
 }
 void OpeningBook::load(const std::string &path) {
@@ -116,7 +115,6 @@ void OpeningBook::load(const std::string &path) {
         loaded[bookPositionKey(board)].push_back(std::move(entry));
     }
     entries_ = std::move(loaded);
-    path_ = path;
     version_ = std::move(loadedVersion);
 }
 std::optional<BookSelection> OpeningBook::select(Board board, BookPolicy policy,

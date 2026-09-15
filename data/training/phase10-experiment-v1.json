@@ -7,28 +7,28 @@
   "config": "data/training/phase10-config-v1.json",
   "candidate": {
     "path": "data/networks/nnue-phase10-candidate-v1.nnue",
-    "sha256": "329a7716b336a907f15f19c7f310d6659c6abb3e4cc4afbc1b76fc0331a89e0e",
+    "sha256": "f29f01a52bcf0af17838c3af1cf9607e966e9299c3673212b1252e60a85f093d",
     "architecture": "sparse_768x16_relu_1",
     "memory_bytes": 24680
   },
   "run": {
-    "duration_seconds": 3.875,
-    "storage_bytes": 811052,
+    "duration_seconds": 4.766,
+    "storage_bytes": 825393,
     "artifacts": 18,
     "dataset_rows": 1406,
     "train_rows": 1113,
     "validation_rows": 293,
-    "validation_loss": 0.911532759666443,
-    "brier": 0.0882518291473389,
-    "wdl_ece": 0.0817770194262266,
-    "quantized_validation_loss": 0.911247874061608,
-    "quantized_brier": 0.0881269755375646,
-    "quantized_wdl_ece": 0.0538538765721474
+    "validation_loss": 0.91096031665802,
+    "brier": 0.0880645290017128,
+    "wdl_ece": 0.0714772138744593,
+    "quantized_validation_loss": 0.910745859795127,
+    "quantized_brier": 0.0879544397372156,
+    "quantized_wdl_ece": 0.0426473792371549
   },
   "benchmark": {
-    "reference_nps": 389153,
-    "candidate_nps": 109061,
-    "relative_nps": 0.280252240121495
+    "reference_nps": 382026,
+    "candidate_nps": 165007,
+    "relative_nps": 0.43192609927073
   },
   "match": {
     "games": 2,

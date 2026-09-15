@@ -33,7 +33,7 @@ Los valores materiales iniciales son 100/120 para peón, 320/305 para caballo, 3
 
 Las pruebas comprueban suma exacta, cambio de perspectiva, fase, simetría, pasados, pareja de alfiles, actividad de torres y contenido del perfil básico. Además se contrastó la simetría al reflejar colores y tablero en 1.600 posiciones aleatorias.
 
-Como referencia inicial, `Positional` obtuvo 13 puntos frente a 3 de `Basic` en 16 partidas a profundidad 3, con ocho aperturas y colores invertidos. Es una comprobación funcional favorable; la muestra es pequeña y no constituye todavía una estimación Elo fiable. Los pesos son iniciales y deberán ajustarse mediante partidas de mayor tamaño en fases posteriores.
+Como referencia inicial, `Positional` obtuvo 13 puntos frente a 3 de `Basic` en 16 partidas a profundidad 3, con ocho aperturas y colores invertidos. Es una comprobación funcional favorable; la muestra es pequeña y no constituye una estimación Elo fiable. Los pesos siguen como referencia activa porque los candidatos automáticos de las fases 8–10 no superaron las puertas de fuerza.
 
 ## NNUE opcional
 
