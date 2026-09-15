@@ -1,0 +1,58 @@
+name: Rules and build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        config: [Debug, Release]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev]'
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCHESSBOT_SLOW_TESTS=${{ matrix.config == 'Release' && 'ON' || 'OFF' }}
+      - run: cmake --build build --config ${{ matrix.config }} --parallel
+      - run: ctest --test-dir build -C ${{ matrix.config }} --output-on-failure
+      - if: runner.os == 'Linux'
+        run: python tools/validate_rules.py --engine build/chessbot --games 12 --plies 80 --perft-depth 2
+      - if: runner.os == 'Windows'
+        run: python tools/validate_rules.py --engine build/${{ matrix.config }}/chessbot.exe --games 12 --plies 80 --perft-depth 2
+      - if: runner.os == 'Linux'
+        run: python tools/test_cli.py --engine build/chessbot
+      - if: runner.os == 'Windows'
+        run: python tools/test_cli.py --engine build/${{ matrix.config }}/chessbot.exe
+      - if: runner.os == 'Linux'
+        run: python tools/test_uci.py --engine build/chessbot
+      - if: runner.os == 'Windows'
+        run: python tools/test_uci.py --engine build/${{ matrix.config }}/chessbot.exe
+      - if: runner.os == 'Linux' && matrix.config == 'Release'
+        run: python tools/compare_engines.py --engine-a build/chessbot --engine-b build/chessbot --games 2 --depth 1 --max-plies 80 --output build/selfplay.pgn
+      - if: runner.os == 'Windows' && matrix.config == 'Release'
+        run: python tools/compare_engines.py --engine-a build/Release/chessbot.exe --engine-b build/Release/chessbot.exe --games 2 --depth 1 --max-plies 80 --output build/selfplay.pgn
+      - if: runner.os == 'Linux' && matrix.config == 'Release'
+        run: python tools/test_analysis.py --engine build/chessbot
+      - if: runner.os == 'Windows' && matrix.config == 'Release'
+        run: python tools/test_analysis.py --engine build/Release/chessbot.exe
+      - run: python tools/check_format.py
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install .
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCHESSBOT_SANITIZERS=ON
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure
+      - run: python tools/validate_rules.py --engine build/chessbot --games 8 --plies 60 --perft-depth 2

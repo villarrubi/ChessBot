@@ -1,0 +1,127 @@
+# Desarrollo y validación
+
+## Preparación en Windows
+
+Se necesita Visual Studio con las herramientas de escritorio C++ y Windows SDK, además de Python 3.12+. Estos comandos no requieren activar scripts PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\cmake.exe -S . -B build -A x64 -DCHESSBOT_SLOW_TESTS=ON
+.\.venv\Scripts\cmake.exe --build build --config Release --parallel
+.\.venv\Scripts\ctest.exe --test-dir build -C Release --output-on-failure
+```
+
+CMake detecta la instalación de Visual Studio. La entrega se ha compilado con Visual Studio 2026 y CMake 4.4.3. Un CMake antiguo puede no reconocer generadores de Visual Studio posteriores.
+
+```powershell
+.\.venv\Scripts\cmake.exe --build build --config Debug --parallel
+.\.venv\Scripts\ctest.exe --test-dir build -C Debug -LE slow --output-on-failure
+.\.venv\Scripts\python.exe tools/validate_rules.py --engine build/Release/chessbot.exe --games 80 --plies 200
+.\.venv\Scripts\python.exe tools/test_cli.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_uci.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_analysis.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/check_format.py --clang-format .venv/Scripts/clang-format.exe
+```
+
+El modificador `--fix` de `check_format.py` aplica el formato. Solo procesa C++ propio y excluye el código de terceros. El paquete del formateador está fijado a 21.1.8 para evitar diferencias entre máquinas.
+
+## Preparación en Linux
+
+Con compilador C++20 y CMake instalados:
+
+```bash
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e '.[dev]'
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCHESSBOT_SLOW_TESTS=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+python tools/validate_rules.py --engine build/chessbot
+python tools/test_cli.py --engine build/chessbot
+python tools/test_uci.py --engine build/chessbot
+python tools/test_analysis.py --engine build/chessbot
+python tools/check_format.py
+```
+
+## Sanitizadores
+
+GCC/Clang utilizan AddressSanitizer y UndefinedBehaviorSanitizer:
+
+```bash
+cmake -S . -B build-sanitize -DCMAKE_BUILD_TYPE=Debug -DCHESSBOT_SANITIZERS=ON
+cmake --build build-sanitize --parallel
+ctest --test-dir build-sanitize --output-on-failure
+```
+
+En MSVC la opción activa AddressSanitizer. Requiere instalar el componente de sanitizador C++ correspondiente a la arquitectura del compilador. Ejemplo:
+
+```powershell
+.\.venv\Scripts\cmake.exe -S . -B build-asan -A x64 -DCHESSBOT_SANITIZERS=ON
+.\.venv\Scripts\cmake.exe --build build-asan --config RelWithDebInfo --parallel
+.\.venv\Scripts\ctest.exe --test-dir build-asan -C RelWithDebInfo --output-on-failure
+```
+
+La máquina de esta entrega no dispone de `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`, por lo que no se ha podido validar localmente la ejecución instrumentada. El workflow configura una comprobación ASan/UBSan en Linux.
+
+## Consola disponible
+
+```powershell
+.\build\Release\chessbot.exe --help
+.\build\Release\chessbot.exe inspect
+.\build\Release\chessbot.exe legal --moves "e2e4 e7e5"
+.\build\Release\chessbot.exe inspect --moves "e2e4 e7e5 g1f3"
+.\build\Release\chessbot.exe eval --moves "e2e4 e7e5 g1f3"
+.\build\Release\chessbot.exe bench 5
+.\build\Release\chessbot.exe perft 6
+.\build\Release\chessbot.exe divide 3
+.\build\Release\chessbot.exe perft 3 --fen "4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 2"
+```
+
+`inspect` devuelve JSON con FEN, hash, jaque, repetición, material insuficiente, estado y jugadas legales ordenadas. `legal` imprime una jugada por línea. `perft` imprime el total y `divide` lo separa por jugada de raíz. La profundidad de consola admite `0..10`; divide requiere al menos 1.
+
+`validate-stream` admite una petición por línea: `FEN`, opcionalmente un tabulador y una secuencia de jugadas UCI separadas por espacios. Devuelve un JSON por petición y continúa tras errores. Esta interfaz permite comparar muchas posiciones sin arrancar un proceso por posición.
+
+Las órdenes de diagnóstico inválidas devuelven código 2 y un mensaje por stderr. La notación de las jugadas es UCI.
+
+## Motor UCI
+
+Ejecutar `chessbot.exe` sin argumentos inicia el protocolo. Admite `uci`, `isready`, `ucinewgame`, `position startpos`, `position fen`, `go`, `stop`, `quit` y `setoption`. La búsqueda acepta profundidad, nodos, tiempo fijo, relojes con incremento, movimientos restantes e infinito. Se ejecuta en un hilo de trabajo para responder a `stop` e `isready`.
+
+```text
+uci
+setoption name Hash value 64
+setoption name Evaluation value Positional
+setoption name SearchProfile value Optimized
+setoption name MultiPV value 3
+isready
+position startpos moves e2e4 e7e5 g1f3
+go movetime 1000
+```
+
+El comando de depuración `eval` devuelve en una línea `info string` la evaluación estática y sus componentes desde la perspectiva del bando al turno. `AnalysisDetail=Full` añade métricas de búsqueda. El analizador usa `MultiPV` y `go searchmoves`, que sí pertenecen al flujo UCI, y consume el desglose mediante la consola JSON separada.
+
+El comparador mínimo se ejecuta así:
+
+```powershell
+.\.venv\Scripts\python.exe tools/compare_engines.py --engine-a build/Release/chessbot.exe --engine-b build/Release/chessbot.exe --evaluation-a Positional --evaluation-b Basic --games 16 --depth 3 --openings tests/positions/benchmark.fen --output data/engine_matches/comparison.pgn
+```
+
+Alterna colores y reutiliza la misma FEN para cada pareja. Admite `--depth`, `--nodes` o `--movetime-ms`, además de perfiles de búsqueda/evaluación; el orquestador completo llegará en la fase 7.
+
+El análisis PGN y su prueba integral se ejecutan así:
+
+```powershell
+.\.venv\Scripts\python.exe tools/analyze_pgn.py --input tests/positions/analysis_sample.pgn --engine build/Release/chessbot.exe --depth 3 --multipv 2 --json data/analysis/sample.json --annotated-pgn data/analysis/sample.pgn --report data/analysis/sample.md
+.\.venv\Scripts\python.exe tools/test_analysis.py --engine build/Release/chessbot.exe
+```
+
+## Cobertura y CI
+
+CTest ejecuta tipos, ataques, FEN, legalidad, terminales, hash, restauración aleatoria, PERFT, evaluación, tácticas, búsqueda, límites y tabla de transposición. `CHESSBOT_SLOW_TESTS=ON` añade profundidad 5/6 de la posición inicial como prueba etiquetada `slow`. Se excluye en Debug para mantener rápidas las aserciones de invariantes.
+
+`validate_rules.py` verifica conjuntos completos de jugadas legales, FEN tras reproducir líneas, jaque, material insuficiente, repetición y terminación frente a python-chess. Incluye fixtures especiales y sus reflejos de color, más partidas aleatorias reproducibles. Contrasta también los totales PERFT mediante un recorrido independiente.
+
+El workflow de GitHub Actions compila Debug/Release en Windows/Linux, comprueba formato, reglas, CLI y UCI, y añade un job Linux de sanitizadores. Se activará con el próximo push o pull request; no se ha publicado código ni ejecutado un workflow remoto durante esta entrega.
+
+Las dependencias de análisis y entrenamiento están declaradas como extras `analysis` y `training`, separadas del entorno básico. El análisis PGN usa la dependencia básica `python-chess`; PyTorch sigue reservado para las fases neuronales.
