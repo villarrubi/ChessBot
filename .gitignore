@@ -1,5 +1,7 @@
 /.venv/
 /build*/
+/launcher/bin/
+/launcher/obj/
 __pycache__/
 *.egg-info/
 .pytest_cache/

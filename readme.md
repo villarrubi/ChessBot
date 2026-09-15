@@ -4,6 +4,22 @@ Motor de ajedrez desarrollado desde cero en C++20 para jugar, analizar partidas,
 
 > **Estado actual: funcionalidades de las fases 0–10 implementadas.** Ya funcionan las reglas, búsqueda y evaluación explicable, UCI MultiPV, análisis PGN, libro propio, partidas reproducibles, ajuste tipo Texel, entrenamiento e inferencia NNUE y el ciclo automático de aprendizaje. Los candidatos que no demostraron fuerza quedaron rechazados y la referencia HCE estable sigue activa. El detalle está en [roadmap.md](roadmap.md).
 
+## Aplicación de Windows
+
+`ChessBot Launcher` permite jugar contra el motor, entrenar redes y ejecutar el ciclo completo desde
+una interfaz gráfica. El acceso directo **ChessBot** del escritorio abre la aplicación sin mostrar
+una terminal.
+
+Para reconstruir el lanzador y volver a crear el acceso directo:
+
+```powershell
+.\tools\build_launcher.ps1
+```
+
+El ejecutable se genera en `build/launcher/ChessBot Launcher.exe`. La pestaña **Jugar** contiene el
+tablero; **Entrenar** muestra los parámetros y el progreso; **Herramientas** permite compilar,
+ejecutar el benchmark y abrir los resultados.
+
 ## Probar la versión actual
 
 Con Visual Studio y sus herramientas C++ instaladas, desde PowerShell:
@@ -61,7 +77,7 @@ El aprendizaje se realiza por lotes: las partidas generan datos, el entrenamient
 | Validación y datos | python-chess, NumPy y pandas | Herramientas Python; reglas del núcleo implementadas en C++ |
 | Entrenamiento neuronal | PyTorch | Entrenar y exportar redes |
 | Gráficas | matplotlib | Informes de benchmarks y experimentos |
-| Juego desde GUI | Una interfaz compatible con UCI | Opcional; utiliza el ejecutable local |
+| Juego desde GUI | ChessBot Launcher incluido; interfaces UCI externas opcionales | Jugar y administrar el proyecto |
 | Rivales | Ejecutables locales compatibles con UCI | Opcionales para partidas externas |
 | Explicación conversacional | Runtime y modelo local compatibles con el adaptador | Opcionales; por ejemplo, Ollama o llama.cpp |
 | Finales exactos | Tablas Syzygy | Opcionales |
@@ -81,7 +97,8 @@ ctest --test-dir build -C Release --output-on-failure
 
 Con un generador de una sola configuración, como Ninja, se configura `-DCMAKE_BUILD_TYPE=Release` y el ejecutable queda en `build/chessbot.exe` en Windows o `build/chessbot` en sistemas Unix.
 
-Para usarlo en una GUI, se añade el ejecutable como motor UCI y se ajustan sus opciones desde la interfaz. El proyecto contempla integración con GUIs existentes; una interfaz gráfica propia no forma parte del MVP.
+`ChessBot Launcher` proporciona la interfaz gráfica propia. Para usar una GUI externa, se añade
+`build/Release/chessbot.exe` como motor UCI y se ajustan sus opciones desde esa interfaz.
 
 ## Uso mediante UCI
 
