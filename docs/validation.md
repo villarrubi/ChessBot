@@ -25,6 +25,7 @@ Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con A
 | Candidato HCE de fase 8 | Rechazado: 25–49–26 en 100 partidas/50 aperturas, −3,5 Elo, IC95% [−51,0, +43,9] |
 | Formato C++ | Conforme a clang-format 21.1.8 |
 | Instalación Python y `pip check` | Extras de desarrollo instalados, dependencias consistentes |
+| GitHub Actions | Windows/Linux Debug/Release y ASan/UBSan: 5/5 jobs correctos en la ejecución `34995362488` |
 
 Los fixtures cubren posición inicial, Kiwipete, final de torres y peones, enroques, promociones, clavadas, jaque doble, jaque descubierto y en passant legal/ilegal. La herramienta incorpora también sus reflejos con colores invertidos.
 
@@ -100,10 +101,10 @@ El dataset registrado tomó dos campañas previas, descartó ocho plies iniciale
 
 El candidato `hce-texel-phase8-v1` redujo la entropía cruzada de validación de 0,634433 a 0,634411. Superó PERFT, tres posiciones tácticas y el límite de rendimiento. En la campaña decisiva a profundidad 2 obtuvo 25 victorias, 49 tablas y 26 derrotas contra `hce-default-v1`: −3,5 Elo, IC95% [−51,0, +43,9], sobre 50 parejas de apertura independientes. La puerta de fuerza lo rechazó y `hce-active.params` permanece idéntico a la referencia. El informe reproducible está en `data/evaluation/phase8-experiment-v1.json`.
 
-## Pendiente de comprobar en otro entorno
+## Validación remota y limitación local
 
-- La primera ejecución de GitHub Actions confirmó Windows Debug/Release y descubrió una deducción de tipos no portable en GCC. La inicialización ya usa tipos explícitos; la nueva matriz Windows/Linux y sanitizadores se verificará con el push final.
-- La compilación local con MSVC AddressSanitizer llegó al enlazado y falló por falta de `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`. No se afirma que las pruebas con sanitizadores hayan pasado. Requieren el componente ASan de Visual Studio o ejecutar el job Linux con ASan/UBSan.
-- No se ha ejecutado una compilación Linux localmente. Esa validación forma parte de la matriz CI preparada.
+La ejecución [GitHub Actions 34995362488](https://github.com/villarrubi/ChessBot/actions/runs/34995362488) completó correctamente los cinco jobs: Windows y Ubuntu en Debug/Release, más el job Linux con AddressSanitizer y UndefinedBehaviorSanitizer. Incluyó las pruebas de reglas, CLI, UCI, análisis, runner, ajuste y formato que corresponden a cada configuración.
+
+La compilación local con MSVC AddressSanitizer sigue sin poder enlazarse porque esta máquina no tiene `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`. Esta limitación del entorno local queda cubierta por el job ASan/UBSan de Linux.
 
 Los contratos de FEN, historial, tablas y límites de la validación están documentados en [architecture.md](architecture.md).

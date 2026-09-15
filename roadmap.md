@@ -14,7 +14,7 @@ El orden prioriza reglas correctas, búsqueda fiable, rendimiento medido, evalua
 - [x] Documentar centipeones, perspectiva del bando al turno, puntuaciones de mate y conversiones para informes.
 - [x] Configurar CI con compilación, pruebas y formato; incorporar PERFT y benchmarks cuando existan.
 - [x] Crear documentación de arquitectura y convenciones, y registrar las decisiones que concreten alternativas de `specs.md`.
-- [ ] **Cierre:** el ejecutable compila y arranca, y una prueba básica pasa localmente y en CI. La validación local está superada; queda pendiente la primera ejecución remota del workflow con el próximo push.
+- [x] **Cierre:** el ejecutable compila y arranca, y las pruebas pasan localmente y en CI (Windows/Linux, Debug/Release y sanitizadores).
 
 ## Fase 1 — Implementar las reglas del ajedrez
 
@@ -33,7 +33,7 @@ El orden prioriza reglas correctas, búsqueda fiable, rendimiento medido, evalua
 - [x] Añadir posiciones PERFT específicas para enroques, promociones, en passant y restricciones por jaque; contrastar legalidad con `python-chess` desde las herramientas.
 - [x] **Cierre:** toda la suite PERFT pasa y hacer/deshacer restaura exactamente la posición. No comenzar la búsqueda antes de cerrar esta fase.
 
-Evidencia de las fases 0/1: [resultados de validación](docs/validation.md), [guía de desarrollo](docs/development.md) y [contratos de arquitectura](docs/architecture.md). La ejecución local de sanitizadores no está verificada por falta del runtime ASan de MSVC.
+Evidencia de las fases 0/1: [resultados de validación](docs/validation.md), [guía de desarrollo](docs/development.md) y [contratos de arquitectura](docs/architecture.md). ASan/UBSan está verificado en Linux mediante CI; la máquina local no dispone del runtime ASan de MSVC.
 
 ## Fase 2 — Conseguir el primer motor jugable
 
