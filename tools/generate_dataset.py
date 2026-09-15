@@ -121,8 +121,8 @@ def read_games(paths: Iterable[Path],
     return samples
 
 
-def split_games(samples: list[Sample], validation_fraction: float, seed: int) -> dict[str, str]:
-    games = sorted({sample.game_id for sample in samples})
+def split_games(game_ids: Iterable[str], validation_fraction: float, seed: int) -> dict[str, str]:
+    games = sorted(set(game_ids))
     random.Random(seed).shuffle(games)
     count = round(len(games) * validation_fraction)
     if len(games) > 1:
@@ -170,7 +170,6 @@ def main() -> None:
                          args.max_per_game)
     if not samples:
         parser.error("no usable positions found")
-    split = split_games(samples, args.validation_fraction, args.seed)
     engine = FeatureEngine(args.engine.resolve(strict=True), args.eval_file)
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -190,7 +189,7 @@ def main() -> None:
             row = {"schema_version": SCHEMA_VERSION, "zobrist": key, "fen": features["fen"],
                    "side_to_move": features["side_to_move"], "ply": sample.ply,
                    "game_id": sample.game_id, "source": sample.source, "origin": sample.origin,
-                   "split": split[sample.game_id], "result_white": sample.result_white,
+                   "split": "", "result_white": sample.result_white,
                    "result_stm": sample.result_white if side_white else 1 - sample.result_white,
                    "search_score_cp": sample.search_score_cp,
                    "search_score_perspective": sample.search_score_perspective,
@@ -202,6 +201,12 @@ def main() -> None:
         engine.close()
     if not rows:
         parser.error("all positions were removed by deduplication or balancing")
+    split = split_games((str(row["game_id"]) for row in rows), args.validation_fraction,
+                        args.seed)
+    if len(split) < 2:
+        parser.error("dataset needs positions from at least two distinct games after deduplication")
+    for row in rows:
+        row["split"] = split[str(row["game_id"])]
     write_output(rows, args.output)
     schema = {"schema_version": SCHEMA_VERSION, "rows": len(rows),
               "games": len({row["game_id"] for row in rows}),

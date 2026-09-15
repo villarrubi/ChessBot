@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ChessBotLauncher;
 
@@ -45,13 +46,22 @@ internal sealed class MainForm : Form
     private readonly Label gameStatus = new() { AutoSize = true, Text = "Preparando partida…" };
     private readonly ComboBox playerColor = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown thinkTime = new() { Minimum = 100, Maximum = 10000, Value = 750, Increment = 100 };
-    private readonly RichTextBox log = new() { Dock = DockStyle.Fill, ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
+    private readonly RichTextBox log = new() { Dock = DockStyle.Fill, MinimumSize = new Size(100, 130), ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
+    private readonly ToolTip tips = new() { AutoPopDelay = 12000, InitialDelay = 300, ReshowDelay = 100 };
     private readonly Button cancelButton = new() { Text = "Cancelar tarea", Enabled = false, AutoSize = true };
     private readonly TextBox dataset = new() { Dock = DockStyle.Fill };
     private readonly TextBox trainingOutput = new() { Dock = DockStyle.Fill };
     private readonly TextBox version = new() { Text = "mi-nnue-v1", Dock = DockStyle.Fill };
     private readonly NumericUpDown hidden = new() { Minimum = 1, Maximum = 64, Value = 32 };
     private readonly NumericUpDown epochs = new() { Minimum = 1, Maximum = 10000, Value = 20 };
+    private readonly ComboBox generationMode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 340 };
+    private readonly TextBox opponentEngine = new() { Dock = DockStyle.Fill, Enabled = false };
+    private readonly NumericUpDown selfplayGames = new() { Minimum = 20, Maximum = 10000, Value = 100, Increment = 2 };
+    private readonly NumericUpDown evaluationGames = new() { Minimum = 2, Maximum = 10000, Value = 20, Increment = 2 };
+    private readonly NumericUpDown searchDepth = new() { Minimum = 1, Maximum = 12, Value = 3 };
+    private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 160, Increment = 10 };
+    private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 60 };
+    private readonly ComboBox trainingTarget = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 290 };
     private readonly TextBox cycleConfig = new() { Dock = DockStyle.Fill };
     private readonly TextBox cycleOutput = new() { Dock = DockStyle.Fill };
     private Process? activeProcess;
@@ -79,6 +89,19 @@ internal sealed class MainForm : Form
         cycleOutput.Text = NewOutput("ciclo");
         playerColor.Items.AddRange(["Blancas", "Negras"]);
         playerColor.SelectedIndex = 0;
+        generationMode.Items.AddRange(["Autojuego: ChessBot contra sí mismo", "Partidas contra otro motor UCI"]);
+        generationMode.SelectedIndex = 0;
+        generationMode.SelectedIndexChanged += (_, _) => opponentEngine.Enabled = generationMode.SelectedIndex == 1;
+        trainingTarget.Items.AddRange(["Solo resultado de las partidas", "Mixto: resultado y evaluación manual", "Evaluación de búsqueda"]);
+        trainingTarget.SelectedIndex = 0;
+        tips.SetToolTip(dataset, "Tabla de posiciones usada por el entrenamiento directo. El ciclo completo la crea automáticamente con sus partidas nuevas.");
+        tips.SetToolTip(hidden, "Tamaño de la capa oculta. 16 o 32 es una buena base; 64 necesita más partidas y reduce la velocidad del motor.");
+        tips.SetToolTip(epochs, "Número de pasadas sobre el dataset. Más épocas no compensan pocos datos y pueden sobreajustar.");
+        tips.SetToolTip(selfplayGames, "Partidas nuevas que generarán los datos de aprendizaje. Se ejecutan por parejas con colores invertidos.");
+        tips.SetToolTip(evaluationGames, "Partidas independientes para decidir si la red nueva es mejor que la referencia.");
+        tips.SetToolTip(searchDepth, "Profundidad usada para cada jugada. Una profundidad mayor mejora las partidas, pero multiplica el tiempo necesario.");
+        tips.SetToolTip(maxPlies, "Límite de medias jugadas por partida; 160 plies equivalen a 80 movimientos completos.");
+        tips.SetToolTip(trainingTarget, "Resultado aprende solo de victoria/tablas/derrota. Mixto añade la evaluación manual y converge con menos partidas.");
 
         TabControl tabs = new() { Dock = DockStyle.Fill };
         tabs.TabPages.Add(BuildPlayTab());
@@ -89,6 +112,7 @@ internal sealed class MainForm : Form
         cancelButton.Click += (_, _) => CancelActiveTask();
         Shown += async (_, _) => await NewGameAsync();
         FormClosing += (_, _) => CancelActiveTask();
+        FormClosed += (_, _) => tips.Dispose();
     }
 
     private TabPage BuildPlayTab()
@@ -121,16 +145,29 @@ internal sealed class MainForm : Form
     private TabPage BuildTrainingTab()
     {
         TabPage page = new("Entrenar");
-        TableLayoutPanel outer = new() { Dock = DockStyle.Fill, RowCount = 2, Padding = new Padding(14) };
+        TableLayoutPanel outer = new() { Dock = DockStyle.Fill, RowCount = 3, Padding = new Padding(14) };
         outer.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         outer.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        outer.RowStyles.Add(new RowStyle(SizeType.Absolute, 160));
+        Label explanation = new()
+        {
+            AutoSize = true,
+            MaximumSize = new Size(940, 0),
+            Margin = new Padding(0, 0, 0, 12),
+            Text = "El ciclo completo genera partidas nuevas, extrae sus posiciones a un dataset, entrena una red y la enfrenta a la referencia. " +
+                   "Elige autojuego o un ejecutable UCI rival. Pasa el ratón sobre cada parámetro para ver su explicación."
+        };
         TableLayoutPanel form = new() { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 3, Padding = new Padding(0, 0, 0, 12) };
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        for (int row = 0; row < 12; ++row)
+        {
+            form.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        }
 
-        AddPathRow(form, 0, "Dataset", dataset, "Examinar…", () => ChooseFile(dataset, "CSV o Parquet|*.csv;*.parquet|Todos|*.*"));
-        AddPathRow(form, 1, "Salida", trainingOutput, "Elegir…", () => ChooseFolder(trainingOutput));
+        AddPathRow(form, 0, "Dataset existente", dataset, "Examinar…", () => ChooseFile(dataset, "CSV o Parquet|*.csv;*.parquet|Todos|*.*"));
+        AddPathRow(form, 1, "Salida red", trainingOutput, "Elegir…", () => ChooseFolder(trainingOutput));
         AddFieldRow(form, 2, "Versión", version);
         FlowLayoutPanel numbers = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
         numbers.Controls.Add(new Label { Text = "Neuronas", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
@@ -138,8 +175,25 @@ internal sealed class MainForm : Form
         numbers.Controls.Add(new Label { Text = "Épocas", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
         numbers.Controls.Add(epochs);
         AddFieldRow(form, 3, "Parámetros", numbers);
-        AddPathRow(form, 4, "Config. ciclo", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
-        AddPathRow(form, 5, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
+        AddFieldRow(form, 4, "Origen de partidas", generationMode);
+        AddPathRow(form, 5, "Motor rival", opponentEngine, "Examinar…", () => ChooseFile(opponentEngine, "Ejecutable|*.exe|Todos|*.*"));
+        FlowLayoutPanel gameCounts = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
+        gameCounts.Controls.Add(new Label { Text = "Para aprender", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
+        gameCounts.Controls.Add(selfplayGames);
+        gameCounts.Controls.Add(new Label { Text = "Para evaluar", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
+        gameCounts.Controls.Add(evaluationGames);
+        AddFieldRow(form, 6, "Partidas", gameCounts);
+        FlowLayoutPanel search = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
+        search.Controls.Add(new Label { Text = "Profundidad", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
+        search.Controls.Add(searchDepth);
+        search.Controls.Add(new Label { Text = "Máx. plies", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
+        search.Controls.Add(maxPlies);
+        search.Controls.Add(new Label { Text = "Minutos", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
+        search.Controls.Add(maxMinutes);
+        AddFieldRow(form, 7, "Búsqueda", search);
+        AddFieldRow(form, 8, "Objetivo", trainingTarget);
+        AddPathRow(form, 9, "Config. base", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
+        AddPathRow(form, 10, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
 
         FlowLayoutPanel actions = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 12, 0, 0) };
         Button train = new() { Text = "Entrenar nueva red", AutoSize = true };
@@ -149,9 +203,10 @@ internal sealed class MainForm : Form
         actions.Controls.Add(train);
         actions.Controls.Add(cycle);
         actions.Controls.Add(cancelButton);
-        form.Controls.Add(actions, 1, 6);
-        outer.Controls.Add(form, 0, 0);
-        outer.Controls.Add(log, 0, 1);
+        form.Controls.Add(actions, 1, 11);
+        outer.Controls.Add(explanation, 0, 0);
+        outer.Controls.Add(form, 0, 1);
+        outer.Controls.Add(log, 0, 2);
         page.Controls.Add(outer);
         return page;
     }
@@ -339,7 +394,7 @@ internal sealed class MainForm : Form
         await RunTaskAsync(python,
             ["tools/train_nnue.py", "--dataset", dataset.Text, "--output-dir", trainingOutput.Text,
              "--version", version.Text.Trim(), "--hidden", hidden.Value.ToString(), "--epochs", epochs.Value.ToString(),
-             "--target", "mixed", "--teacher-weight", "0.25", "--seed", "7"], "Entrenamiento NNUE");
+             "--target", TargetValue(), "--teacher-weight", "0.25", "--seed", "7"], "Entrenamiento NNUE");
     }
 
     private async Task RunCycleAsync()
@@ -349,10 +404,96 @@ internal sealed class MainForm : Form
             MessageBox.Show("No se encuentra la configuración del ciclo.", "Ciclo de aprendizaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
+        if (generationMode.SelectedIndex == 1 && !File.Exists(opponentEngine.Text))
+        {
+            MessageBox.Show("Selecciona el ejecutable UCI del motor rival.", "Ciclo de aprendizaje", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
         cycleOutput.Text = UniqueOutput(cycleOutput.Text);
+        string generatedConfig;
+        try
+        {
+            generatedConfig = CreateCycleConfig();
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show("No se pudo preparar la configuración: " + exception.Message, "Ciclo de aprendizaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
         await RunTaskAsync(python,
-            ["tools/learning_cycle.py", "--config", cycleConfig.Text, "--engine", engine, "--output-dir", cycleOutput.Text],
+            ["tools/learning_cycle.py", "--config", generatedConfig, "--engine", engine, "--output-dir", cycleOutput.Text],
             "Ciclo completo");
+    }
+
+    private string CreateCycleConfig()
+    {
+        JsonObject config = JsonNode.Parse(File.ReadAllText(cycleConfig.Text))?.AsObject() ??
+                            throw new InvalidDataException("El JSON base está vacío");
+        string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        config["id"] = "launcher-cycle-" + stamp;
+        config["candidate_version"] = string.IsNullOrWhiteSpace(version.Text) ? "launcher-nnue-" + stamp : version.Text.Trim();
+        config["source_pgns"] = new JsonArray();
+
+        JsonObject budgets = ObjectAt(config, "budgets");
+        budgets["selfplay_games"] = EvenCount(selfplayGames.Value);
+        budgets["evaluation_games"] = EvenCount(evaluationGames.Value);
+        budgets["max_seconds"] = (int)maxMinutes.Value * 60;
+
+        JsonObject selfplay = ObjectAt(config, "selfplay");
+        selfplay["enabled"] = true;
+        selfplay["depth"] = (int)searchDepth.Value;
+        selfplay["max_plies"] = (int)maxPlies.Value;
+        if (generationMode.SelectedIndex == 1)
+        {
+            string opponent = Path.GetFullPath(opponentEngine.Text);
+            selfplay["opponent_engine"] = opponent;
+            selfplay["opponent_name"] = Path.GetFileNameWithoutExtension(opponent);
+            selfplay["opponent_options"] = new JsonObject();
+        }
+        else
+        {
+            selfplay.Remove("opponent_engine");
+            selfplay.Remove("opponent_name");
+            selfplay.Remove("opponent_options");
+        }
+
+        JsonObject training = ObjectAt(config, "training");
+        training["hidden"] = (int)hidden.Value;
+        training["epochs"] = (int)epochs.Value;
+        training["target"] = TargetValue();
+
+        JsonObject evaluation = ObjectAt(config, "evaluation");
+        evaluation["depth"] = (int)searchDepth.Value;
+        evaluation["benchmark_depth"] = Math.Min(12, (int)searchDepth.Value + 1);
+        evaluation["max_plies"] = (int)maxPlies.Value;
+
+        string configDirectory = Path.Combine(root, "build", "launcher-configs");
+        Directory.CreateDirectory(configDirectory);
+        string path = Path.Combine(configDirectory, "cycle-" + stamp + ".json");
+        File.WriteAllText(path, config.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine);
+        return path;
+    }
+
+    private string TargetValue() => trainingTarget.SelectedIndex switch
+    {
+        1 => "mixed",
+        2 => "search",
+        _ => "result"
+    };
+
+    private static int EvenCount(decimal value)
+    {
+        int count = (int)value;
+        return count % 2 == 0 ? count : count + 1;
+    }
+
+    private static JsonObject ObjectAt(JsonObject parent, string name)
+    {
+        if (parent[name] is JsonObject value)
+            return value;
+        JsonObject created = [];
+        parent[name] = created;
+        return created;
     }
 
     private async Task BuildEngineAsync()

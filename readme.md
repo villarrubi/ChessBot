@@ -17,8 +17,9 @@ Para reconstruir el lanzador y volver a crear el acceso directo:
 ```
 
 El ejecutable se genera en `build/launcher/ChessBot Launcher.exe`. La pestaña **Jugar** contiene el
-tablero; **Entrenar** muestra los parámetros y el progreso; **Herramientas** permite compilar,
-ejecutar el benchmark y abrir los resultados.
+tablero; **Entrenar** permite elegir autojuego o un motor UCI rival, partidas, profundidad, tamaño
+de red y objetivo, y muestra el progreso; **Herramientas** permite compilar, ejecutar el benchmark
+y abrir los resultados.
 
 ## Probar la versión actual
 

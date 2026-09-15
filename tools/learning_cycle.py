@@ -123,14 +123,28 @@ class Cycle:
         if selfplay.get("enabled", selfplay_games > 0) and selfplay_games:
             match = self.output / "selfplay"
             options = json.dumps(self.options(reference_kind, reference))
+            opponent_value = selfplay.get("opponent_engine")
+            if opponent_value:
+                opponent = Path(opponent_value)
+                if not opponent.is_absolute():
+                    opponent = ROOT / opponent
+                opponent = opponent.resolve(strict=True)
+                opponent_options = json.dumps(selfplay.get("opponent_options", {}))
+                opponent_name = str(selfplay.get("opponent_name", opponent.stem))
+            else:
+                opponent = engine
+                opponent_options = options
+                opponent_name = "generator-b"
             command = [python, str(ROOT / "tools" / "match_runner.py"), "--engine-a",
-                       str(engine), "--engine-b", str(engine), "--name-a", "generator-a",
-                       "--name-b", "generator-b", "--options-a", options, "--options-b",
-                       options, "--games", str(selfplay_games), "--depth",
+                       str(engine), "--engine-b", str(opponent), "--name-a", "ChessBot",
+                       "--name-b", opponent_name, "--options-a", options, "--options-b",
+                       opponent_options, "--games", str(selfplay_games), "--depth",
                        str(selfplay.get("depth", 1)), "--max-plies",
                        str(selfplay.get("max_plies", 80)), "--color-mode", "paired",
                        "--openings", str(openings), "--seed", str(seed), "--output-dir",
                        str(match)]
+            if opponent_value:
+                command.extend(["--cwd-b", str(opponent.parent)])
             self.run("games", command)
             pgns.append(match / "games.pgn")
             metadata.append(match / "metadata.json")

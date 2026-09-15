@@ -38,12 +38,14 @@ with tempfile.TemporaryDirectory(prefix="chessbot-cycle-") as directory:
         "engine": str(engine),
         "reference": "data/evaluation/hce-default-v1.params",
         "reference_kind": "hce",
-        "source_pgns": ["data/engine_matches/phase5-final-50ms-64.pgn"],
+        "source_pgns": [],
         "candidate_version": "learning-cycle-test-v1",
         "seed": 71,
-        "budgets": {"selfplay_games": 0, "evaluation_games": 2, "max_seconds": 120,
+        "budgets": {"selfplay_games": 4, "evaluation_games": 2, "max_seconds": 120,
                     "max_storage_mb": 20, "threads": 1},
-        "dataset": {"skip_plies": 8, "sample_every": 8, "max_per_game": 4,
+        "selfplay": {"enabled": True, "depth": 1, "max_plies": 8,
+                     "opponent_engine": str(engine), "opponent_name": "external-test"},
+        "dataset": {"skip_plies": 0, "sample_every": 1, "max_per_game": 4,
                     "validation_fraction": 0.2},
         "training": {"hidden": 4, "epochs": 1, "batch_size": 128},
         "evaluation": {"depth": 1, "benchmark_depth": 1, "max_plies": 4,
@@ -55,14 +57,19 @@ with tempfile.TemporaryDirectory(prefix="chessbot-cycle-") as directory:
     config_path = temporary / "config.json"
     output = temporary / "output"
     config_path.write_text(json.dumps(config), encoding="utf-8")
-    subprocess.run([sys.executable, str(root / "tools" / "learning_cycle.py"), "--config",
-                    str(config_path), "--engine", str(engine), "--output-dir", str(output)],
-                   check=True, capture_output=True, text=True, timeout=120)
+    completed = subprocess.run(
+        [sys.executable, str(root / "tools" / "learning_cycle.py"), "--config",
+         str(config_path), "--engine", str(engine), "--output-dir", str(output)],
+        capture_output=True, text=True, timeout=120)
+    assert completed.returncode == 0, completed.stdout + completed.stderr
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
     decision = json.loads((output / "evaluation" / "decision.json").read_text(encoding="utf-8"))
     assert manifest["status"] == "complete" and manifest["decision"] == "reject"
     assert [row["stage"] for row in manifest["commands"]] == [
-        "data", "training", "candidate_evaluation"]
+        "games", "data", "training", "candidate_evaluation"]
+    games_command = manifest["commands"][0]["command"]
+    assert games_command[games_command.index("--engine-b") + 1] == str(engine)
+    assert games_command[games_command.index("--cwd-b") + 1] == str(engine.parent)
     assert manifest["artifacts"] and all(row["sha256"] for row in manifest["artifacts"])
     assert decision["artifacts"]["promoted_to"] is None
     assert active.read_text(encoding="utf-8") == "preserve-active-network\n"

@@ -70,6 +70,12 @@ características binarias: color × tipo de pieza × casilla. La capa oculta ReL
 neuronas y produce una puntuación en centipeones orientada a blancas; C++ cambia el signo según el
 turno. La etiqueta puede ser resultado, puntuación de búsqueda o una mezcla documentada de ambas.
 
+El número máximo de neuronas no es automáticamente el mejor. Una red de 64 neuronas tarda más en
+evaluarse, reduce los nodos por segundo y necesita más posiciones distintas para no memorizar el
+dataset. `16` sirve para pruebas rápidas y `32` es el punto de partida recomendado; `64` tiene
+sentido cuando una campaña con muchas partidas demuestra una mejora después de medir fuerza y NPS.
+Las épocas son pasadas sobre los mismos datos: aumentarlas tampoco sustituye a generar más partidas.
+
 ```powershell
 python tools/train_nnue.py --dataset build/phase8-dataset.csv `
   --output-dir build/nnue-training --version nnue-example-v1 `
@@ -111,6 +117,23 @@ El analizador PGN acepta el mismo archivo con `--nnue-file` y conserva esa proce
 fijar partidas de generación y evaluación, segundos máximos, almacenamiento máximo, hilos, semilla,
 filtros del dataset, arquitectura y puertas de aceptación. El directorio de salida debe ser nuevo.
 Así una partida aislada nunca modifica el motor activo ni sobrescribe un experimento.
+
+La pestaña **Entrenar** de `ChessBot Launcher` configura estos valores sin editar JSON. En modo
+**Autentrenamiento**, las dos instancias de ChessBot juegan por parejas con colores invertidos. En
+modo **otro motor UCI**, `opponent_engine` apunta al ejecutable del rival y las posiciones de esas
+partidas alimentan el entrenamiento. Una DLL o biblioteca necesita primero un adaptador UCI.
+
+El lanzador vacía `source_pgns`, por lo que cada ciclo iniciado desde la interfaz usa solo partidas
+nuevas. Esas partidas se convierten necesariamente en un dataset temporal: una tabla de posiciones,
+turno y resultado que PyTorch puede leer. No es una colección externa que ChessBot memoriza; es el
+registro estructurado de lo que acaba de jugar. Con objetivo `result`, la red aprende únicamente de
+victoria, tablas o derrota. `mixed` añade como profesor la evaluación manual y suele necesitar menos
+partidas; `search` usa las puntuaciones calculadas durante las partidas.
+
+La profundidad se aplica a cada jugada tanto en la generación como en la evaluación del candidato.
+Subirla produce partidas de mayor calidad, pero el coste crece con rapidez. Profundidad `3` es una
+base práctica; `4–5` requiere bastante más tiempo. `selfplay_games` genera datos y
+`evaluation_games` mide el candidato después, sin mezclar esas partidas con el entrenamiento.
 
 ```powershell
 python tools/learning_cycle.py --config data/training/phase10-config-v1.json `
