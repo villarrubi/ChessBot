@@ -30,7 +30,12 @@ struct EvalBreakdown {
     Score space = 0;
     Score tempo = 0;
     Score total = 0;
+    Score manualTotal = 0;
+    Score neural = 0;
     int phase = 0;
+    bool manualAuxiliary = false;
+    std::string source = "hce";
+    std::string networkVersion;
 };
 
 // All public evaluation scores use the side-to-move perspective.

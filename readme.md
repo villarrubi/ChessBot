@@ -2,7 +2,7 @@
 
 Motor de ajedrez desarrollado desde cero en C++20 para jugar, analizar partidas, explicar evaluaciones y mejorar mediante autojuego y entrenamiento controlado.
 
-> **Estado actual: funcionalidades de las fases 0–8 implementadas.** Ya funcionan las reglas, búsqueda y evaluación explicable, UCI MultiPV, análisis PGN, libro propio, partidas UCI reproducibles y ajuste tipo Texel. Los candidatos que no demostraron fuerza quedaron rechazados y las referencias estables siguen activas. Redes neuronales y NNUE pertenecen a fases posteriores. El detalle está en [roadmap.md](roadmap.md).
+> **Estado actual: funcionalidades de las fases 0–10 implementadas.** Ya funcionan las reglas, búsqueda y evaluación explicable, UCI MultiPV, análisis PGN, libro propio, partidas reproducibles, ajuste tipo Texel, entrenamiento e inferencia NNUE y el ciclo automático de aprendizaje. Los candidatos que no demostraron fuerza quedaron rechazados y la referencia HCE estable sigue activa. El detalle está en [roadmap.md](roadmap.md).
 
 ## Probar la versión actual
 
@@ -21,13 +21,14 @@ python -m venv .venv
 .\build\Release\chessbot.exe divide 3
 .\.venv\Scripts\python.exe tools/test_match_runner.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_tuning.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_nnue.py --engine build/Release/chessbot.exe
 ```
 
 PERFT de la posición inicial a profundidad 6 devuelve `119060324`. `inspect` muestra el estado y las jugadas legales; `eval`, el desglose de evaluación; `bench`, una referencia de búsqueda; y `divide`, los nodos por jugada. Al ejecutar el binario sin argumentos se inicia UCI y ya puede añadirse a una GUI compatible.
 
 Las instrucciones para Debug, Linux, validación con python-chess y sanitizadores están en [docs/development.md](docs/development.md). Los resultados locales y las comprobaciones pendientes están en [docs/validation.md](docs/validation.md).
 
-Las secciones siguientes combinan las capacidades actuales con las previstas. El ajuste de la evaluación manual ya está implementado; el entrenamiento neuronal llegará en fases posteriores.
+Las secciones siguientes describen el proyecto completo y el estado medido de sus candidatos.
 
 ## Qué ofrecerá el proyecto terminado
 
@@ -130,9 +131,18 @@ go wtime 120000 btime 120000 winc 1000 binc 1000
 | `BookSeed` | Semilla reproducible de selección |
 | `MultiPV` | Número de alternativas de raíz, entre 1 y 10 |
 | `AnalysisDetail` | `Full` añade evaluación estática y métricas internas de búsqueda |
-| `NNUE` | Reservada; en esta versión solo admite `false` |
+| `NNUEFile` | Carga una red cuantizada `CHESSBOT_NNUE 1` desde disco |
+| `NNUE` | Activa la red cargada o vuelve al evaluador manual |
 
-La configuración inicial utiliza un hilo, 64 MB de hash y evaluación manual posicional, con NNUE y libro desactivados. Las opciones y sus valores admitidos se anuncian mediante `uci`. Los intentos de activar opciones todavía no disponibles devuelven un mensaje `info string error`.
+La configuración inicial utiliza un hilo, 64 MB de hash y evaluación manual posicional, con NNUE y libro desactivados. Para usar una red, se establece primero `NNUEFile` y después `NNUE=true`; los errores se devuelven mediante `info string error`.
+
+```text
+setoption name NNUEFile value data/networks/nnue-phase9-candidate-v1.nnue
+setoption name NNUE value true
+isready
+```
+
+La red incluida es un candidato reproducible rechazado, útil para pruebas y desarrollo. No es la referencia de juego recomendada.
 
 ## Analizar posiciones y partidas
 
@@ -191,7 +201,7 @@ Si la jugada preguntada no estaba en MultiPV, la herramienta realiza una búsque
 
 ## Aprendizaje y comparación de versiones
 
-La mejora automática comienza ajustando pesos del evaluador manual y continúa con redes pequeñas y acumuladores NNUE. La búsqueda sigue siendo alfa-beta.
+La mejora automática ajusta pesos del evaluador manual o entrena redes pequeñas con acumuladores NNUE. La búsqueda sigue siendo alfa-beta.
 
 ```text
 Autojuego y partidas externas
@@ -204,7 +214,19 @@ Autojuego y partidas externas
 
 Cada experimento guarda versiones, commit, configuración, semilla, límites, compilador y hardware. Los informes comparan victorias, tablas y derrotas, estimación Elo e incertidumbre, rendimiento y regresiones. Una menor pérdida de entrenamiento o más nodos por segundo no bastan para promover un candidato.
 
-La evaluación manual acepta parámetros externos mediante `EvalFile`. `tools/generate_dataset.py` crea CSV/Parquet con particiones por partida; `tools/tune_eval.py` ajusta multiplicadores con pérdida tipo Texel; y `tools/evaluate_candidate.py` comprueba corrección, táctica, rendimiento y fuerza antes de promover. Véase [docs/learning.md](docs/learning.md). El experimento de fase 8 conservó la referencia porque el primer candidato no demostró ventaja en partidas.
+El ciclo completo se lanza con una configuración versionada. El directorio de salida debe ser nuevo para que una ejecución anterior nunca se sobrescriba:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[training]"
+.\.venv\Scripts\python.exe tools/learning_cycle.py `
+  --config data/training/phase10-config-v1.json `
+  --engine build/Release/chessbot.exe `
+  --output-dir build/learning-20260915
+```
+
+La promoción solo ocurre cuando todas las puertas pasan. Cada ejecución conserva `config.json`, dataset, checkpoint, red, partidas, decisión y `manifest.json` con comandos, versiones, entorno y SHA-256. GitHub Actions mantiene este trabajo largo en `learning.yml`, separado del CI rápido.
+
+La evaluación manual acepta parámetros externos mediante `EvalFile`. `tools/generate_dataset.py` crea CSV/Parquet con particiones por partida; `tools/tune_eval.py` ajusta multiplicadores; `tools/train_nnue.py` entrena y exporta una red cuantizada; y `tools/evaluate_candidate.py` comprueba corrección, táctica, rendimiento y fuerza. `tools/learning_cycle.py` une todas las etapas con presupuestos y un manifiesto de artefactos. Véase [docs/learning.md](docs/learning.md). Los primeros candidatos HCE y NNUE fueron rechazados, por lo que la referencia estable permanece activa.
 
 ## Organización del repositorio terminado
 
@@ -218,7 +240,7 @@ ChessBot/
 │   ├── main.cpp
 │   ├── board/        # Bitboards, reglas, movimientos y Zobrist
 │   ├── search/       # Alfa-beta, ordenación, TT y tiempo
-│   ├── eval/         # Evaluación manual y desglose
+│   ├── eval/         # Evaluación manual, NNUE y desglose
 │   ├── engine/       # API, límites y resultados
 │   ├── protocol/     # UCI
 │   ├── openings/     # Libro y base de aperturas
@@ -235,7 +257,7 @@ ChessBot/
 └── docs/             # Arquitectura, evaluación, búsqueda y aprendizaje
 ```
 
-Ya están disponibles `compare_engines.py`, `match_runner.py`, `analyze_pgn.py`, `explain_analysis.py`, `generate_dataset.py`, `tune_eval.py` y `evaluate_candidate.py`. El entrenamiento neuronal y su exportación corresponden a las fases siguientes.
+Ya están disponibles `compare_engines.py`, `match_runner.py`, `analyze_pgn.py`, `explain_analysis.py`, `generate_dataset.py`, `tune_eval.py`, `train_nnue.py`, `evaluate_candidate.py` y `learning_cycle.py`.
 
 FEN se usa para posiciones; PGN con metadatos JSON, para partidas; CSV/Parquet y posteriormente shards binarios, para entrenamiento. El binario, la búsqueda, el evaluador, el libro, las redes y los datasets se versionan de forma independiente.
 
@@ -245,6 +267,6 @@ La validación incluye PERFT, invariantes, restauración de posiciones, coherenc
 
 El modo determinista permite reproducir resultados bajo una configuración controlada, inicialmente monohilo y con límite de nodos. Los cambios se aceptan por mejoras verificables en corrección, fuerza, análisis, velocidad, memoria o explicabilidad.
 
-El objetivo inicial es un motor correcto, observable y ampliable. No se promete una cifra Elo ni fuerza equivalente a Stockfish. La búsqueda distribuida y la búsqueda en GPU quedan fuera del alcance inicial; NNUE, multihilo, Syzygy y el asistente local llegan después de consolidar el motor básico.
+El objetivo es un motor correcto, observable y ampliable. No se promete una cifra Elo ni fuerza equivalente a Stockfish. La búsqueda distribuida, búsqueda en GPU, multihilo real y Syzygy integrado quedan fuera del alcance actual.
 
 La definición técnica completa está en [specs.md](specs.md), y las tareas y criterios de aceptación están en [roadmap.md](roadmap.md).

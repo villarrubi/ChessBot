@@ -73,7 +73,7 @@ def pv_data(board: chess.Board, info: dict[str, Any], color: chess.Color) -> dic
     }
 
 
-def static_evaluation(engine: Path, board: chess.Board, enabled: bool,
+def static_evaluation(engine: Path, board: chess.Board, enabled: bool, nnue_file: Path | None,
                       cache: dict[str, dict[str, Any] | None]) -> dict[str, Any] | None:
     fen = board.fen()
     if fen in cache:
@@ -82,7 +82,10 @@ def static_evaluation(engine: Path, board: chess.Board, enabled: bool,
         cache[fen] = None
         return None
     try:
-        result = subprocess.run([str(engine), "eval", "--fen", fen], check=True,
+        command = [str(engine), "eval", "--fen", fen]
+        if nnue_file:
+            command.extend(["--nnue-file", str(nnue_file)])
+        result = subprocess.run(command, check=True,
                                 capture_output=True, text=True, timeout=10)
         value = json.loads(result.stdout)
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
@@ -97,7 +100,7 @@ def from_player_perspective(value: dict[str, Any] | None, flip: bool) -> dict[st
     result = dict(value)
     if flip:
         for key, component in result.items():
-            if key not in {"perspective", "phase"} and isinstance(component, int):
+            if key not in {"perspective", "phase"} and isinstance(component, int) and not isinstance(component, bool):
                 result[key] = -component
     result["perspective"] = "player_before_move"
     return result
@@ -114,12 +117,13 @@ def analysis_limit(args: argparse.Namespace) -> chess.engine.Limit:
 def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine_path: Path,
                  limit: chess.engine.Limit, multipv: int, thresholds: tuple[int, int, int],
                  max_plies: int | None, include_static: bool,
-                 static_cache: dict[str, dict[str, Any] | None]) -> tuple[dict[str, Any], chess.pgn.Game]:
+                 static_cache: dict[str, dict[str, Any] | None],
+                 nnue_file: Path | None) -> tuple[dict[str, Any], chess.pgn.Game]:
     board = game.board()
     annotated = chess.pgn.Game()
     annotated.setup(game.board())
     annotated.headers.update(game.headers)
-    annotated.headers["Annotator"] = "ChessBot analyzer 0.8.0"
+    annotated.headers["Annotator"] = "ChessBot analyzer 0.10.0"
     annotated_node: chess.pgn.GameNode = annotated
     records = []
     history_uci: list[str] = []
@@ -139,9 +143,11 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
         played = pv_data(board, played_raw, color)
         best = candidates[0]
         classification, loss, mate_note = classify(best["score"], played["score"], thresholds)
-        static_before = static_evaluation(engine_path, board, include_static, static_cache)
+        static_before = static_evaluation(engine_path, board, include_static, nnue_file,
+                                          static_cache)
         board.push(move)
-        static_after_raw = static_evaluation(engine_path, board, include_static, static_cache)
+        static_after_raw = static_evaluation(engine_path, board, include_static, nnue_file,
+                                             static_cache)
         static_after = from_player_perspective(static_after_raw, flip=True)
         record = {
             "ply": ply,
@@ -209,6 +215,8 @@ def main() -> None:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--no-static", action="store_true",
                         help="skip the ChessBot diagnostic eval command for external engines")
+    parser.add_argument("--nnue-file", type=Path,
+                        help="enable this ChessBot NNUE for search and static diagnostics")
     args = parser.parse_args()
     if args.depth is None and args.movetime_ms is None and args.nodes is None:
         args.depth = 4
@@ -220,6 +228,7 @@ def main() -> None:
     if not (0 <= thresholds[0] <= thresholds[1] <= thresholds[2]):
         parser.error("classification thresholds must be ordered and nonnegative")
     engine_path = args.engine.resolve(strict=True)
+    nnue_file = args.nnue_file.resolve(strict=True) if args.nnue_file else None
     input_path = args.input.resolve(strict=True)
     games = []
     with input_path.open(encoding="utf-8") as handle:
@@ -235,10 +244,12 @@ def main() -> None:
     results, annotated_games = [], []
     cache: dict[str, dict[str, Any] | None] = {}
     try:
+        if nnue_file:
+            engine.configure({"NNUEFile": str(nnue_file), "NNUE": True})
         for game in games:
             result, annotated = analyze_game(game, engine, engine_path, analysis_limit(args),
                                              args.multipv, thresholds, args.max_plies,
-                                             not args.no_static, cache)
+                                             not args.no_static, cache, nnue_file)
             results.append(result)
             annotated_games.append(annotated)
     finally:
@@ -248,6 +259,8 @@ def main() -> None:
         "generated_at": datetime.now(UTC).isoformat(),
         "source": str(input_path),
         "engine": {"path": str(engine_path), "multipv": args.multipv,
+                   "options": ({"NNUEFile": str(nnue_file), "NNUE": True}
+                               if nnue_file else {"NNUE": False}),
                    "limit": {"depth": args.depth, "movetime_ms": args.movetime_ms,
                              "nodes": args.nodes}},
         "thresholds_cp": {"inaccuracy": thresholds[0], "mistake": thresholds[1],

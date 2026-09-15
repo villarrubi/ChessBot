@@ -14,10 +14,11 @@ namespace {
 std::string quote(std::string_view value);
 void help() {
     std::cout
-        << "ChessBot 0.8.0 - UCI chess engine and diagnostic CLI\n"
+        << "ChessBot 0.10.0 - UCI chess engine and diagnostic CLI\n"
            "Usage: chessbot                         Start UCI protocol\n"
            "       chessbot <inspect|eval|legal|perft N|divide N> [--fen FEN] [--moves \"e2e4 "
            "e7e5\"]\n"
+           "       chessbot eval [--fen FEN] [--moves \"...\"] [--nnue-file FILE]\n"
            "       chessbot bench [depth] [Baseline|Optimized]\n"
            "       chessbot validate-stream\n"
            "       chessbot features-stream [--eval-file FILE]\n"
@@ -25,9 +26,13 @@ void help() {
            "Stream output: one JSON object per line; invalid requests return an error object.\n";
 }
 void printEvaluationFields(const EvalBreakdown &eval) {
-    std::cout << "\"perspective\":\"side_to_move\",\"total\":" << eval.total
-              << ",\"material\":" << eval.material << ",\"piece_square\":" << eval.pieceSquare
-              << ",\"mobility\":" << eval.mobility << ",\"pawn_structure\":" << eval.pawnStructure
+    std::cout << "\"perspective\":\"side_to_move\",\"source\":" << quote(eval.source)
+              << ",\"network_version\":" << quote(eval.networkVersion)
+              << ",\"manual_auxiliary\":" << (eval.manualAuxiliary ? "true" : "false")
+              << ",\"total\":" << eval.total << ",\"neural\":" << eval.neural
+              << ",\"manual_total\":" << eval.manualTotal << ",\"material\":" << eval.material
+              << ",\"piece_square\":" << eval.pieceSquare << ",\"mobility\":" << eval.mobility
+              << ",\"pawn_structure\":" << eval.pawnStructure
               << ",\"passed_pawns\":" << eval.passedPawns << ",\"bishop_pair\":" << eval.bishopPair
               << ",\"rook_activity\":" << eval.rookActivity
               << ",\"king_safety\":" << eval.kingSafety << ",\"space\":" << eval.space
@@ -226,8 +231,8 @@ int main(int argc, char **argv) {
         } else if (command != "inspect" && command != "eval" && command != "legal") {
             throw std::invalid_argument("Unknown command: " + command);
         }
-        std::string fen{StartFen}, moves;
-        bool sawFen = false, sawMoves = false;
+        std::string fen{StartFen}, moves, nnueFile;
+        bool sawFen = false, sawMoves = false, sawNnueFile = false;
         while (index < argc) {
             const std::string option = argv[index++];
             if (index == argc)
@@ -238,16 +243,27 @@ int main(int argc, char **argv) {
             } else if (option == "--moves" && !sawMoves) {
                 moves = argv[index++];
                 sawMoves = true;
+            } else if (option == "--nnue-file" && !sawNnueFile) {
+                nnueFile = argv[index++];
+                sawNnueFile = true;
             } else
                 throw std::invalid_argument("Unknown or duplicate option: " + option);
         }
+        if (sawNnueFile && command != "eval")
+            throw std::invalid_argument("--nnue-file is only valid with eval");
         auto board = Board::fromFen(fen);
         applyMoves(board, moves);
         if (command == "inspect")
             inspect(board);
-        else if (command == "eval")
-            printEvaluation(evaluateDetailed(board));
-        else if (command == "legal")
+        else if (command == "eval") {
+            Engine engine;
+            engine.setPosition(board);
+            if (!nnueFile.empty()) {
+                engine.setNnueFile(nnueFile);
+                engine.setNnue(true);
+            }
+            printEvaluation(engine.evaluateDetailed());
+        } else if (command == "legal")
             for (const auto &move : moveNames(board))
                 std::cout << move << '\n';
         else if (command == "perft")

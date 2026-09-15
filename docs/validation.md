@@ -1,4 +1,4 @@
-# Validación de las fases 0–8
+# Validación de las fases 0–10
 
 Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con AMD Ryzen 7 7800X3D, MSVC 19.51.36252, CMake 4.4.3 y Python 3.12.7. Son resultados de esta entrega; las cifras de rendimiento dependen del equipo.
 
@@ -7,7 +7,7 @@ Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con A
 | Compilación Release y Debug | Correcta, sin avisos del código propio |
 | CTest Release | 3/3 pruebas, incluida PERFT completa |
 | CTest Debug sin etiqueta `slow` | 2/2 pruebas |
-| Suite doctest rápida | 34 casos y 29.321 aserciones: reglas, evaluación parametrizada, libro, mates, táctica, límites, null-move, MultiPV y transposiciones |
+| Suite doctest rápida | 38 casos y más de 29.400 aserciones: reglas, evaluación parametrizada, NNUE incremental, libro, mates, táctica, límites, null-move, MultiPV y transposiciones |
 | Restauración aleatoria | Hasta 40 partidas de 150 plies, comprobando todos los estados al retroceder |
 | Comparación Release con python-chess | 15.675 posiciones y 24 fixtures PERFT hasta profundidad 3 |
 | Comparación Debug con python-chess | 1.874 posiciones y 24 fixtures PERFT hasta profundidad 3 |
@@ -23,6 +23,9 @@ Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con A
 | Runner de fase 7 | Escenarios A–F, importadores JSON/PGN/EPD/FEN/UCI/Polyglot, libro y metadatos correctos |
 | Pipeline de fase 8 | Dataset de 2.528 posiciones/126 partidas, particiones sin solapamiento, ajuste, carga y puertas de promoción correctos |
 | Candidato HCE de fase 8 | Rechazado: 25–49–26 en 100 partidas/50 aperturas, −3,5 Elo, IC95% [−51,0, +43,9] |
+| Equivalencia NNUE | 63 posiciones con puntuación entera idéntica en Python/C++, más activación UCI y retorno a HCE |
+| Candidato NNUE de fase 9 | Rechazado: 0–0–16 frente a HCE; conserva red, entrenamiento, calibración y decisión |
+| Ciclo de fase 10 | 1.406 muestras, 18 artefactos con SHA-256 y rechazo seguro sin cambiar la referencia activa |
 | Formato C++ | Conforme a clang-format 21.1.8 |
 | Instalación Python y `pip check` | Extras de desarrollo instalados, dependencias consistentes |
 | GitHub Actions | Windows/Linux Debug/Release y ASan/UBSan: 5/5 jobs correctos en la ejecución `34995362488` |
@@ -52,6 +55,7 @@ Los fixtures cubren posición inicial, Kiwipete, final de torres y peones, enroq
 .\.venv\Scripts\python.exe tools/test_uci.py --engine build/Debug/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_match_runner.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_tuning.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_nnue.py --engine build/Release/chessbot.exe
 .\build\Release\chessbot.exe bench 5
 ```
 
@@ -108,3 +112,24 @@ La ejecución [GitHub Actions 34995362488](https://github.com/villarrubi/ChessBo
 La compilación local con MSVC AddressSanitizer sigue sin poder enlazarse porque esta máquina no tiene `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`. Esta limitación del entorno local queda cubierta por el job ASan/UBSan de Linux.
 
 Los contratos de FEN, historial, tablas y límites de la validación están documentados en [architecture.md](architecture.md).
+
+## Evaluación neuronal y ciclo completo
+
+La red `nnue-phase9-v1` usa 768 entradas, 32 neuronas ocultas ReLU y salida cuantizada. Su
+validación registró pérdida 0,92940, Brier 0,07081, error de calibración WDL 0,10793 y MAE respecto
+al profesor de 430,42 cp. La prueba de paridad reprodujo exactamente 63 puntuaciones entre Python
+y C++; doctest contrastó refresco y actualización incremental tras movimientos normales,
+capturas, en passant, enroques y promociones. El candidato perdió las 16 partidas de ocho parejas
+de apertura y no pasó táctica, por lo que fue rechazado.
+
+`phase10-cycle-v1` ejecutó partidas → datos → entrenamiento → candidato → evaluación bajo límites
+de 300 segundos, 50 MB y un hilo. Generó 1.406 filas separadas en 1.113 de entrenamiento y 293 de
+validación. La red `768×16×1` ocupó 24.680 bytes; pasó PERFT, las tres posiciones tácticas y produjo
+pérdida 0,91153, Brier 0,08825 y ECE 0,08178. El benchmark midió 109.061 NPS frente a 389.153 de
+HCE y la campaña mínima terminó 0–1–1. Las puertas de rendimiento y fuerza la rechazaron. El ciclo
+terminó en 3,875 segundos, conservó 18 artefactos y no ejecutó la promoción.
+
+Los escenarios A–F continúan cubiertos por `test_match_runner.py`; G y H, incluida una búsqueda
+restringida adicional para una jugada ausente de MultiPV, por `test_analysis.py`. `test_nnue.py`
+añade procedencia neuronal al análisis, y `test_learning_cycle.py` verifica manifiesto, hashes,
+presupuestos y que un rechazo no reemplaza el archivo activo.

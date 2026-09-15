@@ -23,6 +23,7 @@ CMake detecta la instalación de Visual Studio. La entrega se ha compilado con V
 .\.venv\Scripts\python.exe tools/test_analysis.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_match_runner.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_tuning.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_nnue.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/check_format.py --clang-format .venv/Scripts/clang-format.exe
 ```
 
@@ -45,6 +46,7 @@ python tools/test_uci.py --engine build/chessbot
 python tools/test_analysis.py --engine build/chessbot
 python tools/test_match_runner.py --engine build/chessbot
 python tools/test_tuning.py --engine build/chessbot
+python tools/test_nnue.py --engine build/chessbot
 python tools/check_format.py
 ```
 
@@ -128,6 +130,6 @@ CTest ejecuta tipos, ataques, FEN, legalidad, terminales, hash, restauración al
 
 `validate_rules.py` verifica conjuntos completos de jugadas legales, FEN tras reproducir líneas, jaque, material insuficiente, repetición y terminación frente a python-chess. Incluye fixtures especiales y sus reflejos de color, más partidas aleatorias reproducibles. Contrasta también los totales PERFT mediante un recorrido independiente.
 
-El workflow de GitHub Actions compila Debug/Release en Windows/Linux, comprueba formato, reglas, CLI, UCI, análisis, partidas y ajuste, y añade un job Linux de sanitizadores.
+El workflow de GitHub Actions compila Debug/Release en Windows/Linux, comprueba formato, reglas, CLI, UCI, análisis, partidas, ajuste y equivalencia NNUE, y añade un job Linux de sanitizadores. `learning.yml` ejecuta por separado campañas manuales que instalan PyTorch y conserva sus artefactos.
 
-Las dependencias de análisis y entrenamiento están declaradas como extras `analysis` y `training`, separadas del entorno básico. El análisis PGN usa la dependencia básica `python-chess`; PyTorch sigue reservado para las fases neuronales.
+Las dependencias de análisis y entrenamiento están declaradas como extras `analysis` y `training`, separadas del entorno básico. El análisis PGN usa la dependencia básica `python-chess`; PyTorch solo se instala para entrenar o probar el ciclo largo.

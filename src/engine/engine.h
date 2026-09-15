@@ -2,10 +2,12 @@
 #include "engine/limits.h"
 #include "engine/result.h"
 #include "eval/evaluation.h"
+#include "eval/nnue.h"
 #include "openings/opening_book.h"
 #include "search/search.h"
 #include "search/transposition_table.h"
 #include <atomic>
+#include <stdexcept>
 
 namespace chessbot {
 class Engine {
@@ -26,7 +28,15 @@ class Engine {
     SearchResult searchPrepared(const SearchLimits &limits,
                                 const SearchInfoCallback &callback = {});
     EvalBreakdown evaluateDetailed() const {
-        return chessbot::evaluateDetailed(board_, evaluationMode_, evaluationParameters_);
+        auto result = chessbot::evaluateDetailed(board_, evaluationMode_, evaluationParameters_);
+        if (nnueEnabled_) {
+            result.neural = network_.evaluate(board_);
+            result.total = result.neural;
+            result.manualAuxiliary = true;
+            result.source = "nnue";
+            result.networkVersion = network_.version();
+        }
+        return result;
     }
     void stop() {
         stop_.store(true, std::memory_order_relaxed);
@@ -53,6 +63,29 @@ class Engine {
     }
     const EvaluationParameters &evaluationParameters() const {
         return evaluationParameters_;
+    }
+    void setNnueFile(const std::string &path) {
+        stop();
+        if (path.empty()) {
+            network_ = NnueNetwork{};
+            nnueEnabled_ = false;
+        } else {
+            network_.load(path);
+        }
+        table_.clear();
+    }
+    void setNnue(bool enabled) {
+        stop();
+        if (enabled && !network_.loaded())
+            throw std::invalid_argument("NNUE requires a loaded NNUEFile");
+        nnueEnabled_ = enabled;
+        table_.clear();
+    }
+    bool nnueEnabled() const {
+        return nnueEnabled_;
+    }
+    const NnueNetwork &network() const {
+        return network_;
     }
     int moveOverhead() const {
         return moveOverheadMs_;
@@ -92,6 +125,8 @@ class Engine {
     int moveOverheadMs_ = 10;
     EvaluationMode evaluationMode_ = EvaluationMode::Positional;
     EvaluationParameters evaluationParameters_;
+    NnueNetwork network_;
+    bool nnueEnabled_ = false;
     SearchMode searchMode_ = SearchMode::Baseline;
     OpeningBook book_;
     BookPolicy bookPolicy_ = BookPolicy::Weighted;

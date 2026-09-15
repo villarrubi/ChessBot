@@ -34,6 +34,10 @@ jobs:
         run: python tools/test_uci.py --engine build/chessbot
       - if: runner.os == 'Windows'
         run: python tools/test_uci.py --engine build/${{ matrix.config }}/chessbot.exe
+      - if: runner.os == 'Linux'
+        run: python tools/test_nnue.py --engine build/chessbot
+      - if: runner.os == 'Windows'
+        run: python tools/test_nnue.py --engine build/${{ matrix.config }}/chessbot.exe
       - if: runner.os == 'Linux' && matrix.config == 'Release'
         run: python tools/compare_engines.py --engine-a build/chessbot --engine-b build/chessbot --games 2 --depth 1 --max-plies 80 --output build/selfplay.pgn
       - if: runner.os == 'Windows' && matrix.config == 'Release'

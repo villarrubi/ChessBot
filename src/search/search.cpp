@@ -34,12 +34,14 @@ class Searcher {
   public:
     Searcher(Board board, const SearchLimits &limits, TranspositionTable &table,
              std::atomic_bool &stop, int overhead, EvaluationMode evaluationMode,
-             const EvaluationParameters &evaluationParameters, SearchMode searchMode,
-             const SearchInfoCallback &callback)
+             const EvaluationParameters &evaluationParameters, const NnueNetwork *network,
+             SearchMode searchMode, const SearchInfoCallback &callback)
         : board_(std::move(board)), limits_(limits), table_(table), stop_(stop),
           callback_(callback), evaluationMode_(evaluationMode),
-          evaluationParameters_(evaluationParameters), searchMode_(searchMode) {
+          evaluationParameters_(evaluationParameters), network_(network), searchMode_(searchMode) {
         timer_.start(limits, board_.sideToMove(), overhead);
+        if (network_)
+            accumulator_ = network_->refresh(board_);
     }
 
     SearchResult run() {
@@ -97,6 +99,8 @@ class Searcher {
     const SearchInfoCallback &callback_;
     EvaluationMode evaluationMode_;
     const EvaluationParameters &evaluationParameters_;
+    const NnueNetwork *network_;
+    NnueAccumulator accumulator_;
     SearchMode searchMode_;
     TimeManager timer_;
     SearchResult result_;
@@ -113,6 +117,22 @@ class Searcher {
 
     bool optimized() const {
         return searchMode_ == SearchMode::Optimized;
+    }
+    Score staticEvaluation() const {
+        return network_ ? network_->evaluate(board_, accumulator_)
+                        : evaluate(board_, evaluationMode_, evaluationParameters_);
+    }
+    void makeMove(Move move, StateInfo &state, NnueAccumulator &previous) {
+        if (network_)
+            previous = accumulator_;
+        board_.makeMove(move, state);
+        if (network_)
+            network_->updateAfterMove(accumulator_, board_, move, state);
+    }
+    void unmakeMove(Move move, const StateInfo &state, const NnueAccumulator &previous) {
+        board_.unmakeMove(move, state);
+        if (network_)
+            accumulator_ = previous;
     }
     void clearPv() {
         for (auto &row : pv_)
@@ -206,7 +226,8 @@ class Searcher {
             if (contains(excluded, move))
                 continue;
             StateInfo state;
-            board_.makeMove(move, state);
+            NnueAccumulator previous;
+            makeMove(move, state, previous);
             Score score;
             if (optimized() && searched > 0) {
                 score = -negamax(depth - 1, -alpha - 1, -alpha, 1, true);
@@ -214,7 +235,7 @@ class Searcher {
                     score = -negamax(depth - 1, -beta, -alpha, 1, true);
             } else
                 score = -negamax(depth - 1, -beta, -alpha, 1, true);
-            board_.unmakeMove(move, state);
+            unmakeMove(move, state, previous);
             if (stopped())
                 return {};
             ++searched;
@@ -284,7 +305,7 @@ class Searcher {
             return ScoreDraw;
         }
         if (ply >= MaxPly - 1)
-            return evaluate(board_, evaluationMode_, evaluationParameters_);
+            return staticEvaluation();
         const bool inCheck = board_.inCheck(board_.sideToMove());
         const Score originalAlpha = alpha;
         Move ttMove;
@@ -308,7 +329,7 @@ class Searcher {
             }
         }
 
-        const Score staticEval = evaluate(board_, evaluationMode_, evaluationParameters_);
+        const Score staticEval = staticEvaluation();
         if (optimized() && allowNull && !inCheck && depth >= 6 && staticEval >= beta &&
             beta < ScoreMate - MaxPly && hasNullMaterial()) {
             ++nullMoveAttempts_;
@@ -341,7 +362,8 @@ class Searcher {
         for (const Move move : moves) {
             const bool isQuiet = quiet(move);
             StateInfo state;
-            board_.makeMove(move, state);
+            NnueAccumulator previous;
+            makeMove(move, state, previous);
             const bool givesCheck = board_.inCheck(board_.sideToMove());
             const int childDepth = depth - 1;
             Score score;
@@ -364,7 +386,7 @@ class Searcher {
                     score = -negamax(childDepth, -beta, -alpha, ply + 1, true);
             } else
                 score = -negamax(childDepth, -beta, -alpha, ply + 1, true);
-            board_.unmakeMove(move, state);
+            unmakeMove(move, state, previous);
             if (stopped())
                 return 0;
             const int moveIndex = searched++;
@@ -404,14 +426,14 @@ class Searcher {
             return ScoreDraw;
         }
         if (ply >= MaxPly - 1)
-            return evaluate(board_, evaluationMode_, evaluationParameters_);
+            return staticEvaluation();
         const bool check = board_.inCheck(board_.sideToMove());
         auto moves = legalMoveList(board_);
         countMoves(moves.size());
         if (moves.empty())
             return check ? -ScoreMate + ply : ScoreDraw;
         if (!check) {
-            const Score standPat = evaluate(board_, evaluationMode_, evaluationParameters_);
+            const Score standPat = staticEvaluation();
             if (standPat >= beta)
                 return standPat;
             alpha = std::max(alpha, standPat);
@@ -425,9 +447,10 @@ class Searcher {
         int searched = 0;
         for (const Move move : moves) {
             StateInfo state;
-            board_.makeMove(move, state);
+            NnueAccumulator previous;
+            makeMove(move, state, previous);
             const Score score = -quiescence(-beta, -alpha, ply + 1);
-            board_.unmakeMove(move, state);
+            unmakeMove(move, state, previous);
             if (stopped())
                 return 0;
             if (score > alpha) {
@@ -449,10 +472,10 @@ class Searcher {
 
 SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTable &table,
                        std::atomic_bool &stop, int moveOverheadMs, EvaluationMode evaluationMode,
-                       const EvaluationParameters &evaluationParameters, SearchMode searchMode,
-                       const SearchInfoCallback &callback) {
+                       const EvaluationParameters &evaluationParameters, const NnueNetwork *network,
+                       SearchMode searchMode, const SearchInfoCallback &callback) {
     return Searcher(std::move(board), limits, table, stop, moveOverheadMs, evaluationMode,
-                    evaluationParameters, searchMode, callback)
+                    evaluationParameters, network, searchMode, callback)
         .run();
 }
 } // namespace chessbot

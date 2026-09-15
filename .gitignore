@@ -11,3 +11,8 @@ __pycache__/
 !/data/evaluation/
 !/data/evaluation/*.params
 !/data/evaluation/*.json
+!/data/networks/
+!/data/networks/*.nnue
+!/data/networks/*.json
+!/data/training/
+!/data/training/*.json

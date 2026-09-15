@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "version": "nnue-phase9-v1",
+  "architecture": "sparse_768x32_relu_1",
+  "features": "12 color-piece planes x 64 squares; white-oriented output",
+  "labels": {
+    "target": "mixed",
+    "result": "white W/D/L as 1/0.5/0",
+    "teacher": "search_score_cp when present, otherwise static_total",
+    "teacher_weight": 0.35
+  },
+  "dataset": {
+    "path": "build\\phase8-dataset.csv",
+    "sha256": "c9c863b7823294b50feee15cec2ffe6505c1c9e457aa7b6b21f39c3ae6ac1bee",
+    "rows": 2528,
+    "train": 2011,
+    "validation": 517
+  },
+  "training": {
+    "seed": 20260915,
+    "epochs": 30,
+    "batch_size": 128,
+    "learning_rate": 0.003,
+    "weight_decay": 1e-05,
+    "torch": "2.14.0+cpu",
+    "device": "cpu",
+    "deterministic": true,
+    "history": [
+      {
+        "epoch": 1,
+        "train_loss": 0.9845589973747523
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.9835070448690004
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.981392173966266
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.9780270814421401
+      },
+      {
+        "epoch": 5,
+        "train_loss": 0.9733819884485655
+      },
+      {
+        "epoch": 6,
+        "train_loss": 0.9673447475570875
+      },
+      {
+        "epoch": 7,
+        "train_loss": 0.9600435747607082
+      },
+      {
+        "epoch": 8,
+        "train_loss": 0.9516626912109417
+      },
+      {
+        "epoch": 9,
+        "train_loss": 0.9422505265856667
+      },
+      {
+        "epoch": 10,
+        "train_loss": 0.9322902312745863
+      },
+      {
+        "epoch": 11,
+        "train_loss": 0.9216626224560502
+      },
+      {
+        "epoch": 12,
+        "train_loss": 0.9108608306965859
+      },
+      {
+        "epoch": 13,
+        "train_loss": 0.8998484807130651
+      },
+      {
+        "epoch": 14,
+        "train_loss": 0.8889485600870798
+      },
+      {
+        "epoch": 15,
+        "train_loss": 0.8780862483321464
+      },
+      {
+        "epoch": 16,
+        "train_loss": 0.8676224469190092
+      },
+      {
+        "epoch": 17,
+        "train_loss": 0.8574500616541673
+      },
+      {
+        "epoch": 18,
+        "train_loss": 0.8477483808786818
+      },
+      {
+        "epoch": 19,
+        "train_loss": 0.8382234867089783
+      },
+      {
+        "epoch": 20,
+        "train_loss": 0.8292975469289995
+      },
+      {
+        "epoch": 21,
+        "train_loss": 0.8206759792308438
+      },
+      {
+        "epoch": 22,
+        "train_loss": 0.8125866364033764
+      },
+      {
+        "epoch": 23,
+        "train_loss": 0.8047608084965558
+      },
+      {
+        "epoch": 24,
+        "train_loss": 0.7974350493918124
+      },
+      {
+        "epoch": 25,
+        "train_loss": 0.790404310989949
+      },
+      {
+        "epoch": 26,
+        "train_loss": 0.7836571110830207
+      },
+      {
+        "epoch": 27,
+        "train_loss": 0.7773673211324873
+      },
+      {
+        "epoch": 28,
+        "train_loss": 0.7714711882948342
+      },
+      {
+        "epoch": 29,
+        "train_loss": 0.7658014627074436
+      },
+      {
+        "epoch": 30,
+        "train_loss": 0.7604109881115102
+      }
+    ]
+  },
+  "metrics": {
+    "train": {
+      "outcome_loss": 0.536373496055603,
+      "teacher_loss": 0.6309686899185181,
+      "loss": 0.7572125196456909,
+      "brier": 0.040950335562229156,
+      "teacher_mae_cp": 399.2002868652344,
+      "mean_probability": 0.5007623434066772,
+      "mean_target": 0.4885629117488861,
+      "wdl_ece": 0.056533572380430996
+    },
+    "validation": {
+      "outcome_loss": 0.6923996806144714,
+      "teacher_loss": 0.6771497130393982,
+      "loss": 0.9294021129608154,
+      "brier": 0.07081128656864166,
+      "teacher_mae_cp": 430.41961669921875,
+      "mean_probability": 0.5418031215667725,
+      "mean_target": 0.563829779624939,
+      "wdl_ece": 0.10793125524651259
+    },
+    "quantized_train": {
+      "loss": 0.7574122720357244,
+      "outcome_loss": 0.5364370368448989,
+      "teacher_loss": 0.6313578148309299,
+      "brier": 0.04096120794963371,
+      "wdl_ece": 0.05656866943494007,
+      "teacher_mae_cp": 399.36200895077076
+    },
+    "quantized_validation": {
+      "loss": 0.9292481295873048,
+      "outcome_loss": 0.6922384620341134,
+      "teacher_loss": 0.6771704787234042,
+      "brier": 0.07075243984494374,
+      "wdl_ece": 0.10908607389094052,
+      "teacher_mae_cp": 430.39845261121854
+    }
+  },
+  "export": {
+    "format": "CHESSBOT_NNUE 1",
+    "input_quant": 256,
+    "output_quant": 256,
+    "clipped": {
+      "input_weights": 0,
+      "output_weights": 0
+    },
+    "memory_bytes": 49352,
+    "network": "build\\phase9-training-v2\\candidate.nnue",
+    "network_sha256": "d108fd11efc5c81bf9de5313897eb65600fdb74c89ac28904c6587d49ad6cc87",
+    "checkpoint": "build\\phase9-training-v2\\checkpoint.pt",
+    "checkpoint_sha256": "cfcee98794f2ec5bc0f327b964702c554ca80910f69986af0c67f9a783c83aaa"
+  },
+  "engine_commit": "33aafae9d30cd702cc5eaa8ea5fbc81920de2626"
+}

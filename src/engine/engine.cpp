@@ -25,7 +25,8 @@ SearchResult Engine::searchPrepared(const SearchLimits &limits,
         }
     }
     return runSearch(board_, limits, table_, stop_, moveOverheadMs_, evaluationMode_,
-                     evaluationParameters_, searchMode_, callback);
+                     evaluationParameters_, nnueEnabled_ ? &network_ : nullptr, searchMode_,
+                     callback);
 }
 void Engine::clear() {
     stop();

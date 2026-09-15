@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "experiment": "nnue-phase9-v1",
+  "date": "2026-09-15",
+  "decision": "reject",
+  "active_evaluator": "hce-default-v1",
+  "candidate": {
+    "path": "data/networks/nnue-phase9-candidate-v1.nnue",
+    "sha256": "d108fd11efc5c81bf9de5313897eb65600fdb74c89ac28904c6587d49ad6cc87",
+    "architecture": "sparse_768x32_relu_1",
+    "memory_bytes": 49352,
+    "training_report": "data/training/nnue-phase9-training-v1.json"
+  },
+  "dataset": {
+    "sha256": "c9c863b7823294b50feee15cec2ffe6505c1c9e457aa7b6b21f39c3ae6ac1bee",
+    "rows": 2528,
+    "train": 2011,
+    "validation": 517
+  },
+  "validation": {
+    "loss": 0.9294021129608154,
+    "brier": 0.07081128656864166,
+    "wdl_ece": 0.10793125524651259,
+    "teacher_mae_cp": 430.41961669921875
+  },
+  "benchmark": {
+    "reference_nps": 404151,
+    "candidate_nps": 556698,
+    "positions": 3,
+    "depth": 4
+  },
+  "match": {
+    "games": 16,
+    "independent_openings": 8,
+    "wins": 0,
+    "draws": 0,
+    "losses": 16
+  },
+  "gates": {
+    "correctness_and_tactics": false,
+    "validation": true,
+    "performance": true,
+    "strength": false
+  },
+  "reason": "The candidate failed the tactical/regression and strength gates; HCE remains active."
+}

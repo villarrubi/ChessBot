@@ -58,7 +58,7 @@ void UciProtocol::writeLine(const std::string &line) {
     output_ << line << '\n' << std::flush;
 }
 void UciProtocol::identify() {
-    writeLine("id name ChessBot 0.8.0");
+    writeLine("id name ChessBot 0.10.0");
     writeLine("id author ChessBot contributors");
     writeLine("option name Hash type spin default 64 min 1 max 4096");
     writeLine("option name Threads type spin default 1 min 1 max 1");
@@ -74,6 +74,7 @@ void UciProtocol::identify() {
     writeLine("option name Evaluation type combo default Positional var Basic var Positional");
     writeLine("option name EvalFile type string default <empty>");
     writeLine("option name NNUE type check default false");
+    writeLine("option name NNUEFile type string default <empty>");
     writeLine("uciok");
 }
 void UciProtocol::stopAndJoin() {
@@ -135,8 +136,11 @@ void UciProtocol::setOption(std::string_view arguments) {
         engine_.setBookSeed(
             static_cast<std::uint64_t>(parseInt(value, 0, 2'000'000'000, "BookSeed")));
     } else if (name == "NNUE") {
-        if (value != "false")
-            throw std::invalid_argument("NNUE is not available in this version");
+        if (value != "true" && value != "false")
+            throw std::invalid_argument("NNUE must be true or false");
+        engine_.setNnue(value == "true");
+    } else if (name == "NNUEFile") {
+        engine_.setNnueFile(value == "<empty>" ? "" : value);
     } else if (name == "AnalysisDetail") {
         if (value != "Basic" && value != "Full")
             throw std::invalid_argument("AnalysisDetail must be Basic or Full");
@@ -334,7 +338,11 @@ void UciProtocol::handle(const std::string &line, bool &quit) {
 }
 void UciProtocol::writeEvaluation() {
     const auto eval = engine_.evaluateDetailed();
-    writeLine("info string eval side_to_move total " + std::to_string(eval.total) + " material " +
+    writeLine("info string eval source " + eval.source + " network " +
+              (eval.networkVersion.empty() ? "none" : eval.networkVersion) + " manual_auxiliary " +
+              (eval.manualAuxiliary ? "true" : "false") + " side_to_move total " +
+              std::to_string(eval.total) + " neural " + std::to_string(eval.neural) +
+              " manual_total " + std::to_string(eval.manualTotal) + " material " +
               std::to_string(eval.material) + " pst " + std::to_string(eval.pieceSquare) +
               " mobility " + std::to_string(eval.mobility) + " pawns " +
               std::to_string(eval.pawnStructure) + " passed " + std::to_string(eval.passedPawns) +

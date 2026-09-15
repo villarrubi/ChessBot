@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(ChessBot VERSION 0.8.0 LANGUAGES CXX)
+project(ChessBot VERSION 0.10.0 LANGUAGES CXX)
 
 include(CTest)
 option(CHESSBOT_SANITIZERS "Enable supported address/undefined behavior sanitizers" OFF)
@@ -9,7 +9,7 @@ find_package(Threads REQUIRED)
 add_library(chessbot_core
     src/board/board.cpp src/board/move.cpp src/board/attack_tables.cpp
     src/board/zobrist.cpp src/board/movegen.cpp
-    src/eval/evaluation.cpp src/engine/engine.cpp
+    src/eval/evaluation.cpp src/eval/nnue.cpp src/engine/engine.cpp
     src/openings/opening_book.cpp
     src/search/search.cpp src/search/ordering.cpp src/search/transposition_table.cpp
     src/search/time_manager.cpp src/protocol/uci.cpp)
@@ -39,7 +39,7 @@ target_link_libraries(chessbot PRIVATE chessbot_core)
 
 if(BUILD_TESTING)
     add_executable(chessbot_tests tests/test_board.cpp tests/test_perft.cpp tests/test_eval.cpp
-        tests/test_search.cpp)
+        tests/test_nnue.cpp tests/test_search.cpp)
     target_include_directories(chessbot_tests SYSTEM PRIVATE third_party/doctest)
     target_link_libraries(chessbot_tests PRIVATE chessbot_core)
     add_test(NAME rules COMMAND chessbot_tests --test-case-exclude=*slow*)

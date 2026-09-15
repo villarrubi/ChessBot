@@ -53,9 +53,10 @@ def wait_for(predicate, timeout: float = 10.0) -> list[str]:
 try:
     send("uci")
     greeting = wait_for(lambda line: line == "uciok")
-    assert any(line == "id name ChessBot 0.8.0" for line in greeting)
+    assert any(line == "id name ChessBot 0.10.0" for line in greeting)
     for option in ("Hash", "Threads", "Move Overhead", "OwnBook", "BookFile", "BookPolicy",
-                   "BookSeed", "MultiPV", "SearchProfile", "Evaluation", "EvalFile", "NNUE"):
+                   "BookSeed", "MultiPV", "SearchProfile", "Evaluation", "EvalFile", "NNUE",
+                   "NNUEFile"):
         assert any(line.startswith(f"option name {option} ") for line in greeting), option
 
     send("isready")
@@ -70,7 +71,7 @@ try:
     send("setoption name EvalFile value <empty>")
     send("setoption name AnalysisDetail value Full")
     send("setoption name NNUE value true")
-    assert "not available" in wait_for(lambda line: "info string error:" in line)[-1]
+    assert "requires a loaded NNUEFile" in wait_for(lambda line: "info string error:" in line)[-1]
     send("position broken")
     assert "position requires" in wait_for(lambda line: "info string error:" in line)[-1]
 

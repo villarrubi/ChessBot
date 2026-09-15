@@ -395,6 +395,7 @@ EvalBreakdown evaluateDetailed(const Board &board, EvaluationMode mode,
     result.total = result.material + result.pieceSquare + result.mobility + result.pawnStructure +
                    result.passedPawns + result.bishopPair + result.rookActivity +
                    result.kingSafety + result.space + result.tempo;
+    result.manualTotal = result.total;
     return result;
 }
 } // namespace chessbot

@@ -3,6 +3,7 @@
 #include "engine/limits.h"
 #include "engine/result.h"
 #include "eval/evaluation.h"
+#include "eval/nnue.h"
 #include "search/transposition_table.h"
 #include <atomic>
 #include <functional>
@@ -12,6 +13,6 @@ using SearchInfoCallback = std::function<void(const SearchResult &, int hashFull
 
 SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTable &table,
                        std::atomic_bool &stop, int moveOverheadMs, EvaluationMode evaluationMode,
-                       const EvaluationParameters &evaluationParameters, SearchMode searchMode,
-                       const SearchInfoCallback &callback = {});
+                       const EvaluationParameters &evaluationParameters, const NnueNetwork *network,
+                       SearchMode searchMode, const SearchInfoCallback &callback = {});
 } // namespace chessbot

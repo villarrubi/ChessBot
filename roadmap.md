@@ -1,6 +1,6 @@
 # Roadmap de ChessBot
 
-Ruta de trabajo basada en [specs.md](specs.md). Las funcionalidades de las fases 0–7 y el pipeline de fase 8 están implementados y verificados localmente. La fase 7 está cerrada; las promociones estadísticas de los candidatos de búsqueda (fase 5) y evaluación manual (fase 8) siguen abiertas porque las campañas no demostraron más fuerza. Las fases 9–10 no se han iniciado.
+Ruta de trabajo basada en [specs.md](specs.md). Las funcionalidades de las fases 0–10 están implementadas y verificadas localmente. Las fases 5, 8 y 9 mantienen abierto su criterio de fuerza: sus primeros candidatos no superaron la referencia. La fase 10 está cerrada porque el ciclo completo produjo, evaluó y rechazó un candidato con evidencia reproducible, sin alterar el motor activo.
 
 El orden prioriza reglas correctas, búsqueda fiable, rendimiento medido, evaluación explicable y, finalmente, aprendizaje. No se fijan fechas hasta disponer de una primera medida de esfuerzo y rendimiento.
 
@@ -140,28 +140,32 @@ Evidencia de las fases 5/6: [búsqueda y benchmark](docs/search.md), [análisis 
 
 ## Fase 9 — Incorporar evaluación neuronal
 
-- [ ] Definir características de entrada y etiquetas de búsqueda, resultado o una combinación documentada.
-- [ ] Entrenar una red pequeña en Python/PyTorch manteniendo búsqueda alfa-beta.
-- [ ] Versionar arquitectura, dataset, pesos, normalización y formato de exportación.
-- [ ] Integrar inferencia CPU en C++ y comprobar equivalencia con la salida de Python.
-- [ ] Evolucionar hacia NNUE con acumuladores incrementales y pruebas de actualización/restauración.
-- [ ] Exponer `NNUE` y `NNUEFile`; mantener disponible el evaluador manual.
-- [ ] En modo neuronal, identificar el origen de cada puntuación y presentar el desglose manual como referencia, sin atribuirle la suma de la salida neuronal.
-- [ ] Medir latencia, NPS, memoria, pérdida de validación, calibración WDL y fuerza real tras integrar la red.
-- [ ] Escalar a shards binarios cuando el volumen lo justifique.
+- [x] Definir características de entrada y etiquetas de búsqueda, resultado o una combinación documentada.
+- [x] Entrenar una red pequeña en Python/PyTorch manteniendo búsqueda alfa-beta.
+- [x] Versionar arquitectura, dataset, pesos, normalización y formato de exportación.
+- [x] Integrar inferencia CPU en C++ y comprobar equivalencia con la salida de Python.
+- [x] Evolucionar hacia NNUE con acumuladores incrementales y pruebas de actualización/restauración.
+- [x] Exponer `NNUE` y `NNUEFile`; mantener disponible el evaluador manual.
+- [x] En modo neuronal, identificar el origen de cada puntuación y presentar el desglose manual como referencia, sin atribuirle la suma de la salida neuronal.
+- [x] Medir latencia, NPS, memoria, pérdida de validación, calibración WDL y fuerza real tras integrar la red.
+- [x] Escalar a shards binarios cuando el volumen lo justifique.
 - [ ] **Cierre:** red reproducible, inferencia validada y candidato aceptado mediante partidas y suite de regresión.
+
+  Evidencia 2026-09-15: `nnue-phase9-v1`, una red `768×32×1`, produjo puntuaciones idénticas en Python y C++ y validó la actualización incremental. Fue rechazada tras perder 0–16 frente a HCE y fallar táctica/regresión; `hce-default-v1` continúa activa. Se conserva la red y el informe en `data/networks/phase9-experiment-v1.json`.
 
 ## Fase 10 — Cerrar el ciclo de aprendizaje continuo
 
-- [ ] Orquestar el ciclo `partidas → datos → filtrado → entrenamiento → candidato → pruebas → promoción o rechazo`.
-- [ ] Ejecutar trabajos por lotes con presupuesto de partidas, tiempo, almacenamiento y recursos configurable.
-- [ ] Guardar versión del binario, búsqueda, evaluación, libro, red y dataset, además de commit, semilla, compilador, opciones y hardware.
-- [ ] Conservar los artefactos y resultados necesarios para reproducir cada promoción y restaurar la referencia anterior.
-- [ ] Separar el CI rápido de las campañas largas de fuerza y entrenamiento.
-- [ ] Evitar que una partida individual modifique directamente el motor activo.
-- [ ] Documentar compilación, uso UCI, análisis, aperturas, entrenamiento, comparación y resolución de errores.
-- [ ] Ejecutar de extremo a extremo todos los escenarios A–H de `specs.md`, incluida la explicación local con búsqueda adicional cuando sea necesaria.
-- [ ] **Cierre:** una ejecución completa produce un candidato, lo evalúa y lo promociona o rechaza con evidencia reproducible.
+- [x] Orquestar el ciclo `partidas → datos → filtrado → entrenamiento → candidato → pruebas → promoción o rechazo`.
+- [x] Ejecutar trabajos por lotes con presupuesto de partidas, tiempo, almacenamiento y recursos configurable.
+- [x] Guardar versión del binario, búsqueda, evaluación, libro, red y dataset, además de commit, semilla, compilador, opciones y hardware.
+- [x] Conservar los artefactos y resultados necesarios para reproducir cada promoción y restaurar la referencia anterior.
+- [x] Separar el CI rápido de las campañas largas de fuerza y entrenamiento.
+- [x] Evitar que una partida individual modifique directamente el motor activo.
+- [x] Documentar compilación, uso UCI, análisis, aperturas, entrenamiento, comparación y resolución de errores.
+- [x] Ejecutar de extremo a extremo todos los escenarios A–H de `specs.md`, incluida la explicación local con búsqueda adicional cuando sea necesaria.
+- [x] **Cierre:** una ejecución completa produce un candidato, lo evalúa y lo promociona o rechaza con evidencia reproducible.
+
+  Evidencia 2026-09-15: `phase10-cycle-v1` recorrió todas las etapas bajo presupuestos declarados, produjo 18 artefactos con SHA-256 y rechazó de forma segura el candidato. El manifiesto resumido y la configuración están en `data/training/phase10-experiment-v1.json` y `data/training/phase10-config-v1.json`.
 
 ## Reglas de seguimiento
 

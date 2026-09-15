@@ -1,4 +1,4 @@
-# Evaluación manual
+# Evaluación manual y neuronal
 
 El evaluador devuelve centipeones desde la perspectiva del bando al turno. Una puntuación positiva favorece a quien mueve. `tempo = +10` aplica siempre a ese bando; los demás componentes se calculan primero desde blancas y se invierten cuando juegan negras.
 
@@ -34,3 +34,14 @@ Los valores materiales iniciales son 100/120 para peón, 320/305 para caballo, 3
 Las pruebas comprueban suma exacta, cambio de perspectiva, fase, simetría, pasados, pareja de alfiles, actividad de torres y contenido del perfil básico. Además se contrastó la simetría al reflejar colores y tablero en 1.600 posiciones aleatorias.
 
 Como referencia inicial, `Positional` obtuvo 13 puntos frente a 3 de `Basic` en 16 partidas a profundidad 3, con ocho aperturas y colores invertidos. Es una comprobación funcional favorable; la muestra es pequeña y no constituye todavía una estimación Elo fiable. Los pesos son iniciales y deberán ajustarse mediante partidas de mayor tamaño en fases posteriores.
+
+## NNUE opcional
+
+`NNUEFile` carga una red `CHESSBOT_NNUE 1` y `NNUE=true` la usa en las hojas de la misma búsqueda
+alfa-beta. El acumulador disperso se actualiza al hacer cada movimiento y se restaura al deshacerlo.
+Desactivar `NNUE` vuelve inmediatamente a `Basic` o `Positional`, según la opción `Evaluation`.
+
+Cuando NNUE está activa, `total` y `neural` contienen su puntuación y `source` vale `nnue`. Los
+componentes posicionales siguen disponibles para explicar la posición, pero se marcan mediante
+`manual_auxiliary=true` y su suma se publica en `manual_total`. La versión de pesos aparece en
+`network_version`. Así el informe no atribuye la salida de la red a los términos manuales.

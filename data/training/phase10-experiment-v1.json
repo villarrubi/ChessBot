@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "experiment": "phase10-cycle-v1",
+  "date": "2026-09-15",
+  "status": "complete",
+  "decision": "reject",
+  "config": "data/training/phase10-config-v1.json",
+  "candidate": {
+    "path": "data/networks/nnue-phase10-candidate-v1.nnue",
+    "sha256": "329a7716b336a907f15f19c7f310d6659c6abb3e4cc4afbc1b76fc0331a89e0e",
+    "architecture": "sparse_768x16_relu_1",
+    "memory_bytes": 24680
+  },
+  "run": {
+    "duration_seconds": 3.875,
+    "storage_bytes": 811052,
+    "artifacts": 18,
+    "dataset_rows": 1406,
+    "train_rows": 1113,
+    "validation_rows": 293,
+    "validation_loss": 0.911532759666443,
+    "brier": 0.0882518291473389,
+    "wdl_ece": 0.0817770194262266,
+    "quantized_validation_loss": 0.911247874061608,
+    "quantized_brier": 0.0881269755375646,
+    "quantized_wdl_ece": 0.0538538765721474
+  },
+  "benchmark": {
+    "reference_nps": 389153,
+    "candidate_nps": 109061,
+    "relative_nps": 0.280252240121495
+  },
+  "match": {
+    "games": 2,
+    "independent_openings": 1,
+    "wins": 0,
+    "draws": 1,
+    "losses": 1
+  },
+  "gates": {
+    "correctness_and_tactics": true,
+    "validation": true,
+    "performance": false,
+    "strength": false
+  },
+  "active_evaluator_after_run": "hce-default-v1",
+  "promotion_was_attempted": false,
+  "engine_commit_before_changes": "33aafae9d30cd702cc5eaa8ea5fbc81920de2626"
+}

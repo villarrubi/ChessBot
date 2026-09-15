@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "id": "phase10-cycle-v1",
+  "mode": "nnue",
+  "engine": "build/Release/chessbot.exe",
+  "reference": "data/evaluation/hce-active.params",
+  "reference_kind": "hce",
+  "feature_eval_file": "data/evaluation/hce-active.params",
+  "openings": "data/openings/core.json",
+  "source_pgns": [
+    "data/engine_matches/phase5-final-50ms-64.pgn"
+  ],
+  "candidate_version": "nnue-phase10-v1",
+  "search_version": "optimized-v1",
+  "evaluation_version": "hce-default-v1",
+  "book_version": "core-v1",
+  "seed": 20260915,
+  "budgets": {
+    "selfplay_games": 2,
+    "evaluation_games": 2,
+    "max_seconds": 300,
+    "max_storage_mb": 50,
+    "threads": 1
+  },
+  "selfplay": {
+    "enabled": true,
+    "depth": 1,
+    "max_plies": 40
+  },
+  "dataset": {
+    "skip_plies": 4,
+    "sample_every": 3,
+    "max_per_game": 24,
+    "max_per_bucket": 500,
+    "validation_fraction": 0.2
+  },
+  "training": {
+    "hidden": 16,
+    "epochs": 8,
+    "batch_size": 256,
+    "learning_rate": 0.003,
+    "target": "mixed",
+    "teacher_weight": 0.35,
+    "binary_shards": true,
+    "shard_size": 1000
+  },
+  "evaluation": {
+    "depth": 1,
+    "benchmark_depth": 2,
+    "max_plies": 40,
+    "max_performance_regression": 0.2,
+    "minimum_lower_score": 0.999,
+    "minimum_independent_samples": 1
+  },
+  "promote_to": "data/networks/nnue-active.nnue"
+}

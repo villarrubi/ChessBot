@@ -1,6 +1,6 @@
 # Arquitectura actual
 
-Las fases 0–8 implementan una biblioteca `chessbot_core`, un motor UCI monohilo, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas y un pipeline de ajuste de la evaluación manual.
+Las fases 0–10 implementan una biblioteca `chessbot_core`, un motor UCI monohilo, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas, evaluación HCE/NNUE y un ciclo de aprendizaje por lotes.
 
 ## Dependencias y módulos
 
@@ -72,5 +72,22 @@ Un mate favorable usa `ScoreMate - ply`; uno desfavorable, `-ScoreMate + ply`. A
 - Consola de diagnóstico y protocolo UCI comparten el ejecutable, pero tienen entradas separadas: sin argumentos se inicia UCI.
 - Búsqueda monohilo determinista con perfiles `Baseline`/`Optimized`; el hilo asíncrono pertenece al adaptador UCI.
 - UCI transporta búsqueda, MultiPV, libro y archivos de evaluación; `eval` y `features-stream` exponen el desglose JSON que consumen las herramientas de análisis y entrenamiento.
+
+## Evaluación neuronal
+
+`NnueNetwork` carga el formato versionado `CHESSBOT_NNUE 1`: 768 entradas binarias por pieza y
+casilla, una capa ReLU pequeña y una salida centipeón. Los enteros cuantizados hacen que Python y
+C++ produzcan el mismo valor. La red se orienta a blancas y la API devuelve siempre la perspectiva
+del bando al turno.
+
+La búsqueda alfa-beta recibe opcionalmente una red. Al comenzar refresca un acumulador desde el
+tablero; cada `makeMove` actualiza solo las piezas que salen o entran y cada `unmakeMove` restaura el
+estado anterior. El evaluador HCE continúa disponible y genera el desglose auxiliar cuando NNUE
+está activa. Cargar o cambiar la evaluación limpia la tabla de transposición para no mezclar
+puntuaciones de procedencias distintas.
+
+El aprendizaje vive fuera del núcleo. Las herramientas producen candidatos inmutables y el motor
+solo carga archivos completos. La promoción es una operación final condicionada por todas las
+puertas, lo que evita cambios durante una partida y permite restaurar la referencia guardada.
 
 La referencia externa de las comprobaciones diferenciales es la [API oficial de python-chess](https://python-chess.readthedocs.io/en/latest/core.html). El uso de FEN con en passant explícito y la comparación de repetición actual se ajustan a esos contratos.
