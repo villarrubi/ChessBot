@@ -21,6 +21,8 @@ CMake detecta la instalación de Visual Studio. La entrega se ha compilado con V
 .\.venv\Scripts\python.exe tools/test_cli.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_uci.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/test_analysis.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_match_runner.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_tuning.py --engine build/Release/chessbot.exe
 .\.venv\Scripts\python.exe tools/check_format.py --clang-format .venv/Scripts/clang-format.exe
 ```
 
@@ -41,6 +43,8 @@ python tools/validate_rules.py --engine build/chessbot
 python tools/test_cli.py --engine build/chessbot
 python tools/test_uci.py --engine build/chessbot
 python tools/test_analysis.py --engine build/chessbot
+python tools/test_match_runner.py --engine build/chessbot
+python tools/test_tuning.py --engine build/chessbot
 python tools/check_format.py
 ```
 
@@ -82,6 +86,8 @@ La máquina de esta entrega no dispone de `clang_rt.asan_dynamic_runtime_thunk-x
 
 `validate-stream` admite una petición por línea: `FEN`, opcionalmente un tabulador y una secuencia de jugadas UCI separadas por espacios. Devuelve un JSON por petición y continúa tras errores. Esta interfaz permite comparar muchas posiciones sin arrancar un proceso por posición.
 
+`features-stream` usa el mismo transporte y devuelve Zobrist, turno, versión de evaluación y todos los componentes. Acepta `--eval-file FILE` y permite generar datasets sin arrancar un proceso por posición.
+
 Las órdenes de diagnóstico inválidas devuelven código 2 y un mensaje por stderr. La notación de las jugadas es UCI.
 
 ## Motor UCI
@@ -101,13 +107,13 @@ go movetime 1000
 
 El comando de depuración `eval` devuelve en una línea `info string` la evaluación estática y sus componentes desde la perspectiva del bando al turno. `AnalysisDetail=Full` añade métricas de búsqueda. El analizador usa `MultiPV` y `go searchmoves`, que sí pertenecen al flujo UCI, y consume el desglose mediante la consola JSON separada.
 
-El comparador mínimo se ejecuta así:
+El runner reproducible se ejecuta así:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/compare_engines.py --engine-a build/Release/chessbot.exe --engine-b build/Release/chessbot.exe --evaluation-a Positional --evaluation-b Basic --games 16 --depth 3 --openings tests/positions/benchmark.fen --output data/engine_matches/comparison.pgn
+.\.venv\Scripts\python.exe tools/match_runner.py --engine-a build/Release/chessbot.exe --engine-b build/Release/chessbot.exe --games 16 --depth 3 --openings data/openings/core.json --color-mode paired --output-dir data/engine_matches/comparison
 ```
 
-Alterna colores y reutiliza la misma FEN para cada pareja. Admite `--depth`, `--nodes` o `--movetime-ms`, además de perfiles de búsqueda/evaluación; el orquestador completo llegará en la fase 7.
+Admite límites de profundidad, nodos o tiempo, relojes completos, colores fijos o emparejados, FEN, líneas forzadas y suites JSON/PGN/EPD/FEN/UCI/Polyglot. Véanse [openings-and-matches.md](openings-and-matches.md) y [learning.md](learning.md).
 
 El análisis PGN y su prueba integral se ejecutan así:
 
@@ -118,10 +124,10 @@ El análisis PGN y su prueba integral se ejecutan así:
 
 ## Cobertura y CI
 
-CTest ejecuta tipos, ataques, FEN, legalidad, terminales, hash, restauración aleatoria, PERFT, evaluación, tácticas, búsqueda, límites y tabla de transposición. `CHESSBOT_SLOW_TESTS=ON` añade profundidad 5/6 de la posición inicial como prueba etiquetada `slow`. Se excluye en Debug para mantener rápidas las aserciones de invariantes.
+CTest ejecuta tipos, ataques, FEN, legalidad, terminales, hash, restauración aleatoria, PERFT, evaluación parametrizada, libro, tácticas, búsqueda, límites y tabla de transposición. `CHESSBOT_SLOW_TESTS=ON` añade profundidad 5/6 de la posición inicial como prueba etiquetada `slow`. Se excluye en Debug para mantener rápidas las aserciones de invariantes.
 
 `validate_rules.py` verifica conjuntos completos de jugadas legales, FEN tras reproducir líneas, jaque, material insuficiente, repetición y terminación frente a python-chess. Incluye fixtures especiales y sus reflejos de color, más partidas aleatorias reproducibles. Contrasta también los totales PERFT mediante un recorrido independiente.
 
-El workflow de GitHub Actions compila Debug/Release en Windows/Linux, comprueba formato, reglas, CLI y UCI, y añade un job Linux de sanitizadores. Se activará con el próximo push o pull request; no se ha publicado código ni ejecutado un workflow remoto durante esta entrega.
+El workflow de GitHub Actions compila Debug/Release en Windows/Linux, comprueba formato, reglas, CLI, UCI, análisis, partidas y ajuste, y añade un job Linux de sanitizadores.
 
 Las dependencias de análisis y entrenamiento están declaradas como extras `analysis` y `training`, separadas del entorno básico. El análisis PGN usa la dependencia básica `python-chess`; PyTorch sigue reservado para las fases neuronales.

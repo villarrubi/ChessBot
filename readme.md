@@ -2,7 +2,7 @@
 
 Motor de ajedrez desarrollado desde cero en C++20 para jugar, analizar partidas, explicar evaluaciones y mejorar mediante autojuego y entrenamiento controlado.
 
-> **Estado actual: funcionalidades de las fases 0–6 implementadas.** Ya funcionan las reglas, los perfiles de búsqueda, la evaluación posicional explicable, UCI MultiPV y el análisis completo de PGN con explicaciones locales. El perfil optimizado sigue como candidato porque su primera campaña no demostró una mejora de fuerza. Aperturas avanzadas, aprendizaje y redes neuronales pertenecen a fases posteriores. El detalle está en [roadmap.md](roadmap.md).
+> **Estado actual: funcionalidades de las fases 0–8 implementadas.** Ya funcionan las reglas, búsqueda y evaluación explicable, UCI MultiPV, análisis PGN, libro propio, partidas UCI reproducibles y ajuste tipo Texel. Los candidatos que no demostraron fuerza quedaron rechazados y las referencias estables siguen activas. Redes neuronales y NNUE pertenecen a fases posteriores. El detalle está en [roadmap.md](roadmap.md).
 
 ## Probar la versión actual
 
@@ -19,13 +19,15 @@ python -m venv .venv
 .\build\Release\chessbot.exe bench 5
 .\build\Release\chessbot.exe perft 6
 .\build\Release\chessbot.exe divide 3
+.\.venv\Scripts\python.exe tools/test_match_runner.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_tuning.py --engine build/Release/chessbot.exe
 ```
 
 PERFT de la posición inicial a profundidad 6 devuelve `119060324`. `inspect` muestra el estado y las jugadas legales; `eval`, el desglose de evaluación; `bench`, una referencia de búsqueda; y `divide`, los nodos por jugada. Al ejecutar el binario sin argumentos se inicia UCI y ya puede añadirse a una GUI compatible.
 
 Las instrucciones para Debug, Linux, validación con python-chess y sanitizadores están en [docs/development.md](docs/development.md). Los resultados locales y las comprobaciones pendientes están en [docs/validation.md](docs/validation.md).
 
-Las secciones siguientes combinan las capacidades actuales con las previstas. Las herramientas de entrenamiento aún no están implementadas.
+Las secciones siguientes combinan las capacidades actuales con las previstas. El ajuste de la evaluación manual ya está implementado; el entrenamiento neuronal llegará en fases posteriores.
 
 ## Qué ofrecerá el proyecto terminado
 
@@ -121,12 +123,16 @@ go wtime 120000 btime 120000 winc 1000 binc 1000
 | `Move Overhead` | Margen de tiempo para comunicación y ejecución |
 | `SearchProfile` | `Baseline` conserva la referencia de fase 4; `Optimized` activa PVS, aspiración y podas verificadas |
 | `Evaluation` | `Basic` reproduce material/PST de fase 2; `Positional` activa el desglose de fase 4 |
-| `OwnBook` | Reservada; en esta versión solo admite `false` |
+| `EvalFile` | Archivo versionado de multiplicadores de la evaluación manual |
+| `OwnBook` | Activa o desactiva el libro nativo |
+| `BookFile` | Ruta del libro TSV versionado |
+| `BookPolicy` | Selección `best`, `weighted`, `random` o `explore` |
+| `BookSeed` | Semilla reproducible de selección |
 | `MultiPV` | Número de alternativas de raíz, entre 1 y 10 |
 | `AnalysisDetail` | `Full` añade evaluación estática y métricas internas de búsqueda |
 | `NNUE` | Reservada; en esta versión solo admite `false` |
 
-La configuración inicial utiliza un hilo, 64 MB de hash y evaluación manual posicional, con NNUE, libro y tablas de finales desactivados. Las opciones y sus valores admitidos se anuncian mediante `uci`. Los intentos de activar opciones todavía no disponibles devuelven un mensaje `info string error`.
+La configuración inicial utiliza un hilo, 64 MB de hash y evaluación manual posicional, con NNUE y libro desactivados. Las opciones y sus valores admitidos se anuncian mediante `uci`. Los intentos de activar opciones todavía no disponibles devuelven un mensaje `info string error`.
 
 ## Analizar posiciones y partidas
 
@@ -148,15 +154,15 @@ Las cifras de un desglose manual suman su evaluación estática. Si está activa
 
 ## Partidas entre motores y entrenamiento de aperturas
 
-La herramienta actual `tools/compare_engines.py` ejecuta partidas UCI emparejadas por colores, valida cada jugada y guarda PGN. La fase 7 la ampliará como `match_runner.py` con controles de tiempo, líneas forzadas y metadatos completos.
+`tools/match_runner.py` ejecuta partidas entre dos motores UCI locales, valida cada jugada y guarda PGN, metadatos JSON y logs. Admite profundidad, nodos, tiempo por jugada o reloj completo, además de líneas forzadas, aperturas y opciones independientes por motor.
 
 Ejemplo de la interfaz actual para organizar partidas a profundidad fija contra un rival local:
 
 ```powershell
-python tools/compare_engines.py --engine-a .\build\Release\chessbot.exe --engine-b C:\motores\stockfish.exe --games 16 --depth 3 --openings tests/positions/benchmark.fen --output data/engine_matches/prueba.pgn
+python tools/match_runner.py --engine-a .\build\Release\chessbot.exe --engine-b C:\motores\stockfish.exe --games 16 --depth 3 --openings data/openings/core.json --color-mode paired --output-dir data/engine_matches/prueba
 ```
 
-La ruta del rival debe sustituirse por la instalación local. En comparaciones de fuerza, el runner utiliza parejas con colores invertidos y la misma posición de salida. Cada experimento registra las opciones de libro de ambos motores.
+La ruta del rival debe sustituirse por la instalación local. En comparaciones de fuerza, el runner utiliza parejas con colores invertidos y la misma posición de salida. Cada experimento registra configuración, relojes, opciones de libro, evaluadores y procedencia. La guía completa está en [docs/openings-and-matches.md](docs/openings-and-matches.md).
 
 Se admiten estos puntos de partida:
 
@@ -198,6 +204,8 @@ Autojuego y partidas externas
 
 Cada experimento guarda versiones, commit, configuración, semilla, límites, compilador y hardware. Los informes comparan victorias, tablas y derrotas, estimación Elo e incertidumbre, rendimiento y regresiones. Una menor pérdida de entrenamiento o más nodos por segundo no bastan para promover un candidato.
 
+La evaluación manual acepta parámetros externos mediante `EvalFile`. `tools/generate_dataset.py` crea CSV/Parquet con particiones por partida; `tools/tune_eval.py` ajusta multiplicadores con pérdida tipo Texel; y `tools/evaluate_candidate.py` comprueba corrección, táctica, rendimiento y fuerza antes de promover. Véase [docs/learning.md](docs/learning.md). El experimento de fase 8 conservó la referencia porque el primer candidato no demostró ventaja en partidas.
+
 ## Organización del repositorio terminado
 
 ```text
@@ -227,7 +235,7 @@ ChessBot/
 └── docs/             # Arquitectura, evaluación, búsqueda y aprendizaje
 ```
 
-`compare_engines.py` ya está disponible. Las herramientas previstas son `analyze_pgn.py`, `match_runner.py`, `selfplay.py`, `opening_suite.py`, `benchmark.py`, `tune_eval.py`, `train_network.py` y `llm_explainer.py`. Sus argumentos definitivos se documentarán al implementarlas.
+Ya están disponibles `compare_engines.py`, `match_runner.py`, `analyze_pgn.py`, `explain_analysis.py`, `generate_dataset.py`, `tune_eval.py` y `evaluate_candidate.py`. El entrenamiento neuronal y su exportación corresponden a las fases siguientes.
 
 FEN se usa para posiciones; PGN con metadatos JSON, para partidas; CSV/Parquet y posteriormente shards binarios, para entrenamiento. El binario, la búsqueda, el evaluador, el libro, las redes y los datasets se versionan de forma independiente.
 

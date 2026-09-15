@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(ChessBot VERSION 0.1.0 LANGUAGES CXX)
+project(ChessBot VERSION 0.8.0 LANGUAGES CXX)
 
 include(CTest)
 option(CHESSBOT_SANITIZERS "Enable supported address/undefined behavior sanitizers" OFF)
@@ -10,6 +10,7 @@ add_library(chessbot_core
     src/board/board.cpp src/board/move.cpp src/board/attack_tables.cpp
     src/board/zobrist.cpp src/board/movegen.cpp
     src/eval/evaluation.cpp src/engine/engine.cpp
+    src/openings/opening_book.cpp
     src/search/search.cpp src/search/ordering.cpp src/search/transposition_table.cpp
     src/search/time_manager.cpp src/protocol/uci.cpp)
 target_include_directories(chessbot_core PUBLIC src)
@@ -43,8 +44,10 @@ if(BUILD_TESTING)
     target_link_libraries(chessbot_tests PRIVATE chessbot_core)
     add_test(NAME rules COMMAND chessbot_tests --test-case-exclude=*slow*)
     add_test(NAME cli_help COMMAND chessbot --help)
+    set_tests_properties(rules cli_help PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     if(CHESSBOT_SLOW_TESTS)
         add_test(NAME perft_full COMMAND chessbot_tests --test-case=*slow*)
-        set_tests_properties(perft_full PROPERTIES LABELS slow TIMEOUT 600)
+        set_tests_properties(perft_full PROPERTIES LABELS slow TIMEOUT 600
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     endif()
 endif()

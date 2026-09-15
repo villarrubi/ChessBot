@@ -1,0 +1,5 @@
+# version=test-book-v1
+# fen(4 fields)	move	weight	games	wins	draws	losses	engine_score_cp	source
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -	e2e4	70	100	55	30	15	24	unit
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -	d2d4	30	20	8	8	4	18	unit
+rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq -	c7c5	100	40	18	15	7	10	unit

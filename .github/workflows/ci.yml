@@ -42,6 +42,14 @@ jobs:
         run: python tools/test_analysis.py --engine build/chessbot
       - if: runner.os == 'Windows' && matrix.config == 'Release'
         run: python tools/test_analysis.py --engine build/Release/chessbot.exe
+      - if: runner.os == 'Linux' && matrix.config == 'Release'
+        run: python tools/test_match_runner.py --engine build/chessbot
+      - if: runner.os == 'Windows' && matrix.config == 'Release'
+        run: python tools/test_match_runner.py --engine build/Release/chessbot.exe
+      - if: runner.os == 'Linux' && matrix.config == 'Release'
+        run: python tools/test_tuning.py --engine build/chessbot
+      - if: runner.os == 'Windows' && matrix.config == 'Release'
+        run: python tools/test_tuning.py --engine build/Release/chessbot.exe
       - run: python tools/check_format.py
 
   sanitizers:

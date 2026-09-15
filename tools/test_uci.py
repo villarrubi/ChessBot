@@ -53,9 +53,9 @@ def wait_for(predicate, timeout: float = 10.0) -> list[str]:
 try:
     send("uci")
     greeting = wait_for(lambda line: line == "uciok")
-    assert any(line == "id name ChessBot 0.6.0" for line in greeting)
-    for option in ("Hash", "Threads", "Move Overhead", "OwnBook", "MultiPV", "SearchProfile",
-                   "Evaluation", "NNUE"):
+    assert any(line == "id name ChessBot 0.8.0" for line in greeting)
+    for option in ("Hash", "Threads", "Move Overhead", "OwnBook", "BookFile", "BookPolicy",
+                   "BookSeed", "MultiPV", "SearchProfile", "Evaluation", "EvalFile", "NNUE"):
         assert any(line.startswith(f"option name {option} ") for line in greeting), option
 
     send("isready")
@@ -64,8 +64,12 @@ try:
     send("setoption name Move Overhead value 1")
     send("setoption name Evaluation value Basic")
     send("setoption name Evaluation value Positional")
+    send("setoption name EvalFile value data/evaluation/hce-default-v1.params")
+    send("setoption name EvalFile value data/evaluation/missing.params")
+    assert "cannot open file" in wait_for(lambda line: "info string error:" in line)[-1]
+    send("setoption name EvalFile value <empty>")
     send("setoption name AnalysisDetail value Full")
-    send("setoption name OwnBook value true")
+    send("setoption name NNUE value true")
     assert "not available" in wait_for(lambda line: "info string error:" in line)[-1]
     send("position broken")
     assert "position requires" in wait_for(lambda line: "info string error:" in line)[-1]
@@ -79,6 +83,17 @@ try:
     assert any(line.startswith("info string eval ") for line in result), result
     assert any(line.startswith("info depth 3 ") for line in result), result
     assert result[-1].split()[1] != "0000"
+
+    send("setoption name BookFile value tests/positions/test_book.tsv")
+    send("setoption name BookPolicy value best")
+    send("setoption name OwnBook value true")
+    send("position startpos")
+    send("go depth 8")
+    result = wait_for(lambda line: line.startswith("bestmove "), timeout=5)
+    assert any("info string book move e2e4" in line and "version test-book-v1" in line
+               for line in result), result
+    assert result[-1].split()[1] == "e2e4"
+    send("setoption name OwnBook value false")
 
     send("setoption name MultiPV value 3")
     send("position startpos")

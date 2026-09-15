@@ -1,6 +1,6 @@
 # Arquitectura actual
 
-Las fases 0–6 implementan una biblioteca `chessbot_core`, un motor UCI monohilo, una consola de diagnóstico, análisis PGN y explicaciones basadas en evidencias. Aperturas y aprendizaje pertenecen a fases posteriores.
+Las fases 0–8 implementan una biblioteca `chessbot_core`, un motor UCI monohilo, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas y un pipeline de ajuste de la evaluación manual.
 
 ## Dependencias y módulos
 
@@ -9,12 +9,13 @@ Las fases 0–6 implementan una biblioteca `chessbot_core`, un motor UCI monohil
 - `board/board.*`: FEN, estado, ataques recibidos, hacer/deshacer, historial y terminación.
 - `board/movegen.*`: listas fijas internas, movimientos pseudolegales, filtrado de legalidad y PERFT/divide.
 - `board/zobrist.*`: claves de 64 bits reproducibles mediante una semilla fija de SplitMix64.
-- `eval/evaluation.*`: perfiles básico/posicional, interpolación de fase y desglose.
+- `eval/evaluation.*`: perfiles básico/posicional, interpolación de fase, desglose y parámetros externos versionados.
+- `openings/opening_book.*`: libro TSV validado y políticas reproducibles de selección.
 - `search/`: alfa-beta/PVS, MultiPV, quietud, heurísticas, tabla de transposición y tiempo.
 - `engine/`: API estable, límites, resultados, configuración y parada.
 - `protocol/uci.*`: protocolo asíncrono y salida sincronizada.
 - `main.cpp`: entrada UCI, diagnóstico JSON y benchmark.
-- `tools/`: validación, partidas, análisis PGN y explicaciones mediante python-chess. El núcleo no enlaza Python ni motores externos.
+- `tools/`: validación, partidas, análisis PGN, explicaciones, datasets, ajuste y promoción mediante python-chess/NumPy. El núcleo no enlaza Python ni motores externos.
 
 `Board` mantiene doce bitboards, ocupación por color y un array de piezas por casilla. El array permite consultar capturas y serializar FEN sin recorrer todos los bitboards. Las mutaciones actualizan las tres representaciones; las aserciones Debug comprueban su coherencia.
 
@@ -70,6 +71,6 @@ Un mate favorable usa `ScoreMate - ply`; uno desfavorable, `-ScoreMate + ply`. A
 - `MoveList` fijo dentro de búsqueda y vectores en las fronteras públicas donde simplifican la interoperabilidad.
 - Consola de diagnóstico y protocolo UCI comparten el ejecutable, pero tienen entradas separadas: sin argumentos se inicia UCI.
 - Búsqueda monohilo determinista con perfiles `Baseline`/`Optimized`; el hilo asíncrono pertenece al adaptador UCI.
-- UCI transporta búsqueda y MultiPV; la consola `eval` transporta el desglose JSON que consumen las herramientas de análisis.
+- UCI transporta búsqueda, MultiPV, libro y archivos de evaluación; `eval` y `features-stream` exponen el desglose JSON que consumen las herramientas de análisis y entrenamiento.
 
 La referencia externa de las comprobaciones diferenciales es la [API oficial de python-chess](https://python-chess.readthedocs.io/en/latest/core.html). El uso de FEN con en passant explícito y la comparación de repetición actual se ajustan a esos contratos.

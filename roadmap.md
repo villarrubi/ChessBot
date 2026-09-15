@@ -1,6 +1,6 @@
 # Roadmap de ChessBot
 
-Ruta de trabajo basada en [specs.md](specs.md). Las funcionalidades de las fases 0–6 están implementadas y verificadas localmente. La fase 6 está cerrada; el candidato de fase 5 conserva abierta su promoción estadística. El primer resultado remoto del CI sigue pendiente y las fases 7–10 no se han iniciado.
+Ruta de trabajo basada en [specs.md](specs.md). Las funcionalidades de las fases 0–7 y el pipeline de fase 8 están implementados y verificados localmente. La fase 7 está cerrada; las promociones estadísticas de los candidatos de búsqueda (fase 5) y evaluación manual (fase 8) siguen abiertas porque las campañas no demostraron más fuerza. Las fases 9–10 no se han iniciado.
 
 El orden prioriza reglas correctas, búsqueda fiable, rendimiento medido, evaluación explicable y, finalmente, aprendizaje. No se fijan fechas hasta disponer de una primera medida de esfuerzo y rendimiento.
 
@@ -108,33 +108,35 @@ Evidencia de las fases 5/6: [búsqueda y benchmark](docs/search.md), [análisis 
 
 ## Fase 7 — Partidas entre motores, aperturas y autojuego
 
-- [ ] Ampliar el comparador mínimo a un runner para ChessBot, Stockfish, cualquier ejecutable UCI local y versiones o redes anteriores.
-- [ ] Configurar por motor su ejecutable, opciones UCI, hash, hilos, evaluador/red, directorio de trabajo y entorno.
-- [ ] Gestionar arranque, handshake, disponibilidad, sincronización de posición, relojes, `bestmove` y terminación.
-- [ ] Detectar movimientos ilegales, timeouts y caídas; aplicar una política explícita y guardar los logs del fallo.
-- [ ] Admitir posición inicial, FEN arbitrario, prefijos PGN/UCI, aperturas con nombre y variantes exactas.
-- [ ] Validar y normalizar aperturas a FEN más movimientos UCI, con identificador, ECO cuando exista y ply de liberación.
-- [ ] Importar suites PGN, EPD, listas FEN/UCI, datos Polyglot y base nativa.
-- [ ] Permitir color fijo, alternancia y parejas de partidas con colores invertidos desde la misma posición.
-- [ ] Implementar libro propio opcional con `OwnBook`, `BookFile` y `BookPolicy`, validación de jugadas y vuelta a búsqueda fuera de libro.
-- [ ] Guardar estadísticas, procedencia y motivo de selección de las jugadas del libro; versionarlo de forma independiente.
-- [ ] Separar el prefijo que fuerza el runner del libro que cada motor puede consultar después de liberarse.
-- [ ] Generar diversidad controlada en autojuego con aperturas, semillas y versiones; mantener estables las condiciones de las pruebas de fuerza.
-- [ ] Guardar PGN, FEN final, resultado, causa de terminación, relojes y metadatos reproducibles de cada experimento.
-- [ ] Automatizar comparación con referencia mediante victorias/tablas/derrotas, porcentaje, Elo estimado e intervalo de confianza; añadir SPRT cuando corresponda.
-- [ ] **Cierre:** funcionan los escenarios A–F de `specs.md`, incluido entrenamiento desde una línea exacta, con color fijo y libro activado o desactivado.
+- [x] Ampliar el comparador mínimo a un runner para ChessBot, Stockfish, cualquier ejecutable UCI local y versiones o redes anteriores.
+- [x] Configurar por motor su ejecutable, opciones UCI, hash, hilos, evaluador/red, directorio de trabajo y entorno.
+- [x] Gestionar arranque, handshake, disponibilidad, sincronización de posición, relojes, `bestmove` y terminación.
+- [x] Detectar movimientos ilegales, timeouts y caídas; aplicar una política explícita y guardar los logs del fallo.
+- [x] Admitir posición inicial, FEN arbitrario, prefijos PGN/UCI, aperturas con nombre y variantes exactas.
+- [x] Validar y normalizar aperturas a FEN más movimientos UCI, con identificador, ECO cuando exista y ply de liberación.
+- [x] Importar suites PGN, EPD, listas FEN/UCI, datos Polyglot y base nativa.
+- [x] Permitir color fijo, alternancia y parejas de partidas con colores invertidos desde la misma posición.
+- [x] Implementar libro propio opcional con `OwnBook`, `BookFile` y `BookPolicy`, validación de jugadas y vuelta a búsqueda fuera de libro.
+- [x] Guardar estadísticas, procedencia y motivo de selección de las jugadas del libro; versionarlo de forma independiente.
+- [x] Separar el prefijo que fuerza el runner del libro que cada motor puede consultar después de liberarse.
+- [x] Generar diversidad controlada en autojuego con aperturas, semillas y versiones; mantener estables las condiciones de las pruebas de fuerza.
+- [x] Guardar PGN, FEN final, resultado, causa de terminación, relojes y metadatos reproducibles de cada experimento.
+- [x] Automatizar comparación con referencia mediante victorias/tablas/derrotas, porcentaje, Elo estimado e intervalo de confianza; añadir SPRT cuando corresponda.
+- [x] **Cierre:** funcionan los escenarios A–F de `specs.md`, incluido entrenamiento desde una línea exacta, con color fijo y libro activado o desactivado.
 
 ## Fase 8 — Ajustar automáticamente la evaluación manual
 
-- [ ] Generar datasets de partidas, posiciones, características, evaluaciones de búsqueda y resultados.
-- [ ] Empezar con CSV/Parquet y definir un esquema versionado con Zobrist, FEN, turno, ply y procedencia.
-- [ ] Filtrar posiciones de poca utilidad, deduplicar, equilibrar rangos y limitar muestras correlacionadas.
-- [ ] Separar entrenamiento y validación por partidas/origen, evitando posiciones duplicadas entre conjuntos.
-- [ ] Implementar un ajuste inicial tipo Texel u otro método documentado para pesos de material, movilidad, peones y seguridad del rey.
-- [ ] Calibrar la transformación entre centipeones y probabilidad de resultado con datos.
-- [ ] Exportar parámetros candidatos y conservar siempre la referencia anterior.
-- [ ] Automatizar aceptación/rechazo según corrección, rendimiento, táctica, regresiones y fuerza en partidas.
+- [x] Generar datasets de partidas, posiciones, características, evaluaciones de búsqueda y resultados.
+- [x] Empezar con CSV/Parquet y definir un esquema versionado con Zobrist, FEN, turno, ply y procedencia.
+- [x] Filtrar posiciones de poca utilidad, deduplicar, equilibrar rangos y limitar muestras correlacionadas.
+- [x] Separar entrenamiento y validación por partidas/origen, evitando posiciones duplicadas entre conjuntos.
+- [x] Implementar un ajuste inicial tipo Texel u otro método documentado para pesos de material, movilidad, peones y seguridad del rey.
+- [x] Calibrar la transformación entre centipeones y probabilidad de resultado con datos.
+- [x] Exportar parámetros candidatos y conservar siempre la referencia anterior.
+- [x] Automatizar aceptación/rechazo según corrección, rendimiento, táctica, regresiones y fuerza en partidas.
 - [ ] **Cierre:** un candidato ajustado mejora la referencia en validación ajedrecística; una menor pérdida de entrenamiento no basta.
+
+  Evidencia 2026-09-15: el pipeline produjo y rechazó `hce-texel-phase8-v1`. Mejoró ligeramente la pérdida de validación (0,634433 → 0,634411), pero quedó 25–49–26 en 100 partidas sobre 50 aperturas independientes: −3,5 Elo estimados, IC95% [−51,0, +43,9]. La referencia sigue activa.
 
 ## Fase 9 — Incorporar evaluación neuronal
 

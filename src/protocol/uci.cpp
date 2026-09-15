@@ -58,16 +58,21 @@ void UciProtocol::writeLine(const std::string &line) {
     output_ << line << '\n' << std::flush;
 }
 void UciProtocol::identify() {
-    writeLine("id name ChessBot 0.6.0");
+    writeLine("id name ChessBot 0.8.0");
     writeLine("id author ChessBot contributors");
     writeLine("option name Hash type spin default 64 min 1 max 4096");
     writeLine("option name Threads type spin default 1 min 1 max 1");
     writeLine("option name Move Overhead type spin default 10 min 0 max 5000");
     writeLine("option name OwnBook type check default false");
+    writeLine("option name BookFile type string default <empty>");
+    writeLine("option name BookPolicy type combo default weighted var best var weighted var random "
+              "var explore");
+    writeLine("option name BookSeed type spin default 1 min 0 max 2000000000");
     writeLine("option name MultiPV type spin default 1 min 1 max 10");
     writeLine("option name SearchProfile type combo default Baseline var Baseline var Optimized");
     writeLine("option name AnalysisDetail type combo default Basic var Basic var Full");
     writeLine("option name Evaluation type combo default Positional var Basic var Positional");
+    writeLine("option name EvalFile type string default <empty>");
     writeLine("option name NNUE type check default false");
     writeLine("uciok");
 }
@@ -109,9 +114,29 @@ void UciProtocol::setOption(std::string_view arguments) {
             throw std::invalid_argument("only one search thread is available");
     } else if (name == "MultiPV") {
         multiPv_ = parseInt(value, 1, 10, "MultiPV");
-    } else if (name == "OwnBook" || name == "NNUE") {
+    } else if (name == "OwnBook") {
+        if (value != "true" && value != "false")
+            throw std::invalid_argument("OwnBook must be true or false");
+        engine_.setOwnBook(value == "true");
+    } else if (name == "BookFile") {
+        engine_.setBookFile(value == "<empty>" ? "" : value);
+    } else if (name == "BookPolicy") {
+        if (value == "best")
+            engine_.setBookPolicy(BookPolicy::Best);
+        else if (value == "weighted")
+            engine_.setBookPolicy(BookPolicy::Weighted);
+        else if (value == "random")
+            engine_.setBookPolicy(BookPolicy::Random);
+        else if (value == "explore")
+            engine_.setBookPolicy(BookPolicy::Explore);
+        else
+            throw std::invalid_argument("BookPolicy must be best, weighted, random or explore");
+    } else if (name == "BookSeed") {
+        engine_.setBookSeed(
+            static_cast<std::uint64_t>(parseInt(value, 0, 2'000'000'000, "BookSeed")));
+    } else if (name == "NNUE") {
         if (value != "false")
-            throw std::invalid_argument(name + " is not available in this version");
+            throw std::invalid_argument("NNUE is not available in this version");
     } else if (name == "AnalysisDetail") {
         if (value != "Basic" && value != "Full")
             throw std::invalid_argument("AnalysisDetail must be Basic or Full");
@@ -123,6 +148,8 @@ void UciProtocol::setOption(std::string_view arguments) {
             engine_.setEvaluationMode(EvaluationMode::Positional);
         else
             throw std::invalid_argument("Evaluation must be Basic or Positional");
+    } else if (name == "EvalFile") {
+        engine_.setEvaluationFile(value == "<empty>" ? "" : value);
     } else if (name == "SearchProfile") {
         if (value == "Baseline")
             engine_.setSearchMode(SearchMode::Baseline);
@@ -265,6 +292,11 @@ void UciProtocol::go(std::string_view arguments) {
             engine_.searchPrepared(limits, [this](const SearchResult &iteration, int hashFull) {
                 writeInfo(iteration, hashFull);
             });
+        if (result.fromBook)
+            writeLine("info string book move " + result.bestMove.uci() + " policy " +
+                      result.bookPolicy + " games " + std::to_string(result.bookGames) +
+                      " weight " + std::to_string(result.bookWeight) + " source " +
+                      result.bookSource + " version " + result.bookVersion);
         writeLine("bestmove " + (result.bestMove ? result.bestMove.uci() : std::string("0000")) +
                   (result.ponderMove ? " ponder " + result.ponderMove.uci() : ""));
     });

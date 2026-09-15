@@ -34,9 +34,11 @@ class Searcher {
   public:
     Searcher(Board board, const SearchLimits &limits, TranspositionTable &table,
              std::atomic_bool &stop, int overhead, EvaluationMode evaluationMode,
-             SearchMode searchMode, const SearchInfoCallback &callback)
+             const EvaluationParameters &evaluationParameters, SearchMode searchMode,
+             const SearchInfoCallback &callback)
         : board_(std::move(board)), limits_(limits), table_(table), stop_(stop),
-          callback_(callback), evaluationMode_(evaluationMode), searchMode_(searchMode) {
+          callback_(callback), evaluationMode_(evaluationMode),
+          evaluationParameters_(evaluationParameters), searchMode_(searchMode) {
         timer_.start(limits, board_.sideToMove(), overhead);
     }
 
@@ -94,6 +96,7 @@ class Searcher {
     std::atomic_bool &stop_;
     const SearchInfoCallback &callback_;
     EvaluationMode evaluationMode_;
+    const EvaluationParameters &evaluationParameters_;
     SearchMode searchMode_;
     TimeManager timer_;
     SearchResult result_;
@@ -281,7 +284,7 @@ class Searcher {
             return ScoreDraw;
         }
         if (ply >= MaxPly - 1)
-            return evaluate(board_, evaluationMode_);
+            return evaluate(board_, evaluationMode_, evaluationParameters_);
         const bool inCheck = board_.inCheck(board_.sideToMove());
         const Score originalAlpha = alpha;
         Move ttMove;
@@ -305,7 +308,7 @@ class Searcher {
             }
         }
 
-        const Score staticEval = evaluate(board_, evaluationMode_);
+        const Score staticEval = evaluate(board_, evaluationMode_, evaluationParameters_);
         if (optimized() && allowNull && !inCheck && depth >= 6 && staticEval >= beta &&
             beta < ScoreMate - MaxPly && hasNullMaterial()) {
             ++nullMoveAttempts_;
@@ -401,14 +404,14 @@ class Searcher {
             return ScoreDraw;
         }
         if (ply >= MaxPly - 1)
-            return evaluate(board_, evaluationMode_);
+            return evaluate(board_, evaluationMode_, evaluationParameters_);
         const bool check = board_.inCheck(board_.sideToMove());
         auto moves = legalMoveList(board_);
         countMoves(moves.size());
         if (moves.empty())
             return check ? -ScoreMate + ply : ScoreDraw;
         if (!check) {
-            const Score standPat = evaluate(board_, evaluationMode_);
+            const Score standPat = evaluate(board_, evaluationMode_, evaluationParameters_);
             if (standPat >= beta)
                 return standPat;
             alpha = std::max(alpha, standPat);
@@ -446,9 +449,10 @@ class Searcher {
 
 SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTable &table,
                        std::atomic_bool &stop, int moveOverheadMs, EvaluationMode evaluationMode,
-                       SearchMode searchMode, const SearchInfoCallback &callback) {
+                       const EvaluationParameters &evaluationParameters, SearchMode searchMode,
+                       const SearchInfoCallback &callback) {
     return Searcher(std::move(board), limits, table, stop, moveOverheadMs, evaluationMode,
-                    searchMode, callback)
+                    evaluationParameters, searchMode, callback)
         .run();
 }
 } // namespace chessbot

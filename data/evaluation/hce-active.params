@@ -1,0 +1,13 @@
+# ChessBot hand-crafted evaluation parameter format, values are per mille.
+version=hce-default-v1
+material=1000
+piece_square=1000
+mobility=1000
+pawn_structure=1000
+passed_pawns=1000
+bishop_pair=1000
+rook_activity=1000
+king_safety=1000
+space=1000
+tempo=1000
+calibration=1000

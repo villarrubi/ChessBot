@@ -4,7 +4,11 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <charconv>
 #include <cstdlib>
+#include <fstream>
+#include <stdexcept>
+#include <string_view>
 
 namespace chessbot {
 namespace {
@@ -108,7 +112,65 @@ int kingDistance(Square a, Square b) {
 }
 } // namespace
 
-EvalBreakdown evaluateDetailed(const Board &board, EvaluationMode mode) {
+EvaluationParameters loadEvaluationParameters(const std::string &path) {
+    std::ifstream input(path);
+    if (!input)
+        throw std::invalid_argument("Evaluation parameters: cannot open file: " + path);
+    EvaluationParameters result;
+    std::array<bool, 12> seen{};
+    std::string line;
+    int lineNumber = 0;
+    while (std::getline(input, line)) {
+        ++lineNumber;
+        if (line.empty() || line[0] == '#')
+            continue;
+        const auto equals = line.find('=');
+        if (equals == std::string::npos || equals == 0 || equals + 1 == line.size())
+            throw std::invalid_argument("Evaluation parameters: malformed line " +
+                                        std::to_string(lineNumber));
+        const std::string key = line.substr(0, equals), value = line.substr(equals + 1);
+        if (key == "version") {
+            if (seen[0])
+                throw std::invalid_argument("Evaluation parameters: duplicate version");
+            seen[0] = true;
+            result.version = value;
+            continue;
+        }
+        int parsed = 0;
+        const auto [end, error] =
+            std::from_chars(value.data(), value.data() + value.size(), parsed);
+        if (error != std::errc{} || end != value.data() + value.size() || parsed < 0 ||
+            parsed > 4000)
+            throw std::invalid_argument("Evaluation parameters: value outside 0..4000 on line " +
+                                        std::to_string(lineNumber));
+        const std::array<std::pair<std::string_view, int *>, 11> fields{
+            std::pair<std::string_view, int *>{"material", &result.material},
+            std::pair<std::string_view, int *>{"piece_square", &result.pieceSquare},
+            std::pair<std::string_view, int *>{"mobility", &result.mobility},
+            std::pair<std::string_view, int *>{"pawn_structure", &result.pawnStructure},
+            std::pair<std::string_view, int *>{"passed_pawns", &result.passedPawns},
+            std::pair<std::string_view, int *>{"bishop_pair", &result.bishopPair},
+            std::pair<std::string_view, int *>{"rook_activity", &result.rookActivity},
+            std::pair<std::string_view, int *>{"king_safety", &result.kingSafety},
+            std::pair<std::string_view, int *>{"space", &result.space},
+            std::pair<std::string_view, int *>{"tempo", &result.tempo},
+            std::pair<std::string_view, int *>{"calibration", &result.calibration}};
+        const auto field = std::find_if(fields.begin(), fields.end(), [&](const auto &candidate) {
+            return candidate.first == key;
+        });
+        if (field == fields.end())
+            throw std::invalid_argument("Evaluation parameters: unknown key: " + key);
+        const auto index = static_cast<std::size_t>(field - fields.begin()) + 1;
+        if (seen[index])
+            throw std::invalid_argument("Evaluation parameters: duplicate key: " + key);
+        seen[index] = true;
+        *field->second = parsed;
+    }
+    return result;
+}
+
+EvalBreakdown evaluateDetailed(const Board &board, EvaluationMode mode,
+                               const EvaluationParameters &parameters) {
     EvalBreakdown result;
     std::array<PairScore, 10> terms{};
     std::array<Bitboard, 2> pawnControl{};
@@ -319,6 +381,17 @@ EvalBreakdown evaluateDetailed(const Board &board, EvaluationMode mode) {
         result.kingSafety = 0;
         result.space = 0;
     }
+    const auto scale = [](Score value, int perMille) { return value * perMille / 1000; };
+    result.material = scale(result.material, parameters.material);
+    result.pieceSquare = scale(result.pieceSquare, parameters.pieceSquare);
+    result.mobility = scale(result.mobility, parameters.mobility);
+    result.pawnStructure = scale(result.pawnStructure, parameters.pawnStructure);
+    result.passedPawns = scale(result.passedPawns, parameters.passedPawns);
+    result.bishopPair = scale(result.bishopPair, parameters.bishopPair);
+    result.rookActivity = scale(result.rookActivity, parameters.rookActivity);
+    result.kingSafety = scale(result.kingSafety, parameters.kingSafety);
+    result.space = scale(result.space, parameters.space);
+    result.tempo = scale(result.tempo, parameters.tempo);
     result.total = result.material + result.pieceSquare + result.mobility + result.pawnStructure +
                    result.passedPawns + result.bishopPair + result.rookActivity +
                    result.kingSafety + result.space + result.tempo;

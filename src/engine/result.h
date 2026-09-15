@@ -1,6 +1,7 @@
 #pragma once
 #include "board/move.h"
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace chessbot {
@@ -31,6 +32,10 @@ struct SearchResult {
     int maximumBranching = 0;
     std::vector<Move> principalVariation;
     std::vector<RootVariation> variations;
+    bool fromBook = false;
+    std::string bookVersion, bookPolicy, bookSource;
+    std::uint64_t bookGames = 0;
+    int bookWeight = 0;
     bool completed = false;
 };
 } // namespace chessbot

@@ -119,7 +119,7 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
     annotated = chess.pgn.Game()
     annotated.setup(game.board())
     annotated.headers.update(game.headers)
-    annotated.headers["Annotator"] = "ChessBot analyzer 0.6.0"
+    annotated.headers["Annotator"] = "ChessBot analyzer 0.8.0"
     annotated_node: chess.pgn.GameNode = annotated
     records = []
     history_uci: list[str] = []

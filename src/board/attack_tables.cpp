@@ -113,6 +113,7 @@ struct SliderTable {
     std::array<Bitboard, 64> masks{};
     std::array<std::vector<Bitboard>, 64> attacks{};
 };
+using AttackGenerator = Bitboard (*)(Square, Bitboard);
 struct SliderTables {
     SliderTable bishop, rook;
     bool usePext = bmi2Available();
@@ -122,8 +123,9 @@ struct SliderTables {
                                    relevantRay(square, -1, 1) | relevantRay(square, -1, -1);
             rook.masks[square] = relevantRay(square, 1, 0) | relevantRay(square, -1, 0) |
                                  relevantRay(square, 0, 1) | relevantRay(square, 0, -1);
-            for (auto [table, generator] :
-                 {std::pair{&bishop, rawBishopAttacks}, std::pair{&rook, rawRookAttacks}}) {
+            const std::array<std::pair<SliderTable *, AttackGenerator>, 2> generators{
+                std::pair{&bishop, &rawBishopAttacks}, std::pair{&rook, &rawRookAttacks}};
+            for (const auto [table, generator] : generators) {
                 const auto count = std::size_t{1} << std::popcount(table->masks[square]);
                 table->attacks[square].resize(count);
                 for (std::size_t index = 0; index < count; ++index)

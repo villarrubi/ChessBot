@@ -9,8 +9,23 @@ SearchResult Engine::search(const SearchLimits &limits, const SearchInfoCallback
 }
 SearchResult Engine::searchPrepared(const SearchLimits &limits,
                                     const SearchInfoCallback &callback) {
-    return runSearch(board_, limits, table_, stop_, moveOverheadMs_, evaluationMode_, searchMode_,
-                     callback);
+    if (ownBook_ && limits.rootMoves.empty()) {
+        if (const auto selection = book_.select(board_, bookPolicy_, bookSeed_)) {
+            SearchResult result;
+            result.bestMove = selection->entry.move;
+            result.principalVariation = {result.bestMove};
+            result.variations = {{result.bestMove, ScoreDraw, {result.bestMove}}};
+            result.fromBook = result.completed = true;
+            result.bookVersion = selection->version;
+            result.bookPolicy = bookPolicyName(bookPolicy_);
+            result.bookSource = selection->entry.source;
+            result.bookGames = selection->entry.games;
+            result.bookWeight = selection->entry.weight;
+            return result;
+        }
+    }
+    return runSearch(board_, limits, table_, stop_, moveOverheadMs_, evaluationMode_,
+                     evaluationParameters_, searchMode_, callback);
 }
 void Engine::clear() {
     stop();

@@ -14,23 +14,29 @@ namespace {
 std::string quote(std::string_view value);
 void help() {
     std::cout
-        << "ChessBot 0.6.0 - UCI chess engine and diagnostic CLI\n"
+        << "ChessBot 0.8.0 - UCI chess engine and diagnostic CLI\n"
            "Usage: chessbot                         Start UCI protocol\n"
            "       chessbot <inspect|eval|legal|perft N|divide N> [--fen FEN] [--moves \"e2e4 "
            "e7e5\"]\n"
            "       chessbot bench [depth] [Baseline|Optimized]\n"
            "       chessbot validate-stream\n"
+           "       chessbot features-stream [--eval-file FILE]\n"
            "Stream input: one FEN per line, optionally followed by TAB and UCI moves.\n"
            "Stream output: one JSON object per line; invalid requests return an error object.\n";
 }
-void printEvaluation(const EvalBreakdown &eval) {
-    std::cout << "{\"perspective\":\"side_to_move\",\"total\":" << eval.total
+void printEvaluationFields(const EvalBreakdown &eval) {
+    std::cout << "\"perspective\":\"side_to_move\",\"total\":" << eval.total
               << ",\"material\":" << eval.material << ",\"piece_square\":" << eval.pieceSquare
               << ",\"mobility\":" << eval.mobility << ",\"pawn_structure\":" << eval.pawnStructure
               << ",\"passed_pawns\":" << eval.passedPawns << ",\"bishop_pair\":" << eval.bishopPair
               << ",\"rook_activity\":" << eval.rookActivity
               << ",\"king_safety\":" << eval.kingSafety << ",\"space\":" << eval.space
-              << ",\"tempo\":" << eval.tempo << ",\"phase\":" << eval.phase << "}\n";
+              << ",\"tempo\":" << eval.tempo << ",\"phase\":" << eval.phase;
+}
+void printEvaluation(const EvalBreakdown &eval) {
+    std::cout << '{';
+    printEvaluationFields(eval);
+    std::cout << "}\n";
 }
 void benchmark(int depth, SearchMode mode) {
     constexpr std::string_view positions[] = {
@@ -139,6 +145,27 @@ void stream() {
         std::cout.flush();
     }
 }
+void featureStream(const EvaluationParameters &parameters) {
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        try {
+            const auto tab = line.find('\t');
+            auto board = Board::fromFen(line.substr(0, tab));
+            if (tab != std::string::npos)
+                applyMoves(board, line.substr(tab + 1));
+            std::cout << "{\"fen\":" << quote(board.fen())
+                      << ",\"key\":" << quote(std::to_string(board.key())) << ",\"side_to_move\":"
+                      << quote(board.sideToMove() == White ? "white" : "black") << ',';
+            const auto eval = evaluateDetailed(board, EvaluationMode::Positional, parameters);
+            std::cout << "\"evaluation_version\":" << quote(parameters.version) << ',';
+            printEvaluationFields(eval);
+            std::cout << "}\n";
+        } catch (const std::exception &error) {
+            std::cout << "{\"error\":" << quote(error.what()) << "}\n";
+        }
+        std::cout.flush();
+    }
+}
 } // namespace
 int main(int argc, char **argv) {
     try {
@@ -153,6 +180,15 @@ int main(int argc, char **argv) {
             if (argc != 2)
                 throw std::invalid_argument("validate-stream takes no arguments");
             stream();
+            return 0;
+        }
+        if (command == "features-stream") {
+            EvaluationParameters parameters;
+            if (argc == 4 && std::string_view(argv[2]) == "--eval-file")
+                parameters = loadEvaluationParameters(argv[3]);
+            else if (argc != 2)
+                throw std::invalid_argument("features-stream accepts only --eval-file FILE");
+            featureStream(parameters);
             return 0;
         }
         if (command == "bench") {

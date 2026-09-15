@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "experiment": "phase8-hce-texel-v1",
+  "status": "rejected",
+  "dataset": {
+    "sources": [
+      "data/engine_matches/phase5-final-50ms-64.pgn",
+      "data/engine_matches/phase5-opt-vs-base-10ms-effective-64.pgn"
+    ],
+    "rows": 2528,
+    "games": 126,
+    "splits": {
+      "train": 2011,
+      "validation": 517
+    },
+    "components": [
+      "material",
+      "piece_square",
+      "mobility",
+      "pawn_structure",
+      "passed_pawns",
+      "bishop_pair",
+      "rook_activity",
+      "king_safety",
+      "space",
+      "tempo"
+    ],
+    "perspective": "side_to_move",
+    "target": "result_stm",
+    "deduplication": "zobrist across all splits",
+    "filters": {
+      "skip_plies": 8,
+      "sample_every": 3,
+      "max_per_game": 40,
+      "max_per_bucket": 400
+    },
+    "seed": 20260915
+  },
+  "tuning": {
+    "method": "Texel-style logistic cross-entropy",
+    "optimizer": {
+      "iterations": 1000,
+      "learning_rate": 0.01,
+      "l2_toward_reference": 0.1
+    },
+    "reference_validation": {
+      "log_loss": 0.6344323985988873,
+      "brier": 0.04826645729596137,
+      "mean_probability": 0.48855519929516067,
+      "mean_target": 0.5
+    },
+    "candidate_validation": {
+      "log_loss": 0.6344107413323372,
+      "brier": 0.0482503730011183,
+      "mean_probability": 0.48853287574680704,
+      "mean_target": 0.5
+    },
+    "validation_improved": true,
+    "weights": {
+      "material": 1.0132075613640363,
+      "piece_square": 0.990977165867395,
+      "mobility": 1.0065167495566298,
+      "pawn_structure": 0.9806236469160272,
+      "passed_pawns": 0.9837570833802904,
+      "bishop_pair": 0.9965477339991591,
+      "rook_activity": 1.0030606626831782,
+      "king_safety": 1.008476040987937,
+      "space": 1.0006966701180549,
+      "tempo": 1.0017479020739748
+    },
+    "candidate": "data/evaluation/hce-phase8-candidate-v1.params",
+    "reference": "data/evaluation/hce-default-v1.params"
+  },
+  "gates": {
+    "correctness_and_tactics": true,
+    "validation": true,
+    "performance": true,
+    "strength": false
+  },
+  "correctness": {
+    "perft": [
+      {
+        "depth": 3,
+        "expected": 8902,
+        "actual": 8902,
+        "pass": true
+      },
+      {
+        "depth": 4,
+        "expected": 197281,
+        "actual": 197281,
+        "pass": true
+      }
+    ],
+    "tactics": [
+      {
+        "fen": "7k/8/6K1/8/8/8/5Q2/8 w - - 0 1",
+        "depth": 2,
+        "expected": "f2f8",
+        "actual": "f2f8",
+        "pass": true
+      },
+      {
+        "fen": "7k/8/4K3/8/8/8/3Q4/8 w - - 0 1",
+        "depth": 4,
+        "expected": "e6f7",
+        "actual": "e6f7",
+        "pass": true
+      },
+      {
+        "fen": "4k3/8/8/8/8/8/4q3/4KQ2 w - - 0 1",
+        "depth": 2,
+        "expected": "f1e2",
+        "actual": "f1e2",
+        "pass": true
+      }
+    ],
+    "pass": true
+  },
+  "performance": {
+    "reference": {
+      "depth": 4,
+      "nodes": 213962,
+      "elapsed_ms": 526.098,
+      "nps": 406696,
+      "positions": [
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "move": "e2e3",
+          "nodes": 3255,
+          "elapsed_ms": 12.435
+        },
+        {
+          "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+          "move": "e2a6",
+          "nodes": 208862,
+          "elapsed_ms": 510.508
+        },
+        {
+          "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+          "move": "b4f4",
+          "nodes": 1845,
+          "elapsed_ms": 3.155
+        }
+      ]
+    },
+    "candidate": {
+      "depth": 4,
+      "nodes": 221304,
+      "elapsed_ms": 544.812,
+      "nps": 406203,
+      "positions": [
+        {
+          "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "move": "e2e3",
+          "nodes": 3072,
+          "elapsed_ms": 11.519
+        },
+        {
+          "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+          "move": "e2a6",
+          "nodes": 216379,
+          "elapsed_ms": 529.825
+        },
+        {
+          "fen": "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
+          "move": "b4f4",
+          "nodes": 1853,
+          "elapsed_ms": 3.468
+        }
+      ]
+    },
+    "elapsed_ratio": 1.035571319411973,
+    "maximum_regression": 0.2
+  },
+  "strength": {
+    "games": 100,
+    "wins": 25,
+    "draws": 49,
+    "losses": 26,
+    "score": 49.5,
+    "score_rate": 0.495,
+    "score_confidence95": [
+      0.42715,
+      0.56285
+    ],
+    "elo": -3.47,
+    "elo_confidence95": [
+      -50.99,
+      43.91
+    ],
+    "independent_samples": 50,
+    "confidence_method": "normal approximation over opening-clustered paired scores",
+    "opening_suite": "data/openings/strength-v1.json",
+    "depth": 2,
+    "max_plies": 140,
+    "minimum_independent_samples": 32
+  },
+  "decision": "reject: the confidence interval includes equal strength; hce-active.params remains the reference"
+}

@@ -1,5 +1,6 @@
 #include "board/movegen.h"
 #include "engine/engine.h"
+#include "openings/opening_book.h"
 #include <atomic>
 #include <doctest.h>
 #include <stdexcept>
@@ -169,6 +170,23 @@ TEST_CASE("safe optimized search preserves the fixed-depth reference") {
     CHECK(optimized.score == baseline.score);
     CHECK(optimized.generatedMoves > 0);
     CHECK(optimized.maximumBranching >= 20);
+}
+
+TEST_CASE("native opening book validates moves and applies deterministic policies") {
+    OpeningBook book;
+    book.load("tests/positions/test_book.tsv");
+    CHECK(book.version() == "test-book-v1");
+    auto board = Board::startPosition();
+    const auto best = book.select(board, BookPolicy::Best, 1);
+    REQUIRE(best);
+    CHECK(best->entry.move.uci() == "e2e4");
+    CHECK(best->entry.games == 100);
+    const auto explore = book.select(board, BookPolicy::Explore, 1);
+    REQUIRE(explore);
+    CHECK(explore->entry.move.uci() == "d2d4");
+    CHECK(book.select(board, BookPolicy::Weighted, 42)->entry.move ==
+          book.select(board, BookPolicy::Weighted, 42)->entry.move);
+    CHECK_THROWS_AS(book.load("tests/positions/missing-book.tsv"), std::invalid_argument);
 }
 
 TEST_CASE("transposition table sizing, bounds and replacement") {

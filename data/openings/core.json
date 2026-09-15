@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "version": "core-openings-v1",
+  "openings": [
+    {
+      "id": "startpos",
+      "name": "Starting position",
+      "eco": null,
+      "start_fen": "startpos",
+      "moves_uci": []
+    },
+    {
+      "id": "italian_giuoco_001",
+      "name": "Italian Game: Giuoco Piano",
+      "eco": "C50",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "e7e5", "g1f3", "b8c6", "f1c4", "f8c5"]
+    },
+    {
+      "id": "queens_gambit_001",
+      "name": "Queen's Gambit",
+      "eco": "D06",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "d7d5", "c2c4"]
+    },
+    {
+      "id": "gruenfeld_exchange_001",
+      "name": "Grünfeld Defence: Exchange Variation",
+      "eco": "D85",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "g8f6", "c2c4", "g7g6", "b1c3", "d7d5", "c4d5", "f6d5", "e2e4", "d5c3", "b2c3", "f8g7"]
+    },
+    {
+      "id": "ruy_lopez_morphy_001",
+      "name": "Ruy Lopez: Morphy Defence",
+      "eco": "C78",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "e7e5", "g1f3", "b8c6", "f1b5", "a7a6", "b5a4", "g8f6", "e1g1", "f8e7"]
+    },
+    {
+      "id": "scotch_001",
+      "name": "Scotch Game",
+      "eco": "C45",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "e7e5", "g1f3", "b8c6", "d2d4", "e5d4", "f3d4"]
+    },
+    {
+      "id": "sicilian_najdorf_001",
+      "name": "Sicilian Defence: Najdorf",
+      "eco": "B90",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "c7c5", "g1f3", "d7d6", "d2d4", "c5d4", "f3d4", "g8f6", "b1c3", "a7a6"]
+    },
+    {
+      "id": "french_advance_001",
+      "name": "French Defence: Advance Variation",
+      "eco": "C02",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "e7e6", "d2d4", "d7d5", "e4e5", "c7c5", "c2c3", "b8c6"]
+    },
+    {
+      "id": "caro_kann_classical_001",
+      "name": "Caro-Kann Defence: Classical Variation",
+      "eco": "B18",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "c7c6", "d2d4", "d7d5", "b1c3", "d5e4", "c3e4", "c8f5"]
+    },
+    {
+      "id": "pirc_classical_001",
+      "name": "Pirc Defence: Classical System",
+      "eco": "B08",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "d7d6", "d2d4", "g8f6", "b1c3", "g7g6", "g1f3", "f8g7"]
+    },
+    {
+      "id": "scandinavian_001",
+      "name": "Scandinavian Defence",
+      "eco": "B01",
+      "start_fen": "startpos",
+      "moves_uci": ["e2e4", "d7d5", "e4d5", "d8d5", "b1c3", "d5d8"]
+    },
+    {
+      "id": "kings_indian_001",
+      "name": "King's Indian Defence",
+      "eco": "E60",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "g8f6", "c2c4", "g7g6", "b1c3", "f8g7", "e2e4", "d7d6"]
+    },
+    {
+      "id": "nimzo_indian_001",
+      "name": "Nimzo-Indian Defence",
+      "eco": "E20",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "g8f6", "c2c4", "e7e6", "b1c3", "f8b4"]
+    },
+    {
+      "id": "slav_001",
+      "name": "Slav Defence",
+      "eco": "D10",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "d7d5", "c2c4", "c7c6", "g1f3", "g8f6"]
+    },
+    {
+      "id": "english_symmetrical_001",
+      "name": "English Opening: Symmetrical Variation",
+      "eco": "A30",
+      "start_fen": "startpos",
+      "moves_uci": ["c2c4", "c7c5", "g1f3", "g8f6", "b1c3", "b8c6"]
+    },
+    {
+      "id": "reti_001",
+      "name": "Réti Opening",
+      "eco": "A09",
+      "start_fen": "startpos",
+      "moves_uci": ["g1f3", "d7d5", "c2c4", "e7e6", "g2g3", "g8f6"]
+    },
+    {
+      "id": "dutch_001",
+      "name": "Dutch Defence",
+      "eco": "A80",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "f7f5", "g2g3", "g8f6", "f1g2", "g7g6"]
+    },
+    {
+      "id": "london_001",
+      "name": "London System",
+      "eco": "D02",
+      "start_fen": "startpos",
+      "moves_uci": ["d2d4", "d7d5", "g1f3", "g8f6", "c1f4", "e7e6", "e2e3"]
+    }
+  ]
+}

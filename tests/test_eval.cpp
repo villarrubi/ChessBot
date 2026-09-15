@@ -1,5 +1,7 @@
 #include "eval/evaluation.h"
 #include <doctest.h>
+#include <filesystem>
+#include <fstream>
 
 using namespace chessbot;
 
@@ -56,4 +58,36 @@ TEST_CASE("basic phase-two profile contains only material, PST and tempo") {
     CHECK(basic.passedPawns == 0);
     CHECK(basic.kingSafety == 0);
     CHECK(evaluateDetailed(board).total != basic.total);
+}
+
+TEST_CASE("evaluation parameters load and scale components") {
+    const auto path = std::filesystem::temp_directory_path() / "chessbot-test-evaluation.params";
+    {
+        std::ofstream output(path);
+        output << "version=test-v1\nmaterial=500\nmobility=0\n";
+    }
+    const auto parameters = loadEvaluationParameters(path.string());
+    CHECK(parameters.version == "test-v1");
+    CHECK(parameters.material == 500);
+    CHECK(parameters.mobility == 0);
+    CHECK(parameters.kingSafety == 1000);
+    const auto board = Board::fromFen("4k3/8/8/8/8/8/P7/Q3K3 w - - 0 1");
+    const auto original = evaluateDetailed(board);
+    const auto adjusted = evaluateDetailed(board, EvaluationMode::Positional, parameters);
+    CHECK(adjusted.material == original.material / 2);
+    CHECK(adjusted.mobility == 0);
+    CHECK(adjusted.total ==
+          original.total - original.material - original.mobility + adjusted.material);
+    std::filesystem::remove(path);
+}
+
+TEST_CASE("evaluation parameter files reject unknown keys") {
+    const auto path =
+        std::filesystem::temp_directory_path() / "chessbot-test-invalid-evaluation.params";
+    {
+        std::ofstream output(path);
+        output << "unknown=1000\n";
+    }
+    CHECK_THROWS_AS(loadEvaluationParameters(path.string()), std::invalid_argument);
+    std::filesystem::remove(path);
 }
