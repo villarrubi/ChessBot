@@ -31,6 +31,7 @@ def run(output: Path, *arguments: str) -> dict:
         while game := chess.pgn.read_game(handle):
             assert not game.errors
     assert (output / "engine.log").exists()
+    assert (output / "progress.log").exists()
     return payload
 
 

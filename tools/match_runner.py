@@ -477,6 +477,7 @@ def main() -> None:
         random.Random(args.seed).shuffle(openings)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     log_path = args.output_dir / "engine.log"
+    progress_path = args.output_dir / "progress.log"
     handler = logging.FileHandler(log_path, encoding="utf-8")
     logging.getLogger("chess.engine").addHandler(handler)
     logging.getLogger("chess.engine").setLevel(getattr(logging, args.engine_log_level))
@@ -486,6 +487,10 @@ def main() -> None:
     except Exception:
         first.process.close()
         raise
+    progress_file = progress_path.open("w", encoding="utf-8")
+    progress_file.write(f"Partidas: {args.games}; profundidad: {args.depth}; "
+                        f"aperturas: {len(openings)}\n")
+    progress_file.flush()
     games, records = [], []
     started = time.monotonic()
     try:
@@ -499,10 +504,13 @@ def main() -> None:
             draws = sum(1 for item in records if item["result"] == "1/2-1/2")
             losses = len(records) - wins - draws
             score = wins + 0.5 * draws
-            print(f"[partida {index + 1}/{args.games}] {record['result']} | "
-                  f"{opening.name} | W {wins} D {draws} L {losses} | "
-                  f"score {score / len(records):.3f} | "
-                  f"{time.monotonic() - started:.0f}s", flush=True)
+            progress_line = (f"[partida {index + 1}/{args.games}] {record['result']} | "
+                             f"{opening.name} | W {wins} D {draws} L {losses} | "
+                             f"score {score / len(records):.3f} | "
+                             f"{time.monotonic() - started:.0f}s")
+            print(progress_line, flush=True)
+            progress_file.write(progress_line + "\n")
+            progress_file.flush()
     finally:
         for running in (first, second):
             try:
@@ -511,6 +519,7 @@ def main() -> None:
                 running.process.close()
         handler.close()
         logging.getLogger("chess.engine").removeHandler(handler)
+        progress_file.close()
     pgn_path = args.output_dir / "games.pgn"
     with pgn_path.open("w", encoding="utf-8") as handle:
         exporter = chess.pgn.FileExporter(handle)
@@ -535,7 +544,8 @@ def main() -> None:
                                "max_plies": args.max_plies, "failure_policy": args.failure_policy},
                 "statistics": statistics(records, sprt, args.color_mode == "paired"),
                 "games": records,
-                "artifacts": {"pgn": pgn_path.name, "log": log_path.name}}
+                "artifacts": {"pgn": pgn_path.name, "log": log_path.name,
+                              "progress": progress_path.name}}
     metadata_path = args.output_dir / "metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n",
                              encoding="utf-8")

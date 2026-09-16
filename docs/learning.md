@@ -136,9 +136,9 @@ base práctica; `4–5` requiere bastante más tiempo. `selfplay_games` genera d
 `evaluation_games` mide el candidato después, sin mezclar esas partidas con el entrenamiento.
 La interfaz permite marcar un subconjunto de aperturas del libro `data/openings/core.json`; la
 selección se aplica tanto a las partidas de aprendizaje como a la evaluación. El progreso se emite
-en directo por partida (apertura, resultado, W/D/L y score) y el registro técnico UCI se mantiene
-en `engine.log` con poca verbosidad para no agotar el almacenamiento. Los ciclos del lanzador
-reservan 512 MB para sus artefactos.
+en directo por partida (apertura, resultado, W/D/L y score). Queda guardado en `progress.log` y el
+registro técnico UCI se mantiene en `engine.log` con poca verbosidad para no agotar el almacenamiento.
+Los ciclos del lanzador reservan 512 MB para sus artefactos.
 Cuando una red supera las puertas de corrección, validación, velocidad y fuerza, el lanzador la
 guarda como red activa. El ciclo siguiente juega y se evalúa contra esa red aceptada, de modo que
 las generaciones forman una cadena de mejora. Hasta que exista una red activa, la referencia es la
