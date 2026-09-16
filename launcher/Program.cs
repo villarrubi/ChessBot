@@ -46,7 +46,7 @@ internal sealed class MainForm : Form
     private readonly Label gameStatus = new() { AutoSize = true, Text = "Preparando partida…" };
     private readonly ComboBox playerColor = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown thinkTime = new() { Minimum = 100, Maximum = 10000, Value = 750, Increment = 100 };
-    private readonly RichTextBox log = new() { Dock = DockStyle.Fill, MinimumSize = new Size(100, 130), ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
+    private readonly RichTextBox log = new() { Dock = DockStyle.Fill, MinimumSize = new Size(100, 100), ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
     private readonly ToolTip tips = new() { AutoPopDelay = 12000, InitialDelay = 300, ReshowDelay = 100 };
     private readonly Button cancelButton = new() { Text = "Cancelar tarea", Enabled = false, AutoSize = true };
     private readonly TextBox dataset = new() { Dock = DockStyle.Fill };
@@ -62,6 +62,15 @@ internal sealed class MainForm : Form
     private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 160, Increment = 10 };
     private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 60 };
     private readonly ComboBox trainingTarget = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 290 };
+    private readonly CheckedListBox openingSelection = new()
+    {
+        CheckOnClick = true,
+        MultiColumn = true,
+        ColumnWidth = 190,
+        Height = 62,
+        IntegralHeight = false,
+        Dock = DockStyle.Fill
+    };
     private readonly TextBox cycleConfig = new() { Dock = DockStyle.Fill };
     private readonly TextBox cycleOutput = new() { Dock = DockStyle.Fill };
     private Process? activeProcess;
@@ -94,6 +103,7 @@ internal sealed class MainForm : Form
         generationMode.SelectedIndexChanged += (_, _) => opponentEngine.Enabled = generationMode.SelectedIndex == 1;
         trainingTarget.Items.AddRange(["Solo resultado de las partidas", "Mixto: resultado y evaluación manual", "Evaluación de búsqueda"]);
         trainingTarget.SelectedIndex = 0;
+        PopulateOpenings();
         tips.SetToolTip(dataset, "Tabla de posiciones usada por el entrenamiento directo. El ciclo completo la crea automáticamente con sus partidas nuevas.");
         tips.SetToolTip(hidden, "Tamaño de la capa oculta. 16 o 32 es una buena base; 64 necesita más partidas y reduce la velocidad del motor.");
         tips.SetToolTip(epochs, "Número de pasadas sobre el dataset. Más épocas no compensan pocos datos y pueden sobreajustar.");
@@ -102,6 +112,7 @@ internal sealed class MainForm : Form
         tips.SetToolTip(searchDepth, "Profundidad usada para cada jugada. Una profundidad mayor mejora las partidas, pero multiplica el tiempo necesario.");
         tips.SetToolTip(maxPlies, "Límite de medias jugadas por partida; 160 plies equivalen a 80 movimientos completos.");
         tips.SetToolTip(trainingTarget, "Resultado aprende solo de victoria/tablas/derrota. Mixto añade la evaluación manual y converge con menos partidas.");
+        tips.SetToolTip(openingSelection, "Marca las aperturas que se usarán en las partidas de aprendizaje y evaluación. Todas vienen marcadas al inicio.");
 
         TabControl tabs = new() { Dock = DockStyle.Fill };
         tabs.TabPages.Add(BuildPlayTab());
@@ -148,7 +159,7 @@ internal sealed class MainForm : Form
         TableLayoutPanel outer = new() { Dock = DockStyle.Fill, RowCount = 3, Padding = new Padding(14) };
         outer.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         outer.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        outer.RowStyles.Add(new RowStyle(SizeType.Absolute, 160));
+        outer.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
         Label explanation = new()
         {
             AutoSize = true,
@@ -161,7 +172,7 @@ internal sealed class MainForm : Form
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        for (int row = 0; row < 12; ++row)
+        for (int row = 0; row < 13; ++row)
         {
             form.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         }
@@ -192,8 +203,9 @@ internal sealed class MainForm : Form
         search.Controls.Add(maxMinutes);
         AddFieldRow(form, 7, "Búsqueda", search);
         AddFieldRow(form, 8, "Objetivo", trainingTarget);
-        AddPathRow(form, 9, "Config. base", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
-        AddPathRow(form, 10, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
+        AddFieldRow(form, 9, "Aperturas", openingSelection);
+        AddPathRow(form, 10, "Config. base", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
+        AddPathRow(form, 11, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
 
         FlowLayoutPanel actions = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 12, 0, 0) };
         Button train = new() { Text = "Entrenar nueva red", AutoSize = true };
@@ -203,7 +215,7 @@ internal sealed class MainForm : Form
         actions.Controls.Add(train);
         actions.Controls.Add(cycle);
         actions.Controls.Add(cancelButton);
-        form.Controls.Add(actions, 1, 11);
+        form.Controls.Add(actions, 1, 12);
         outer.Controls.Add(explanation, 0, 0);
         outer.Controls.Add(form, 0, 1);
         outer.Controls.Add(log, 0, 2);
@@ -425,6 +437,30 @@ internal sealed class MainForm : Form
             "Ciclo completo");
     }
 
+    private void PopulateOpenings()
+    {
+        string path = Path.Combine(root, "data", "openings", "core.json");
+        if (!File.Exists(path))
+            return;
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+            foreach (JsonElement item in document.RootElement.GetProperty("openings").EnumerateArray())
+            {
+                string id = item.GetProperty("id").GetString() ?? string.Empty;
+                string name = item.GetProperty("name").GetString() ?? id;
+                string eco = item.TryGetProperty("eco", out JsonElement ecoElement) &&
+                             ecoElement.ValueKind != JsonValueKind.Null ? $" ({ecoElement.GetString()})" : string.Empty;
+                if (!string.IsNullOrWhiteSpace(id))
+                    openingSelection.Items.Add(new OpeningChoice(id, name + eco), true);
+            }
+        }
+        catch (Exception exception)
+        {
+            AppendLog($"No se pudieron cargar las aperturas: {exception.Message}\n");
+        }
+    }
+
     private string CreateCycleConfig()
     {
         JsonObject config = JsonNode.Parse(File.ReadAllText(cycleConfig.Text))?.AsObject() ??
@@ -444,11 +480,13 @@ internal sealed class MainForm : Form
         budgets["selfplay_games"] = EvenCount(selfplayGames.Value);
         budgets["evaluation_games"] = EvenCount(evaluationGames.Value);
         budgets["max_seconds"] = (int)maxMinutes.Value * 60;
+        budgets["max_storage_mb"] = 512;
 
         JsonObject selfplay = ObjectAt(config, "selfplay");
         selfplay["enabled"] = true;
         selfplay["depth"] = (int)searchDepth.Value;
         selfplay["max_plies"] = (int)maxPlies.Value;
+        selfplay["opening_ids"] = SelectedOpeningIds();
         if (generationMode.SelectedIndex == 1)
         {
             string opponent = Path.GetFullPath(opponentEngine.Text);
@@ -472,6 +510,7 @@ internal sealed class MainForm : Form
         evaluation["depth"] = (int)searchDepth.Value;
         evaluation["benchmark_depth"] = Math.Min(12, (int)searchDepth.Value + 1);
         evaluation["max_plies"] = (int)maxPlies.Value;
+        evaluation["opening_ids"] = SelectedOpeningIds();
         evaluation["minimum_lower_score"] = 0.5;
         evaluation["minimum_independent_samples"] = Math.Max(4, EvenCount(evaluationGames.Value) / 2);
 
@@ -480,6 +519,16 @@ internal sealed class MainForm : Form
         string path = Path.Combine(configDirectory, "cycle-" + stamp + ".json");
         File.WriteAllText(path, config.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine);
         return path;
+    }
+
+    private JsonArray SelectedOpeningIds()
+    {
+        JsonArray result = [];
+        foreach (OpeningChoice opening in openingSelection.CheckedItems.OfType<OpeningChoice>())
+            result.Add(opening.Id);
+        if (result.Count == 0)
+            throw new InvalidDataException("Selecciona al menos una apertura");
+        return result;
     }
 
     private string TargetValue() => trainingTarget.SelectedIndex switch
@@ -637,7 +686,7 @@ internal sealed class MainForm : Form
     private static void AddPathRow(TableLayoutPanel panel, int row, string label, TextBox box, string buttonText, Action action)
     {
         panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 8, 12, 8) }, 0, row);
+        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 3, 10, 3) }, 0, row);
         panel.Controls.Add(box, 1, row);
         Button button = new() { Text = buttonText, AutoSize = true };
         button.Click += (_, _) => action();
@@ -647,7 +696,7 @@ internal sealed class MainForm : Form
     private static void AddFieldRow(TableLayoutPanel panel, int row, string label, Control control)
     {
         panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 8, 12, 8) }, 0, row);
+        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 3, 10, 3) }, 0, row);
         panel.Controls.Add(control, 1, row);
         panel.SetColumnSpan(control, 2);
     }
@@ -671,6 +720,11 @@ internal sealed class MainForm : Form
         Directory.CreateDirectory(path);
         Process.Start(new ProcessStartInfo("explorer.exe", path) { UseShellExecute = true });
     }
+}
+
+internal sealed record OpeningChoice(string Id, string DisplayName)
+{
+    public override string ToString() => DisplayName;
 }
 
 internal sealed class ChessBoard : Control

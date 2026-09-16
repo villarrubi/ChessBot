@@ -9,6 +9,8 @@ import platform
 import shutil
 import subprocess
 import sys
+from queue import Empty, Queue
+from threading import Thread
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -84,15 +86,42 @@ class Cycle:
     def run(self, stage: str, command: list[str]) -> None:
         self.check_budgets()
         started = time.monotonic()
-        completed = subprocess.run(command, cwd=ROOT, capture_output=True, text=True,
-                                   timeout=max(1, self.remaining()))
-        record = {"stage": stage, "command": command, "exit_code": completed.returncode,
+        print(f"[{stage}] iniciado", flush=True)
+        process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT, text=True, encoding="utf-8",
+                                   errors="replace", bufsize=1)
+        output: Queue[str] = Queue()
+
+        def read_output() -> None:
+            assert process.stdout is not None
+            for line in process.stdout:
+                output.put(line)
+
+        reader = Thread(target=read_output, daemon=True)
+        reader.start()
+        captured: list[str] = []
+        deadline = time.monotonic() + max(1, self.remaining())
+        while process.poll() is None or reader.is_alive() or not output.empty():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                process.kill()
+                process.wait()
+                raise subprocess.TimeoutExpired(command, self.max_seconds)
+            try:
+                line = output.get(timeout=min(0.2, remaining))
+            except Empty:
+                continue
+            print(line, end="", flush=True)
+            captured.append(line)
+        reader.join(timeout=1)
+        code = process.returncode
+        stdout = "".join(captured)
+        record = {"stage": stage, "command": command, "exit_code": code,
                   "duration_seconds": round(time.monotonic() - started, 3),
-                  "stdout": completed.stdout[-4000:], "stderr": completed.stderr[-4000:]}
+                  "stdout": stdout[-4000:], "stderr": ""}
         self.commands.append(record)
-        if completed.returncode:
-            raise RuntimeError(f"{stage} failed with exit code {completed.returncode}: "
-                               f"{completed.stderr[-1000:]}")
+        if code:
+            raise RuntimeError(f"{stage} failed with exit code {code}: {stdout[-1000:]}")
         self.check_budgets()
 
     def options(self, kind: str, artifact: Path) -> dict[str, Any]:
@@ -145,6 +174,10 @@ class Cycle:
                        str(match)]
             if opponent_value:
                 command.extend(["--cwd-b", str(opponent.parent)])
+            opening_ids = selfplay.get("opening_ids", [])
+            if opening_ids:
+                command.extend(["--opening-ids", ",".join(map(str, opening_ids))])
+            command.extend(["--engine-log-level", str(selfplay.get("engine_log_level", "WARNING"))])
             self.run("games", command)
             pgns.append(match / "games.pgn")
             metadata.append(match / "metadata.json")
@@ -208,6 +241,9 @@ class Cycle:
                    "--minimum-lower-score", str(eval_config.get("minimum_lower_score", 0.5)),
                    "--minimum-independent-samples",
                    str(eval_config.get("minimum_independent_samples", 8))]
+        opening_ids = eval_config.get("opening_ids", [])
+        if opening_ids:
+            command.extend(["--opening-ids", ",".join(map(str, opening_ids))])
         if promotion:
             command.extend(["--promote-to", str((ROOT / promotion).resolve())])
         self.run("candidate_evaluation", command)

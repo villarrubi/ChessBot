@@ -19,7 +19,7 @@
     "selfplay_games": 2,
     "evaluation_games": 2,
     "max_seconds": 300,
-    "max_storage_mb": 50,
+    "max_storage_mb": 512,
     "threads": 1
   },
   "selfplay": {

@@ -418,10 +418,15 @@ def main() -> None:
     parser.add_argument("--moves", default="", help="additional forced SAN or UCI moves")
     parser.add_argument("--openings", type=Path)
     parser.add_argument("--opening-id")
+    parser.add_argument("--opening-ids",
+                        help="comma-separated opening identifiers to include")
     parser.add_argument("--opening-name")
     parser.add_argument("--shuffle", action="store_true")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--event", default="ChessBot engine match")
+    parser.add_argument("--engine-log-level", choices=("DEBUG", "INFO", "WARNING"),
+                        default="WARNING",
+                        help="verbosity of the technical UCI log written to engine.log")
     parser.add_argument("--sprt-elo0", type=float)
     parser.add_argument("--sprt-elo1", type=float)
     parser.add_argument("--sprt-alpha", type=float, default=0.05)
@@ -453,6 +458,9 @@ def main() -> None:
         openings = [Opening("startpos", "Starting position", None, "startpos", [], "built-in")]
     if args.opening_id:
         openings = [opening for opening in openings if opening.identifier == args.opening_id]
+    if args.opening_ids:
+        identifiers = {value.strip() for value in args.opening_ids.split(",") if value.strip()}
+        openings = [opening for opening in openings if opening.identifier in identifiers]
     if args.opening_name:
         query = args.opening_name.casefold()
         openings = [opening for opening in openings if query in opening.name.casefold()]
@@ -471,7 +479,7 @@ def main() -> None:
     log_path = args.output_dir / "engine.log"
     handler = logging.FileHandler(log_path, encoding="utf-8")
     logging.getLogger("chess.engine").addHandler(handler)
-    logging.getLogger("chess.engine").setLevel(logging.DEBUG)
+    logging.getLogger("chess.engine").setLevel(getattr(logging, args.engine_log_level))
     first = start_engine(config_a, args.timeout)
     try:
         second = start_engine(config_b, args.timeout)
@@ -479,6 +487,7 @@ def main() -> None:
         first.process.close()
         raise
     games, records = [], []
+    started = time.monotonic()
     try:
         for index in range(args.games):
             opening_index = index // 2 if args.color_mode == "paired" else index
@@ -486,6 +495,14 @@ def main() -> None:
             game, record = play_game(first, second, opening, index, args)
             games.append(game)
             records.append(record)
+            wins = sum(1 for item in records if item["result"] == ("1-0" if item["engine_a_color"] == "white" else "0-1"))
+            draws = sum(1 for item in records if item["result"] == "1/2-1/2")
+            losses = len(records) - wins - draws
+            score = wins + 0.5 * draws
+            print(f"[partida {index + 1}/{args.games}] {record['result']} | "
+                  f"{opening.name} | W {wins} D {draws} L {losses} | "
+                  f"score {score / len(records):.3f} | "
+                  f"{time.monotonic() - started:.0f}s", flush=True)
     finally:
         for running in (first, second):
             try:

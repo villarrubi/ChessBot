@@ -77,6 +77,11 @@ with tempfile.TemporaryDirectory() as directory:
     assert named["games"][0]["opening"]["version"] == "core-openings-v1"
     assert named["games"][0]["opening"]["release_ply"] == 12
 
+    filtered = run(temporary / "filtered", "--games", "1", "--depth", "1", "--max-plies", "2",
+                   "--openings", str(root / "data" / "openings" / "core.json"),
+                   "--opening-ids", "italian_giuoco_001,scotch_001")
+    assert filtered["games"][0]["opening"]["id"] in {"italian_giuoco_001", "scotch_001"}
+
     # C: exact SAN/UCI prefix, validated before release.
     exact = run(temporary / "exact", "--games", "1", "--depth", "1", "--max-plies", "4",
                 "--moves", "e4 e5 Nf3")

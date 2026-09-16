@@ -97,6 +97,8 @@ def main() -> None:
     parser.add_argument("--training-report", "--tuning-report", dest="training_report",
                         type=Path)
     parser.add_argument("--openings", type=Path, default=Path("data/openings/core.json"))
+    parser.add_argument("--opening-ids",
+                        help="comma-separated opening identifiers to include")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--games", type=int, default=16)
     parser.add_argument("--depth", type=int, default=3)
@@ -134,6 +136,8 @@ def main() -> None:
                "--depth", str(args.depth), "--max-plies", str(args.max_plies),
                "--color-mode", "paired", "--openings", str(args.openings.resolve(strict=True)),
                "--output-dir", str(match_dir)]
+    if args.opening_ids:
+        command.extend(["--opening-ids", args.opening_ids])
     subprocess.run(command, check=True)
     match = json.loads((match_dir / "metadata.json").read_text(encoding="utf-8"))
     statistics = match["statistics"]
