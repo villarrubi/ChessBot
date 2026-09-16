@@ -39,6 +39,11 @@ internal static class Program
 
 internal sealed class MainForm : Form
 {
+    private static readonly Color Paper = Color.FromArgb(244, 241, 233);
+    private static readonly Color Ink = Color.FromArgb(39, 49, 48);
+    private static readonly Color Accent = Color.FromArgb(42, 79, 70);
+    private static readonly Color AccentLight = Color.FromArgb(218, 228, 219);
+    private static readonly Color Field = Color.FromArgb(255, 254, 250);
     private readonly string root;
     private readonly string engine;
     private readonly string python;
@@ -86,11 +91,13 @@ internal sealed class MainForm : Form
         root = projectRoot;
         engine = Path.Combine(root, "build", "Release", "chessbot.exe");
         python = Path.Combine(root, ".venv", "Scripts", "python.exe");
-        Text = "ChessBot";
+        Text = "ChessBot — mesa de análisis";
         StartPosition = FormStartPosition.CenterScreen;
         MinimumSize = new Size(900, 690);
         Size = new Size(1040, 760);
         Font = new Font("Segoe UI", 10f);
+        BackColor = Paper;
+        ForeColor = Ink;
         Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? SystemIcons.Application;
 
         dataset.Text = Path.Combine(root, "build", "phase8-dataset.csv");
@@ -121,11 +128,62 @@ internal sealed class MainForm : Form
         tabs.TabPages.Add(BuildTrainingTab());
         tabs.TabPages.Add(BuildToolsTab());
         Controls.Add(tabs);
+        ApplyVisualStyle(tabs);
         board.SquareClicked += OnBoardClick;
         cancelButton.Click += (_, _) => CancelActiveTask();
         Shown += async (_, _) => await NewGameAsync();
         FormClosing += (_, _) => CancelActiveTask();
         FormClosed += (_, _) => tips.Dispose();
+    }
+
+    private void ApplyVisualStyle(TabControl tabs)
+    {
+        tabs.DrawMode = TabDrawMode.OwnerDrawFixed;
+        tabs.SizeMode = TabSizeMode.Fixed;
+        tabs.ItemSize = new Size(118, 32);
+        tabs.Padding = new Point(14, 4);
+        tabs.DrawItem += (_, eventArgs) =>
+        {
+            bool selected = eventArgs.Index == tabs.SelectedIndex;
+            Color background = selected ? Accent : Paper;
+            Color foreground = selected ? Color.White : Ink;
+            using SolidBrush brush = new(background);
+            eventArgs.Graphics.FillRectangle(brush, eventArgs.Bounds);
+            TextRenderer.DrawText(eventArgs.Graphics, tabs.TabPages[eventArgs.Index].Text,
+                                  Font, eventArgs.Bounds, foreground,
+                                  TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+        };
+        tabs.SelectedIndexChanged += (_, _) => tabs.Invalidate();
+        StyleControls(tabs);
+    }
+
+    private void StyleControls(Control parent)
+    {
+        if (parent is not ChessBoard && parent != log)
+        {
+            parent.BackColor = parent is TextBoxBase or ComboBox or NumericUpDown or CheckedListBox
+                ? Field : Paper;
+            parent.ForeColor = Ink;
+        }
+        if (parent is Button button)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.FlatAppearance.BorderSize = 0;
+            button.BackColor = Accent;
+            button.ForeColor = Color.White;
+            button.Padding = new Padding(10, 4, 10, 4);
+            button.Cursor = Cursors.Hand;
+        }
+        else if (parent is Label label)
+        {
+            label.ForeColor = Ink;
+        }
+        else if (parent is TabPage page)
+        {
+            page.BackColor = Paper;
+        }
+        foreach (Control child in parent.Controls)
+            StyleControls(child);
     }
 
     private TabPage BuildPlayTab()
