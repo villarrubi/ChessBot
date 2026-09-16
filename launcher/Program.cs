@@ -48,12 +48,22 @@ internal sealed class MainForm : Form
     private readonly string engine;
     private readonly string python;
     private readonly ChessBoard board = new() { Dock = DockStyle.Fill };
-    private readonly Label gameStatus = new() { AutoSize = true, Text = "Preparando partida…" };
+    private readonly Label gameStatus = new()
+    {
+        AutoSize = false,
+        Text = "Preparando partida…",
+        TextAlign = ContentAlignment.MiddleLeft,
+        Padding = new Padding(10, 5, 10, 5),
+        Width = 270,
+        Height = 42,
+        BorderStyle = BorderStyle.FixedSingle
+    };
     private readonly ComboBox playerColor = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown thinkTime = new() { Minimum = 100, Maximum = 10000, Value = 750, Increment = 100 };
     private readonly RichTextBox log = new() { Dock = DockStyle.Fill, MinimumSize = new Size(100, 100), ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
     private readonly ToolTip tips = new() { AutoPopDelay = 12000, InitialDelay = 300, ReshowDelay = 100 };
     private readonly Button cancelButton = new() { Text = "Cancelar tarea", Enabled = false, AutoSize = true };
+    private readonly Button resignButton = new() { Text = "Rendirse", AutoSize = true, Enabled = false };
     private readonly TextBox dataset = new() { Dock = DockStyle.Fill };
     private readonly TextBox trainingOutput = new() { Dock = DockStyle.Fill };
     private readonly TextBox version = new() { Text = "mi-nnue-v1", Dock = DockStyle.Fill };
@@ -84,6 +94,7 @@ internal sealed class MainForm : Form
     private HashSet<string> legalMoves = [];
     private string? selectedSquare;
     private bool gameBusy;
+    private bool gameFinished;
     private string currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     public MainForm(string projectRoot)
@@ -130,6 +141,7 @@ internal sealed class MainForm : Form
         Controls.Add(tabs);
         ApplyVisualStyle(tabs);
         board.SquareClicked += OnBoardClick;
+        resignButton.Click += (_, _) => ResignGame();
         cancelButton.Click += (_, _) => CancelActiveTask();
         Shown += async (_, _) => await NewGameAsync();
         FormClosing += (_, _) => CancelActiveTask();
@@ -169,7 +181,7 @@ internal sealed class MainForm : Form
         {
             button.FlatStyle = FlatStyle.Flat;
             button.FlatAppearance.BorderSize = 0;
-            button.BackColor = Accent;
+            button.BackColor = button == resignButton ? Color.FromArgb(143, 71, 57) : Accent;
             button.ForeColor = Color.White;
             button.Padding = new Padding(10, 4, 10, 4);
             button.Cursor = Cursors.Hand;
@@ -205,6 +217,7 @@ internal sealed class MainForm : Form
         side.Controls.Add(new Label { Text = "Tiempo del motor (ms)", AutoSize = true, Margin = new Padding(3, 12, 3, 3) });
         side.Controls.Add(thinkTime);
         side.Controls.Add(newGame);
+        side.Controls.Add(resignButton);
         side.Controls.Add(Spacer());
         side.Controls.Add(gameStatus);
         side.Controls.Add(new Label { Text = "Selecciona una pieza y después su casilla de destino. Las promociones se realizan a dama.", MaximumSize = new Size(260, 0), AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(3, 18, 3, 3) });
@@ -309,9 +322,15 @@ internal sealed class MainForm : Form
             Dock = DockStyle.Fill,
             ReadOnly = true,
             Text =
-            "El ejecutable del motor se encuentra en:\n" + engine +
-            "\n\nEl lanzador oculta los procesos de consola y muestra su resultado dentro de la aplicación. " +
-            "Para usar ChessBot con Arena, Cute Chess u otra interfaz UCI, selecciona chessbot.exe como motor."
+            "BENCHMARK RÁPIDO\n" +
+            "Mide velocidad y nodos por segundo del motor. Sirve para comprobar que la compilación funciona y comparar cambios.\n\n" +
+            "COMPILAR / ACTUALIZAR\n" +
+            "Configura y compila el motor C++ en modo Release. Úsalo después de cambiar el código del motor.\n\n" +
+            "ABRIR RESULTADOS\n" +
+            "Abre la carpeta build, donde se guardan datasets, redes, partidas, logs y ciclos de aprendizaje.\n\n" +
+            "ABRIR PROYECTO\n" +
+            "Abre la carpeta raíz del proyecto para editar el código o revisar la configuración.\n\n" +
+            "Ejecutable UCI actual:\n" + engine
         }, 0, 2);
         page.Controls.Add(layout);
         return page;
@@ -321,9 +340,13 @@ internal sealed class MainForm : Form
     {
         moves.Clear();
         selectedSquare = null;
+        gameFinished = false;
+        resignButton.Enabled = false;
+        SetGameStatus("Preparando partida…");
         currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         board.Position = currentFen;
         board.SelectedSquare = null;
+        board.CheckedSquare = null;
         board.Flipped = playerColor.SelectedIndex == 1;
         board.Invalidate();
         if (!File.Exists(engine))
@@ -331,14 +354,29 @@ internal sealed class MainForm : Form
             gameStatus.Text = "Falta el motor. Usa Herramientas → Compilar/actualizar.";
             return;
         }
+        resignButton.Enabled = true;
         await RefreshPositionAsync();
         if (playerColor.SelectedIndex == 1)
             await EngineMoveAsync();
     }
 
+    private void ResignGame()
+    {
+        if (gameFinished || gameBusy || legalMoves.Count == 0)
+            return;
+        gameFinished = true;
+        selectedSquare = null;
+        legalMoves.Clear();
+        board.SelectedSquare = null;
+        board.TargetSquares.Clear();
+        board.Invalidate();
+        resignButton.Enabled = false;
+        SetGameStatus("Te has rendido · gana ChessBot", finished: true);
+    }
+
     private async void OnBoardClick(object? sender, string square)
     {
-        if (gameBusy || SideToMoveIsWhite() != PlayerIsWhite())
+        if (gameFinished || gameBusy || SideToMoveIsWhite() != PlayerIsWhite())
             return;
         string piece = board.PieceAt(square);
         if (selectedSquare is null)
@@ -354,8 +392,12 @@ internal sealed class MainForm : Form
         }
 
         string prefix = selectedSquare + square;
-        string? move = legalMoves.FirstOrDefault(candidate => candidate == prefix + "q") ??
-                       legalMoves.FirstOrDefault(candidate => candidate.StartsWith(prefix, StringComparison.Ordinal));
+        List<string> candidates = legalMoves
+            .Where(candidate => candidate.StartsWith(prefix, StringComparison.Ordinal))
+            .ToList();
+        string? move = candidates.Count == 1 ? candidates[0] : null;
+        if (candidates.Count > 1 && ChoosePromotion(candidates) is char promotion)
+            move = candidates.FirstOrDefault(candidate => candidate.EndsWith(promotion));
         if (move is null)
         {
             selectedSquare = null;
@@ -373,6 +415,39 @@ internal sealed class MainForm : Form
         await RefreshPositionAsync();
         if (legalMoves.Count > 0)
             await EngineMoveAsync();
+    }
+
+    private char? ChoosePromotion(IReadOnlyCollection<string> candidates)
+    {
+        using Form dialog = new()
+        {
+            Text = "Elige la promoción",
+            StartPosition = FormStartPosition.CenterParent,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            MinimizeBox = false,
+            MaximizeBox = false,
+            ShowInTaskbar = false,
+            ClientSize = new Size(360, 92),
+            BackColor = Paper,
+            ForeColor = Ink
+        };
+        FlowLayoutPanel buttons = new()
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Padding = new Padding(12)
+        };
+        foreach ((char code, string name) in new[] { ('q', "Dama"), ('r', "Torre"), ('b', "Alfil"), ('n', "Caballo") })
+        {
+            if (!candidates.Any(move => move.EndsWith(code)))
+                continue;
+            Button button = new() { Text = name, Tag = code, AutoSize = true, DialogResult = DialogResult.OK };
+            button.Click += (_, _) => dialog.Tag = code;
+            buttons.Controls.Add(button);
+        }
+        dialog.Controls.Add(buttons);
+        return dialog.ShowDialog(this) == DialogResult.OK && dialog.Tag is char choice ? choice : null;
     }
 
     private async Task RefreshPositionAsync()
@@ -393,11 +468,28 @@ internal sealed class MainForm : Form
             legalMoves = rootElement.GetProperty("legal_moves").EnumerateArray()
                 .Select(value => value.GetString() ?? string.Empty).Where(value => value.Length >= 4).ToHashSet();
             string status = rootElement.GetProperty("status").GetString() ?? "ongoing";
+            bool inCheck = rootElement.TryGetProperty("in_check", out JsonElement checkElement) &&
+                           checkElement.GetBoolean();
+            board.CheckedSquare = inCheck ? FindKingSquare(currentFen) : null;
             board.Position = currentFen;
             board.Invalidate();
-            gameStatus.Text = status == "ongoing"
-                ? (SideToMoveIsWhite() ? "Turno de blancas" : "Turno de negras")
-                : TranslateStatus(status);
+            if (status == "ongoing")
+            {
+                gameFinished = false;
+                resignButton.Enabled = true;
+                string turn = SideToMoveIsWhite() ? "Turno de blancas" : "Turno de negras";
+                SetGameStatus(inCheck ? $"Jaque · {turn}" : turn, warning: inCheck);
+            }
+            else
+            {
+                gameFinished = true;
+                resignButton.Enabled = false;
+                bool checkmate = status == "checkmate";
+                string result = checkmate
+                    ? $"JAQUE MATE · ganan {(SideToMoveIsWhite() ? "negras" : "blancas")}"
+                    : TranslateStatus(status);
+                SetGameStatus(result, finished: true);
+            }
         }
         catch (Exception exception)
         {
@@ -412,6 +504,8 @@ internal sealed class MainForm : Form
     private async Task EngineMoveAsync()
     {
         if (legalMoves.Count == 0 || SideToMoveIsWhite() == PlayerIsWhite())
+            return;
+        if (gameFinished)
             return;
         gameBusy = true;
         gameStatus.Text = "ChessBot está pensando…";
@@ -797,6 +891,38 @@ internal sealed class MainForm : Form
     private static string UniqueOutput(string path) => Directory.Exists(path) || File.Exists(path) ? path + "-" + DateTime.Now.ToString("HHmmss") : path;
     private string StatusText() => $"Proyecto: {root}\nMotor: {(File.Exists(engine) ? "listo" : "pendiente de compilar")}\nPython de entrenamiento: {(File.Exists(python) ? "listo" : "no instalado")}";
 
+    private void SetGameStatus(string text, bool warning = false, bool finished = false)
+    {
+        gameStatus.Text = text;
+        gameStatus.BackColor = finished ? Color.FromArgb(247, 220, 214) : warning ? Color.FromArgb(255, 239, 194) : AccentLight;
+        gameStatus.ForeColor = finished ? Color.FromArgb(130, 46, 36) : warning ? Color.FromArgb(111, 76, 20) : Ink;
+    }
+
+    private static string? FindKingSquare(string fen)
+    {
+        string[] fields = fen.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (fields.Length < 2)
+            return null;
+        char king = fields[1] == "w" ? 'K' : 'k';
+        string[] ranks = fields[0].Split('/');
+        for (int rankIndex = 0; rankIndex < ranks.Length; ++rankIndex)
+        {
+            int file = 0;
+            foreach (char piece in ranks[rankIndex])
+            {
+                if (char.IsDigit(piece))
+                    file += piece - '0';
+                else
+                {
+                    if (piece == king)
+                        return $"{(char)('a' + file)}{8 - rankIndex}";
+                    ++file;
+                }
+            }
+        }
+        return null;
+    }
+
     private void AppendLog(string text)
     {
         if (InvokeRequired)
@@ -813,7 +939,7 @@ internal sealed class MainForm : Form
     {
         "checkmate" => "Jaque mate",
         "stalemate" => "Tablas por ahogado",
-        "threefold" => "Tablas por repetición",
+        "threefold" or "threefold_repetition" => "Tablas por repetición",
         "fifty_move" => "Tablas por cincuenta movimientos",
         "insufficient_material" => "Tablas por material insuficiente",
         _ => "Partida terminada: " + status
@@ -890,6 +1016,8 @@ internal sealed class ChessBoard : Control
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public HashSet<string> TargetSquares { get; set; } = [];
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public string? CheckedSquare { get; set; }
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool Flipped { get; set; }
 
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -934,7 +1062,9 @@ internal sealed class ChessBoard : Control
                 Rectangle rectangle = new(left + displayFile * cell, top + displayRank * cell, cell, cell);
                 bool light = (file + rank) % 2 != 0;
                 Color color = light ? Color.FromArgb(235, 220, 184) : Color.FromArgb(119, 149, 86);
-                if (square == SelectedSquare)
+                if (square == CheckedSquare)
+                    color = Color.FromArgb(218, 104, 91);
+                else if (square == SelectedSquare)
                     color = Color.FromArgb(246, 246, 105);
                 else if (TargetSquares.Contains(square))
                     color = light ? Color.FromArgb(191, 205, 122) : Color.FromArgb(91, 170, 91);
@@ -942,10 +1072,22 @@ internal sealed class ChessBoard : Control
                 e.Graphics.FillRectangle(background, rectangle);
                 if (pieces.TryGetValue(square, out char piece))
                 {
-                    using SolidBrush shadow = new(Color.FromArgb(80, Color.Black));
-                    Rectangle shadowRect = new(rectangle.X + 2, rectangle.Y + 3, rectangle.Width, rectangle.Height);
-                    e.Graphics.DrawString(Symbols[piece], pieceFont, shadow, shadowRect, centered);
-                    using SolidBrush foreground = new(char.IsUpper(piece) ? Color.WhiteSmoke : Color.FromArgb(30, 30, 30));
+                    bool whitePiece = char.IsUpper(piece);
+                    Color outlineColor = whitePiece ? Color.FromArgb(30, 41, 38) : Color.FromArgb(247, 241, 222);
+                    Color pieceColor = whitePiece ? Color.FromArgb(255, 253, 245) : Color.FromArgb(28, 30, 29);
+                    using SolidBrush outline = new(outlineColor);
+                    for (int offsetX = -1; offsetX <= 1; ++offsetX)
+                    {
+                        for (int offsetY = -1; offsetY <= 1; ++offsetY)
+                        {
+                            if (offsetX == 0 && offsetY == 0)
+                                continue;
+                            Rectangle outlineRect = new(rectangle.X + offsetX, rectangle.Y + offsetY,
+                                                        rectangle.Width, rectangle.Height);
+                            e.Graphics.DrawString(Symbols[piece], pieceFont, outline, outlineRect, centered);
+                        }
+                    }
+                    using SolidBrush foreground = new(pieceColor);
                     e.Graphics.DrawString(Symbols[piece], pieceFont, foreground, rectangle, centered);
                 }
                 if (displayFile == 0)
