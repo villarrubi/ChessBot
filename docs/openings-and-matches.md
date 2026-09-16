@@ -46,3 +46,23 @@ la decisión y su procedencia.
 Los intervalos de las partidas emparejadas se calculan sobre resultados agrupados por apertura.
 Repetir una misma apertura no aumenta artificialmente el número de muestras independientes. El
 SPRT opcional se configura con `--sprt-elo0`, `--sprt-elo1`, `--sprt-alpha` y `--sprt-beta`.
+
+## Escalera de Elo contra Stockfish
+
+El lanzador incluye **Medir Elo aproximado** en la pestaña Herramientas. Selecciona un ejecutable
+UCI nativo de Stockfish, indica las partidas por nivel y la profundidad, y ejecuta la prueba. La
+escalera usa los límites `UCI_LimitStrength` y `UCI_Elo` de Stockfish (1320–3190), juega cada nivel
+con colores emparejados y guarda `summary.json`, `summary.csv` y una carpeta por nivel. La cifra
+estimada suma el Elo configurado de Stockfish y la diferencia medida en la partida; el intervalo
+de confianza se muestra junto al valor y suele ser amplio con pocas partidas.
+
+También se puede ejecutar sin el lanzador:
+
+```powershell
+python tools/elo_ladder.py --engine build/Release/chessbot.exe `
+  --stockfish C:\motores\stockfish\stockfish-windows-x86-64.exe `
+  --games-per-level 16 --depth 3 --output-dir build/elo-ladder
+```
+
+La versión `.js/.wasm` de Stockfish que usa ChessPrep funciona dentro del navegador y no es un
+ejecutable UCI nativo; para esta prueba hay que seleccionar el binario de Windows.

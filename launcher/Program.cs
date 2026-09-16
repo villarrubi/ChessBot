@@ -77,6 +77,9 @@ internal sealed class MainForm : Form
     private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 160, Increment = 10 };
     private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 60 };
     private readonly ComboBox trainingTarget = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 290 };
+    private readonly TextBox stockfishEngine = new() { Dock = DockStyle.Fill, Width = 320 };
+    private readonly NumericUpDown eloGames = new() { Minimum = 2, Maximum = 1000, Value = 16, Increment = 2 };
+    private readonly NumericUpDown eloDepth = new() { Minimum = 1, Maximum = 12, Value = 3 };
     private readonly TextBox customOpening = new() { Dock = DockStyle.Fill };
     private readonly CheckedListBox openingSelection = new()
     {
@@ -133,6 +136,9 @@ internal sealed class MainForm : Form
         tips.SetToolTip(trainingTarget, "Resultado aprende solo de victoria/tablas/derrota. Mixto añade la evaluación manual y converge con menos partidas.");
         tips.SetToolTip(openingSelection, "Marca las aperturas que se usarán en las partidas de aprendizaje y evaluación. Todas vienen marcadas al inicio.");
         tips.SetToolTip(customOpening, "Opcional: añade una línea propia. Ejemplo: Gambito de Rey | e4 e5 f4. Usa SAN o UCI separados por espacios.");
+        tips.SetToolTip(stockfishEngine, "Ejecutable UCI nativo de Stockfish para medir la fuerza aproximada de ChessBot.");
+        tips.SetToolTip(eloGames, "Partidas por nivel de Stockfish. Siempre se juegan en parejas con colores invertidos.");
+        tips.SetToolTip(eloDepth, "Profundidad fija usada por ChessBot y Stockfish en la escalera Elo.");
 
         TabControl tabs = new() { Dock = DockStyle.Fill };
         tabs.TabPages.Add(BuildPlayTab());
@@ -300,7 +306,8 @@ internal sealed class MainForm : Form
     private TabPage BuildToolsTab()
     {
         TabPage page = new("Herramientas");
-        TableLayoutPanel layout = new() { Dock = DockStyle.Fill, RowCount = 3, Padding = new Padding(18) };
+        TableLayoutPanel layout = new() { Dock = DockStyle.Fill, RowCount = 4, Padding = new Padding(18) };
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -315,8 +322,28 @@ internal sealed class MainForm : Form
         Button project = new() { Text = "Abrir proyecto", AutoSize = true };
         project.Click += (_, _) => OpenFolder(root);
         buttons.Controls.AddRange([benchmark, build, results, project]);
+        FlowLayoutPanel eloControls = new()
+        {
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = true,
+            Margin = new Padding(0, 0, 0, 12)
+        };
+        eloControls.Controls.Add(new Label { Text = "Stockfish", AutoSize = true, Margin = new Padding(0, 7, 6, 0) });
+        eloControls.Controls.Add(stockfishEngine);
+        Button browseStockfish = new() { Text = "Examinar…", AutoSize = true };
+        browseStockfish.Click += (_, _) => ChooseFile(stockfishEngine, "Ejecutable Stockfish|*.exe|Todos|*.*");
+        eloControls.Controls.Add(browseStockfish);
+        eloControls.Controls.Add(new Label { Text = "Partidas/nivel", AutoSize = true, Margin = new Padding(14, 7, 6, 0) });
+        eloControls.Controls.Add(eloGames);
+        eloControls.Controls.Add(new Label { Text = "Profundidad", AutoSize = true, Margin = new Padding(14, 7, 6, 0) });
+        eloControls.Controls.Add(eloDepth);
+        Button elo = new() { Text = "Medir Elo aproximado", AutoSize = true };
+        elo.Click += async (_, _) => await RunEloLadderAsync();
+        eloControls.Controls.Add(elo);
         layout.Controls.Add(state, 0, 0);
         layout.Controls.Add(buttons, 0, 1);
+        layout.Controls.Add(eloControls, 0, 2);
         layout.Controls.Add(new RichTextBox
         {
             Dock = DockStyle.Fill,
@@ -331,7 +358,7 @@ internal sealed class MainForm : Form
             "ABRIR PROYECTO\n" +
             "Abre la carpeta raíz del proyecto para editar el código o revisar la configuración.\n\n" +
             "Ejecutable UCI actual:\n" + engine
-        }, 0, 2);
+        }, 0, 3);
         page.Controls.Add(layout);
         return page;
     }
@@ -590,6 +617,21 @@ internal sealed class MainForm : Form
         await RunTaskAsync(python,
             ["tools/learning_cycle.py", "--config", generatedConfig, "--engine", engine, "--output-dir", cycleOutput.Text],
             "Ciclo completo");
+    }
+
+    private async Task RunEloLadderAsync()
+    {
+        if (!File.Exists(stockfishEngine.Text))
+        {
+            MessageBox.Show("Selecciona un ejecutable stockfish.exe.", "Medir Elo",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        string output = NewOutput("elo-ladder");
+        await RunTaskAsync(python,
+            ["tools/elo_ladder.py", "--engine", engine, "--stockfish", stockfishEngine.Text,
+             "--games-per-level", eloGames.Value.ToString(), "--depth", eloDepth.Value.ToString(),
+             "--output-dir", output], "Escalera Elo");
     }
 
     private void PopulateOpenings()
