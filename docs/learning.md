@@ -135,9 +135,18 @@ Subirla produce partidas de mayor calidad, pero el coste crece con rapidez. Prof
 base práctica; `4–5` requiere bastante más tiempo. `selfplay_games` genera datos y
 `evaluation_games` mide el candidato después, sin mezclar esas partidas con el entrenamiento.
 La interfaz permite marcar un subconjunto de aperturas del libro `data/openings/core.json`; la
-selección se aplica tanto a las partidas de aprendizaje como a la evaluación. El progreso se emite
-en directo por partida (apertura, resultado, W/D/L y score). Queda guardado en `progress.log` y el
-registro técnico UCI se mantiene en `engine.log` con poca verbosidad para no agotar el almacenamiento.
+selección se aplica tanto a las partidas de aprendizaje como a la evaluación. Para probar una línea
+que no esté en el libro, escribe en **Apertura propia** `Nombre | movimientos`, por ejemplo
+`Gambito de Rey | e4 e5 f4`. Se admiten movimientos SAN (`e4`) y UCI (`e2e4`) separados por espacios;
+el lanzador genera un catálogo temporal para ese ciclo y valida que la línea sea legal.
+El progreso se emite en directo por partida (apertura, resultado, W/D/L y score). Queda guardado en
+`progress.log` y el registro técnico UCI se mantiene en `engine.log` con poca verbosidad para no
+agotar el almacenamiento.
+
+Las partidas contra otro motor UCI se ejecutan siempre en modo emparejado: cada apertura se juega dos
+veces consecutivas y se intercambian los colores de ambos motores. `metadata.json` registra
+`engine_a_color` en cada partida para poder comprobarlo después. El lanzador ajusta el total a un
+múltiplo de parejas completas por apertura para no dejar aperturas sin su partida de revancha.
 Los ciclos del lanzador reservan 512 MB para sus artefactos.
 Cuando una red supera las puertas de corrección, validación, velocidad y fuerza, el lanzador la
 guarda como red activa. El ciclo siguiente juega y se evalúa contra esa red aceptada, de modo que

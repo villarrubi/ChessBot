@@ -44,6 +44,10 @@ with tempfile.TemporaryDirectory() as directory:
     fen.write_text(chess.STARTING_FEN + "\n", encoding="utf-8")
     uci = temporary / "suite.uci"
     uci.write_text("e2e4 e7e5 g1f3\n", encoding="utf-8")
+    native = temporary / "custom.json"
+    native.write_text(json.dumps({"version": "test", "openings": [{
+        "id": "king_gambit", "name": "King's Gambit", "start_fen": "startpos",
+        "moves": ["e4", "e5", "f4"]}]}), encoding="utf-8")
     polyglot = temporary / "suite.bin"
     move = chess.Move.from_uci("e2e4")
     raw_move = (move.to_square & 7) | ((move.to_square >> 3) << 3) | \
@@ -53,6 +57,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert len(load_openings(root / "data" / "openings" / "core.json")) >= 4
     assert len(load_openings(root / "tests" / "positions" / "analysis_sample.pgn")) == 1
     assert len(load_openings(epd)) == len(load_openings(fen)) == len(load_openings(uci)) == 1
+    assert load_openings(native)[0].moves == ["e2e4", "e7e5", "f2f4"]
     assert load_openings(polyglot)[0].moves == ["e2e4"]
 
     decisive = [{"result": "0-1", "engine_a_color": "white",
@@ -78,10 +83,12 @@ with tempfile.TemporaryDirectory() as directory:
     assert named["games"][0]["opening"]["version"] == "core-openings-v1"
     assert named["games"][0]["opening"]["release_ply"] == 12
 
-    filtered = run(temporary / "filtered", "--games", "1", "--depth", "1", "--max-plies", "2",
+    filtered = run(temporary / "filtered", "--games", "4", "--depth", "1", "--max-plies", "2",
                    "--openings", str(root / "data" / "openings" / "core.json"),
                    "--opening-ids", "italian_giuoco_001,scotch_001")
-    assert filtered["games"][0]["opening"]["id"] in {"italian_giuoco_001", "scotch_001"}
+    assert {(game["opening"]["id"], game["engine_a_color"]) for game in filtered["games"]} == {
+        ("italian_giuoco_001", "white"), ("italian_giuoco_001", "black"),
+        ("scotch_001", "white"), ("scotch_001", "black")}
 
     # C: exact SAN/UCI prefix, validated before release.
     exact = run(temporary / "exact", "--games", "1", "--depth", "1", "--max-plies", "4",

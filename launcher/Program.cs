@@ -62,6 +62,7 @@ internal sealed class MainForm : Form
     private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 160, Increment = 10 };
     private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 60 };
     private readonly ComboBox trainingTarget = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 290 };
+    private readonly TextBox customOpening = new() { Dock = DockStyle.Fill };
     private readonly CheckedListBox openingSelection = new()
     {
         CheckOnClick = true,
@@ -113,6 +114,7 @@ internal sealed class MainForm : Form
         tips.SetToolTip(maxPlies, "Límite de medias jugadas por partida; 160 plies equivalen a 80 movimientos completos.");
         tips.SetToolTip(trainingTarget, "Resultado aprende solo de victoria/tablas/derrota. Mixto añade la evaluación manual y converge con menos partidas.");
         tips.SetToolTip(openingSelection, "Marca las aperturas que se usarán en las partidas de aprendizaje y evaluación. Todas vienen marcadas al inicio.");
+        tips.SetToolTip(customOpening, "Opcional: añade una línea propia. Ejemplo: Gambito de Rey | e4 e5 f4. Usa SAN o UCI separados por espacios.");
 
         TabControl tabs = new() { Dock = DockStyle.Fill };
         tabs.TabPages.Add(BuildPlayTab());
@@ -172,7 +174,7 @@ internal sealed class MainForm : Form
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        for (int row = 0; row < 13; ++row)
+        for (int row = 0; row < 14; ++row)
         {
             form.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         }
@@ -204,8 +206,9 @@ internal sealed class MainForm : Form
         AddFieldRow(form, 7, "Búsqueda", search);
         AddFieldRow(form, 8, "Objetivo", trainingTarget);
         AddFieldRow(form, 9, "Aperturas", openingSelection);
-        AddPathRow(form, 10, "Config. base", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
-        AddPathRow(form, 11, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
+        AddFieldRow(form, 10, "Apertura propia", customOpening);
+        AddPathRow(form, 11, "Config. base", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
+        AddPathRow(form, 12, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
 
         FlowLayoutPanel actions = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 12, 0, 0) };
         Button train = new() { Text = "Entrenar nueva red", AutoSize = true };
@@ -215,7 +218,7 @@ internal sealed class MainForm : Form
         actions.Controls.Add(train);
         actions.Controls.Add(cycle);
         actions.Controls.Add(cancelButton);
-        form.Controls.Add(actions, 1, 12);
+        form.Controls.Add(actions, 1, 13);
         outer.Controls.Add(explanation, 0, 0);
         outer.Controls.Add(form, 0, 1);
         outer.Controls.Add(log, 0, 2);
@@ -477,16 +480,30 @@ internal sealed class MainForm : Form
         }
 
         JsonObject budgets = ObjectAt(config, "budgets");
-        budgets["selfplay_games"] = EvenCount(selfplayGames.Value);
-        budgets["evaluation_games"] = EvenCount(evaluationGames.Value);
         budgets["max_seconds"] = (int)maxMinutes.Value * 60;
         budgets["max_storage_mb"] = 512;
+
+        List<OpeningChoice> selectedOpenings = SelectedOpenings();
+        bool hasCustomOpening = !string.IsNullOrWhiteSpace(customOpening.Text);
+        if (!hasCustomOpening && selectedOpenings.Count == 0)
+            throw new InvalidDataException("Selecciona al menos una apertura o escribe una apertura propia");
+        string? customOpeningsPath = hasCustomOpening
+            ? CreateCustomOpeningSource(stamp, selectedOpenings)
+            : null;
+        int openingCount = selectedOpenings.Count + (hasCustomOpening ? 1 : 0);
+        budgets["selfplay_games"] = PairedCount(selfplayGames.Value, openingCount);
+        budgets["evaluation_games"] = PairedCount(evaluationGames.Value, openingCount);
+        if (customOpeningsPath is not null)
+            config["openings"] = customOpeningsPath;
 
         JsonObject selfplay = ObjectAt(config, "selfplay");
         selfplay["enabled"] = true;
         selfplay["depth"] = (int)searchDepth.Value;
         selfplay["max_plies"] = (int)maxPlies.Value;
-        selfplay["opening_ids"] = SelectedOpeningIds();
+        if (customOpeningsPath is null)
+            selfplay["opening_ids"] = OpeningIds(selectedOpenings);
+        else
+            selfplay.Remove("opening_ids");
         if (generationMode.SelectedIndex == 1)
         {
             string opponent = Path.GetFullPath(opponentEngine.Text);
@@ -510,9 +527,12 @@ internal sealed class MainForm : Form
         evaluation["depth"] = (int)searchDepth.Value;
         evaluation["benchmark_depth"] = Math.Min(12, (int)searchDepth.Value + 1);
         evaluation["max_plies"] = (int)maxPlies.Value;
-        evaluation["opening_ids"] = SelectedOpeningIds();
+        if (customOpeningsPath is null)
+            evaluation["opening_ids"] = OpeningIds(selectedOpenings);
+        else
+            evaluation.Remove("opening_ids");
         evaluation["minimum_lower_score"] = 0.5;
-        evaluation["minimum_independent_samples"] = Math.Max(4, EvenCount(evaluationGames.Value) / 2);
+        evaluation["minimum_independent_samples"] = Math.Max(4, PairedCount(evaluationGames.Value, openingCount) / 2);
 
         string configDirectory = Path.Combine(root, "build", "launcher-configs");
         Directory.CreateDirectory(configDirectory);
@@ -521,14 +541,68 @@ internal sealed class MainForm : Form
         return path;
     }
 
-    private JsonArray SelectedOpeningIds()
+    private List<OpeningChoice> SelectedOpenings() =>
+        openingSelection.CheckedItems.OfType<OpeningChoice>().ToList();
+
+    private static JsonArray OpeningIds(IEnumerable<OpeningChoice> openings)
     {
         JsonArray result = [];
-        foreach (OpeningChoice opening in openingSelection.CheckedItems.OfType<OpeningChoice>())
+        foreach (OpeningChoice opening in openings)
             result.Add(opening.Id);
-        if (result.Count == 0)
-            throw new InvalidDataException("Selecciona al menos una apertura");
         return result;
+    }
+
+    private string CreateCustomOpeningSource(string stamp, IReadOnlyCollection<OpeningChoice> selected)
+    {
+        string corePath = Path.Combine(root, "data", "openings", "core.json");
+        JsonObject core = JsonNode.Parse(File.ReadAllText(corePath))?.AsObject() ??
+                          throw new InvalidDataException("El catálogo de aperturas está vacío");
+        JsonArray openings = [];
+        HashSet<string> selectedIds = selected.Select(opening => opening.Id).ToHashSet(StringComparer.Ordinal);
+        if (core["openings"] is JsonArray coreOpenings)
+        {
+            foreach (JsonNode? node in coreOpenings)
+            {
+                if (node is JsonObject opening &&
+                    selectedIds.Contains(opening["id"]?.GetValue<string>() ?? string.Empty))
+                    openings.Add(opening.DeepClone());
+            }
+        }
+
+        string raw = customOpening.Text.Trim();
+        string name = "Apertura personalizada";
+        string movesText = raw;
+        int separator = raw.IndexOf('|');
+        if (separator >= 0)
+        {
+            string requestedName = raw[..separator].Trim();
+            if (!string.IsNullOrWhiteSpace(requestedName))
+                name = requestedName;
+            movesText = raw[(separator + 1)..].Trim();
+        }
+        string[] moves = movesText.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (moves.Length == 0)
+            throw new InvalidDataException("La apertura propia necesita movimientos, por ejemplo: Gambito de Rey | e4 e5 f4");
+        openings.Add(new JsonObject
+        {
+            ["id"] = "custom_1",
+            ["name"] = name,
+            ["eco"] = null,
+            ["start_fen"] = "startpos",
+            ["moves"] = new JsonArray(moves.Select(move => (JsonNode?)move).ToArray())
+        });
+
+        JsonObject payload = new()
+        {
+            ["schema_version"] = 1,
+            ["version"] = "launcher-custom-" + stamp,
+            ["openings"] = openings
+        };
+        string directory = Path.Combine(root, "build", "launcher-configs");
+        Directory.CreateDirectory(directory);
+        string path = Path.Combine(directory, "openings-" + stamp + ".json");
+        File.WriteAllText(path, payload.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine);
+        return path;
     }
 
     private string TargetValue() => trainingTarget.SelectedIndex switch
@@ -538,10 +612,12 @@ internal sealed class MainForm : Form
         _ => "result"
     };
 
-    private static int EvenCount(decimal value)
+    private static int PairedCount(decimal value, int openingCount)
     {
-        int count = (int)value;
-        return count % 2 == 0 ? count : count + 1;
+        int count = Math.Max(2, (int)value);
+        int pairSize = Math.Max(1, openingCount) * 2;
+        int remainder = count % pairSize;
+        return remainder == 0 ? count : count + pairSize - remainder;
     }
 
     private static JsonObject ObjectAt(JsonObject parent, string name)
