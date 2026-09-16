@@ -53,10 +53,23 @@ internal sealed class MainForm : Form
         AutoSize = false,
         Text = "Preparando partida…",
         TextAlign = ContentAlignment.MiddleLeft,
+        Padding = new Padding(12, 8, 12, 8),
+        Width = 270,
+        Height = 52,
+        BorderStyle = BorderStyle.FixedSingle,
+        Font = new Font("Segoe UI", 10f, FontStyle.Bold)
+    };
+    private readonly Label lastMoveSummary = new()
+    {
+        AutoSize = false,
+        Text = "Aún no hay movimientos",
+        TextAlign = ContentAlignment.MiddleLeft,
         Padding = new Padding(10, 5, 10, 5),
         Width = 270,
-        Height = 42,
-        BorderStyle = BorderStyle.FixedSingle
+        Height = 34,
+        BorderStyle = BorderStyle.FixedSingle,
+        BackColor = Color.FromArgb(250, 244, 220),
+        ForeColor = Color.FromArgb(102, 72, 37)
     };
     private readonly ComboBox playerColor = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown thinkTime = new() { Minimum = 100, Maximum = 10000, Value = 750, Increment = 100 };
@@ -212,11 +225,21 @@ internal sealed class MainForm : Form
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
         layout.Controls.Add(board, 0, 0);
 
-        FlowLayoutPanel side = new() { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(12), AutoScroll = true };
-        Label title = new() { Text = "Partida contra ChessBot", AutoSize = true, Font = new Font(Font, FontStyle.Bold) };
-        Button newGame = new() { Text = "Nueva partida", AutoSize = true };
+        FlowLayoutPanel side = new()
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
+            Padding = new Padding(18, 14, 14, 14),
+            AutoScroll = true,
+            BackColor = Color.FromArgb(255, 254, 250)
+        };
+        Label title = new() { Text = "Partida contra ChessBot", AutoSize = true, Font = new Font(Font, FontStyle.Bold), Margin = new Padding(3, 0, 3, 2) };
+        Label subtitle = new() { Text = "Juega desde el tablero y sigue el estado de la partida.", AutoSize = true, MaximumSize = new Size(270, 0), ForeColor = Color.FromArgb(91, 102, 99), Margin = new Padding(3, 0, 3, 10) };
+        Button newGame = new() { Text = "Nueva partida", AutoSize = true, Margin = new Padding(3, 10, 3, 3) };
         newGame.Click += async (_, _) => await NewGameAsync();
         side.Controls.Add(title);
+        side.Controls.Add(subtitle);
         side.Controls.Add(Spacer());
         side.Controls.Add(new Label { Text = "Tu color", AutoSize = true });
         side.Controls.Add(playerColor);
@@ -226,7 +249,10 @@ internal sealed class MainForm : Form
         side.Controls.Add(resignButton);
         side.Controls.Add(Spacer());
         side.Controls.Add(gameStatus);
-        side.Controls.Add(new Label { Text = "Selecciona una pieza y después su casilla de destino. Las promociones se realizan a dama.", MaximumSize = new Size(260, 0), AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(3, 18, 3, 3) });
+        side.Controls.Add(new Label { Text = "Último movimiento", AutoSize = true, Font = new Font(Font, FontStyle.Bold), Margin = new Padding(3, 18, 3, 2) });
+        side.Controls.Add(lastMoveSummary);
+        side.Controls.Add(new Label { Text = "Las casillas doradas marcan el movimiento más reciente. Los puntos verdes muestran destinos legales.", MaximumSize = new Size(270, 0), AutoSize = true, ForeColor = Color.FromArgb(91, 102, 99), Margin = new Padding(3, 0, 3, 3) });
+        side.Controls.Add(new Label { Text = "Selecciona una pieza y después su casilla de destino. Las promociones se realizan a dama.", MaximumSize = new Size(270, 0), AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(3, 14, 3, 3) });
         layout.Controls.Add(side, 1, 0);
         page.Controls.Add(layout);
         return page;
@@ -372,6 +398,8 @@ internal sealed class MainForm : Form
         SetGameStatus("Preparando partida…");
         currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         board.Position = currentFen;
+        board.LastMove = null;
+        lastMoveSummary.Text = "Aún no hay movimientos";
         board.SelectedSquare = null;
         board.CheckedSquare = null;
         board.Flipped = playerColor.SelectedIndex == 1;
@@ -499,6 +527,10 @@ internal sealed class MainForm : Form
                            checkElement.GetBoolean();
             board.CheckedSquare = inCheck ? FindKingSquare(currentFen) : null;
             board.Position = currentFen;
+            board.LastMove = moves.LastOrDefault();
+            lastMoveSummary.Text = board.LastMove is { Length: >= 4 } lastMove
+                ? $"{lastMove[..2]}  →  {lastMove.Substring(2, 2)}"
+                : "Aún no hay movimientos";
             board.Invalidate();
             if (status == "ongoing")
             {
@@ -1060,6 +1092,8 @@ internal sealed class ChessBoard : Control
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public string? CheckedSquare { get; set; }
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public string? LastMove { get; set; }
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public bool Flipped { get; set; }
 
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -1086,14 +1120,21 @@ internal sealed class ChessBoard : Control
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
+        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
         int size = Math.Min(ClientSize.Width, ClientSize.Height) - 16;
         int cell = size / 8;
         int boardSize = cell * 8;
         int left = (ClientSize.Width - boardSize) / 2;
         int top = (ClientSize.Height - boardSize) / 2;
-        using Font pieceFont = new("Segoe UI Symbol", cell * 0.62f, FontStyle.Regular, GraphicsUnit.Pixel);
+        using SolidBrush frameBrush = new(Color.FromArgb(39, 49, 48));
+        e.Graphics.FillRectangle(frameBrush, new Rectangle(left - 5, top - 5, boardSize + 10, boardSize + 10));
+        using Font pieceFont = new("Segoe UI Symbol", cell * 0.73f, FontStyle.Regular, GraphicsUnit.Pixel);
         using Font coordinateFont = new("Segoe UI", Math.Max(8, cell * 0.13f), FontStyle.Bold, GraphicsUnit.Pixel);
         using StringFormat centered = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+        (string? from, string? to) = LastMove is { Length: >= 4 } move
+            ? (move[..2], move.Substring(2, 2))
+            : (null, null);
         for (int displayRank = 0; displayRank < 8; ++displayRank)
         {
             for (int displayFile = 0; displayFile < 8; ++displayFile)
@@ -1103,24 +1144,49 @@ internal sealed class ChessBoard : Control
                 string square = $"{(char)('a' + file)}{rank + 1}";
                 Rectangle rectangle = new(left + displayFile * cell, top + displayRank * cell, cell, cell);
                 bool light = (file + rank) % 2 != 0;
-                Color color = light ? Color.FromArgb(235, 220, 184) : Color.FromArgb(119, 149, 86);
+                Color color = light ? Color.FromArgb(242, 226, 190) : Color.FromArgb(126, 156, 91);
+                bool isLastMove = square == from || square == to;
+                if (isLastMove)
+                    color = light ? Color.FromArgb(246, 211, 102) : Color.FromArgb(210, 169, 57);
                 if (square == CheckedSquare)
-                    color = Color.FromArgb(218, 104, 91);
+                    color = Color.FromArgb(219, 106, 91);
                 else if (square == SelectedSquare)
-                    color = Color.FromArgb(246, 246, 105);
-                else if (TargetSquares.Contains(square))
-                    color = light ? Color.FromArgb(191, 205, 122) : Color.FromArgb(91, 170, 91);
+                    color = Color.FromArgb(255, 241, 122);
                 using SolidBrush background = new(color);
                 e.Graphics.FillRectangle(background, rectangle);
+                if (TargetSquares.Contains(square))
+                {
+                    bool occupied = pieces.ContainsKey(square);
+                    Color marker = occupied ? Color.FromArgb(85, 95, 73) : Color.FromArgb(72, 118, 77);
+                    using SolidBrush markerBrush = new(marker);
+                    if (occupied)
+                    {
+                        using Pen capturePen = new(Color.FromArgb(170, marker), Math.Max(2, cell * 0.045f));
+                        e.Graphics.DrawEllipse(capturePen, rectangle.X + cell * 0.14f, rectangle.Y + cell * 0.14f,
+                                               cell * 0.72f, cell * 0.72f);
+                    }
+                    else
+                    {
+                        float markerSize = Math.Max(8, cell * 0.18f);
+                        e.Graphics.FillEllipse(markerBrush,
+                                               rectangle.X + (cell - markerSize) / 2,
+                                               rectangle.Y + (cell - markerSize) / 2,
+                                               markerSize, markerSize);
+                    }
+                }
                 if (pieces.TryGetValue(square, out char piece))
                 {
                     bool whitePiece = char.IsUpper(piece);
-                    Color outlineColor = whitePiece ? Color.FromArgb(30, 41, 38) : Color.FromArgb(247, 241, 222);
-                    Color pieceColor = whitePiece ? Color.FromArgb(255, 253, 245) : Color.FromArgb(28, 30, 29);
+                    Color outlineColor = whitePiece ? Color.FromArgb(26, 36, 34) : Color.FromArgb(250, 242, 218);
+                    Color pieceColor = whitePiece ? Color.FromArgb(255, 255, 250) : Color.FromArgb(22, 27, 26);
+                    using SolidBrush shadow = new(Color.FromArgb(55, 0, 0, 0));
+                    e.Graphics.DrawString(Symbols[piece], pieceFont, shadow,
+                                          new Rectangle(rectangle.X + 2, rectangle.Y + 3, rectangle.Width, rectangle.Height), centered);
                     using SolidBrush outline = new(outlineColor);
-                    for (int offsetX = -1; offsetX <= 1; ++offsetX)
+                    int outlineWidth = Math.Max(2, (int)Math.Round(cell * 0.025f));
+                    for (int offsetX = -outlineWidth; offsetX <= outlineWidth; ++offsetX)
                     {
-                        for (int offsetY = -1; offsetY <= 1; ++offsetY)
+                        for (int offsetY = -outlineWidth; offsetY <= outlineWidth; ++offsetY)
                         {
                             if (offsetX == 0 && offsetY == 0)
                                 continue;
@@ -1134,17 +1200,30 @@ internal sealed class ChessBoard : Control
                 }
                 if (displayFile == 0)
                 {
-                    using SolidBrush brush = new(light ? Color.FromArgb(119, 149, 86) : Color.FromArgb(235, 220, 184));
+                    using SolidBrush brush = new(ContrastForCoordinate(color));
                     e.Graphics.DrawString((rank + 1).ToString(), coordinateFont, brush, rectangle.X + 3, rectangle.Y + 2);
                 }
                 if (displayRank == 7)
                 {
-                    using SolidBrush brush = new(light ? Color.FromArgb(119, 149, 86) : Color.FromArgb(235, 220, 184));
+                    using SolidBrush brush = new(ContrastForCoordinate(color));
                     e.Graphics.DrawString(((char)('a' + file)).ToString(), coordinateFont, brush, rectangle.Right - coordinateFont.Size - 3, rectangle.Bottom - coordinateFont.Height - 1);
+                }
+                if (isLastMove && square != CheckedSquare)
+                {
+                    using Pen lastMovePen = new(Color.FromArgb(185, 125, 30), Math.Max(1, cell * 0.025f));
+                    e.Graphics.DrawRectangle(lastMovePen, rectangle.X, rectangle.Y, rectangle.Width - 1, rectangle.Height - 1);
+                }
+                if (square == SelectedSquare)
+                {
+                    using Pen selectedPen = new(Color.FromArgb(42, 79, 70), Math.Max(2, cell * 0.04f));
+                    e.Graphics.DrawRectangle(selectedPen, rectangle.X + 2, rectangle.Y + 2, rectangle.Width - 5, rectangle.Height - 5);
                 }
             }
         }
     }
+
+    private static Color ContrastForCoordinate(Color square) =>
+        square.GetBrightness() > 0.55f ? Color.FromArgb(102, 72, 37) : Color.FromArgb(247, 239, 207);
 
     protected override void OnMouseClick(MouseEventArgs e)
     {
