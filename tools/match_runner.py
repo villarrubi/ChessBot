@@ -11,7 +11,7 @@ import random
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -246,6 +246,29 @@ def result_for_winner(winner: chess.Color | None) -> str:
     return "1-0" if winner == chess.WHITE else "0-1"
 
 
+def explore_opening(opening: Opening, engine: RunningEngine, args: argparse.Namespace,
+                    randomizer: random.Random) -> Opening:
+    """Create a seeded prefix from near-best moves, reused by both games of a pair."""
+    board = opening.initial_board()
+    moves = list(opening.moves)
+    for move in moves:
+        board.push_uci(move)
+    token = object()
+    for _ in range(args.exploration_plies):
+        if board.is_game_over(claim_draw=True):
+            break
+        lines = engine.process.analyse(board, chess.engine.Limit(depth=args.exploration_depth),
+                                       multipv=args.exploration_topk, game=token)
+        scored = [(line["score"].pov(board.turn).score(mate_score=100_000), line["pv"][0])
+                  for line in lines if line.get("pv") and "score" in line]
+        best = max(score for score, _ in scored)
+        move = randomizer.choice([move for score, move in scored
+                                  if score >= best - args.exploration_max_loss_cp])
+        moves.append(move.uci())
+        board.push(move)
+    return replace(opening, moves=moves)
+
+
 def play_game(first: RunningEngine, second: RunningEngine, opening: Opening, index: int,
               args: argparse.Namespace) -> tuple[chess.pgn.Game, dict[str, Any]]:
     swapped, a_color_name = choose_assignment(args.color_mode, index)
@@ -271,13 +294,15 @@ def play_game(first: RunningEngine, second: RunningEngine, opening: Opening, ind
     move_records, failure = [], None
     termination = "maximum plies"
     winner: chess.Color | None = None
+    game_token = object()
     while not board.is_game_over(claim_draw=True) and board.ply() < args.max_plies:
         side = board.turn
         running = white if side == chess.WHITE else black
         limit = search_limit(args, clocks)
         started = time.monotonic()
         try:
-            played = running.process.play(board, limit, info=chess.engine.INFO_ALL)
+            score_fen = board.fen()
+            played = running.process.play(board, limit, info=chess.engine.INFO_ALL, game=game_token)
             elapsed = time.monotonic() - started
             if played.move is None or played.move not in board.legal_moves:
                 raise chess.engine.EngineError("engine returned no legal move")
@@ -298,6 +323,7 @@ def play_game(first: RunningEngine, second: RunningEngine, opening: Opening, ind
                       "clock_ms": round(clocks[side] * 1000, 3) if args.initial_ms is not None else None,
                       "depth": played.info.get("depth"), "nodes": played.info.get("nodes"),
                       "score_cp": score_cp,
+                      "score_fen": score_fen,
                       "book": info_string if isinstance(info_string, str) and
                       info_string.startswith("book move ") else None}
             move_records.append(record)
@@ -355,8 +381,9 @@ def statistics(games: list[dict[str, Any]], sprt: tuple[float, float, float, flo
     else:
         samples = scores
     sample_rate = sum(samples) / len(samples)
-    variance = sum((sample - sample_rate) ** 2 for sample in samples) / max(1, len(samples) - 1)
-    margin = 1.96 * math.sqrt(variance / len(samples)) if len(samples) >= 2 else 1.0
+    # Bounded cluster means: unlike a normal interval this retains uncertainty
+    # even when every observed game is a win or a loss.
+    margin = math.sqrt(math.log(40) / (2 * len(samples)))
     def clamp_probability(value: float) -> float:
         return min(0.999, max(0.001, value))
 
@@ -371,9 +398,10 @@ def statistics(games: list[dict[str, Any]], sprt: tuple[float, float, float, flo
               "elo": round(elo(min(0.999, max(0.001, rate))), 2),
               "elo_confidence95": [round(elo(value), 2) for value in confidence],
               "independent_samples": len(samples),
-              "confidence_method": ("normal approximation over opening-clustered paired scores"
+              "elo_is_clipped": rate <= 0.001 or rate >= 0.999,
+              "confidence_method": ("Hoeffding bound over opening-clustered paired scores"
                                     if clustered else
-                                    "normal approximation over individual game scores")}
+                                    "Hoeffding bound over individual game scores")}
     if sprt:
         elo0, elo1, alpha, beta = sprt
         def probability(value: float) -> float:
@@ -434,6 +462,11 @@ def main() -> None:
     parser.add_argument("--opening-name")
     parser.add_argument("--shuffle", action="store_true")
     parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--exploration-plies", type=int, default=0)
+    parser.add_argument("--exploration-topk", type=int, default=3)
+    parser.add_argument("--exploration-depth", type=int, default=2)
+    parser.add_argument("--exploration-max-loss-cp", type=int, default=80)
+    parser.add_argument("--exploration-engine", choices=("a", "b"), default="a")
     parser.add_argument("--event", default="ChessBot engine match")
     parser.add_argument("--engine-log-level", choices=("DEBUG", "INFO", "WARNING"),
                         default="WARNING",
@@ -446,6 +479,9 @@ def main() -> None:
     args = parser.parse_args()
     if args.games < 1 or args.max_plies < 1 or args.timeout <= 0:
         parser.error("games, max-plies and timeout must be positive")
+    if (args.exploration_plies < 0 or not 1 <= args.exploration_topk <= 10 or
+            args.exploration_depth < 1 or args.exploration_max_loss_cp < 0):
+        parser.error("invalid exploration settings")
     if all(value is None for value in (args.depth, args.nodes, args.movetime_ms, args.initial_ms)):
         args.depth = 2
     if any(value is not None and value < 1 for value in
@@ -503,11 +539,19 @@ def main() -> None:
                         f"aperturas: {len(openings)}\n")
     progress_file.flush()
     games, records = [], []
+    randomizer = random.Random(args.seed)
+    explored = None
     started = time.monotonic()
     try:
         for index in range(args.games):
             opening_index = index // 2 if args.color_mode == "paired" else index
             opening = openings[opening_index % len(openings)]
+            if args.exploration_plies:
+                if args.color_mode != "paired" or index % 2 == 0:
+                    generator_engine = first if args.exploration_engine == "a" else second
+                    explored = explore_opening(opening, generator_engine, args, randomizer)
+                assert explored is not None
+                opening = explored
             game, record = play_game(first, second, opening, index, args)
             games.append(game)
             records.append(record)
@@ -553,6 +597,10 @@ def main() -> None:
                                "movetime_ms": args.movetime_ms, "initial_ms": args.initial_ms,
                                "increment_ms": args.increment_ms, "moves_to_go": args.moves_to_go,
                                "max_plies": args.max_plies, "failure_policy": args.failure_policy},
+                "exploration": {"plies": args.exploration_plies, "topk": args.exploration_topk,
+                                "depth": args.exploration_depth,
+                                "engine": args.exploration_engine,
+                                "max_loss_cp": args.exploration_max_loss_cp},
                 "statistics": statistics(records, sprt, args.color_mode == "paired"),
                 "games": records,
                 "artifacts": {"pgn": pgn_path.name, "log": log_path.name,

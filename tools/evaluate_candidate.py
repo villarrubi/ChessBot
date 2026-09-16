@@ -18,9 +18,10 @@ import chess.engine
 POSITIONS = (chess.STARTING_FEN,
              "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
              "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1")
-TACTICS = (("7k/8/6K1/8/8/8/5Q2/8 w - - 0 1", "f2f8", 2),
-           ("7k/8/4K3/8/8/8/3Q4/8 w - - 0 1", "e6f7", 4),
-           ("4k3/8/8/8/8/8/4q3/4KQ2 w - - 0 1", "f1e2", 2))
+TACTICS = (("7k/8/6K1/8/8/8/5Q2/8 w - - 0 1", ("f2f8",), 2),
+           ("7k/8/4K3/8/8/8/3Q4/8 w - - 0 1", ("e6f7",), 4),
+           # Both captures win the undefended queen; Kxe2 is also correct.
+           ("4k3/8/8/8/8/8/4q3/4KQ2 w - - 0 1", ("f1e2", "e1e2"), 2))
 
 
 def engine_options(kind: str, artifact: Path) -> dict[str, Any]:
@@ -45,7 +46,7 @@ def correctness(engine: Path, options: dict[str, Any]) -> dict[str, Any]:
             played = process.play(chess.Board(fen), chess.engine.Limit(depth=depth))
             actual = played.move.uci() if played.move else "0000"
             tactics.append({"fen": fen, "depth": depth, "expected": expected,
-                            "actual": actual, "pass": actual == expected})
+                            "actual": actual, "pass": actual in expected})
     finally:
         process.quit()
     return {"perft": perft, "tactics": tactics,
@@ -60,14 +61,15 @@ def benchmark(engine: Path, options: dict[str, Any], depth: int) -> dict[str, An
         process.configure(options)
         for fen in POSITIONS:
             started = time.perf_counter()
-            result = process.play(chess.Board(fen), chess.engine.Limit(depth=depth),
-                                  info=chess.engine.INFO_ALL)
+            result = process.play(chess.Board(fen), chess.engine.Limit(depth=depth, nodes=2_000_000),
+                                  info=chess.engine.INFO_ALL, game=object())
             duration = time.perf_counter() - started
             count = int(result.info.get("nodes", 0))
             elapsed += duration
             nodes += count
             rows.append({"fen": fen, "move": result.move.uci() if result.move else "0000",
-                         "nodes": count, "elapsed_ms": round(duration * 1000, 3)})
+                         "nodes": count, "elapsed_ms": round(duration * 1000, 3),
+                         "completed_depth": int(result.info.get("depth", 0)) >= depth})
     finally:
         process.quit()
     return {"depth": depth, "nodes": nodes, "elapsed_ms": round(elapsed * 1000, 3),
@@ -84,6 +86,12 @@ def validation_gate(report_path: Path | None) -> tuple[bool, dict[str, Any] | No
     metrics = report.get("metrics", {}).get("validation", {})
     required = ("loss", "brier", "wdl_ece")
     valid = all(key in metrics and math.isfinite(float(metrics[key])) for key in required)
+    initial = report.get("metrics", {}).get("initial_validation")
+    if initial:
+        quantized = report["metrics"].get("quantized_validation", {})
+        valid = (valid and metrics["loss"] <= initial["loss"] and
+                 math.isfinite(float(quantized.get("loss", float("nan")))) and
+                 quantized["loss"] <= metrics["loss"] + 0.02)
     return valid, report
 
 
@@ -105,6 +113,9 @@ def main() -> None:
     parser.add_argument("--benchmark-depth", type=int, default=4)
     parser.add_argument("--max-plies", type=int, default=160)
     parser.add_argument("--max-performance-regression", type=float, default=0.20)
+    parser.add_argument("--max-search-slowdown", type=float, default=3.0)
+    parser.add_argument("--exploration-plies", type=int, default=0)
+    parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--minimum-lower-score", type=float, default=0.5)
     parser.add_argument("--minimum-independent-samples", type=int, default=8)
     parser.add_argument("--promote-to", type=Path)
@@ -127,7 +138,10 @@ def main() -> None:
     candidate_benchmark = benchmark(engine, candidate_options, args.benchmark_depth)
     nps_ratio = candidate_benchmark["nps"] / max(reference_benchmark["nps"], 1)
     performance_ratio = 1 / max(nps_ratio, 1e-9)
-    performance_pass = nps_ratio >= 1 - args.max_performance_regression
+    latency_ratio = candidate_benchmark["elapsed_ms"] / max(reference_benchmark["elapsed_ms"], 1)
+    performance_pass = (nps_ratio >= 1 - args.max_performance_regression and
+                        latency_ratio <= args.max_search_slowdown and
+                        all(row["completed_depth"] for row in candidate_benchmark["positions"]))
     match_dir = args.output_dir / "match"
     command = [sys.executable, str(Path(__file__).with_name("match_runner.py")),
                "--engine-a", str(engine), "--engine-b", str(engine), "--name-a", "candidate",
@@ -135,7 +149,8 @@ def main() -> None:
                "--options-b", json.dumps(reference_options), "--games", str(args.games),
                "--depth", str(args.depth), "--max-plies", str(args.max_plies),
                "--color-mode", "paired", "--openings", str(args.openings.resolve(strict=True)),
-               "--output-dir", str(match_dir)]
+               "--output-dir", str(match_dir), "--exploration-plies", str(args.exploration_plies),
+               "--exploration-engine", "b", "--seed", str(args.seed)]
     if args.opening_ids:
         command.extend(["--opening-ids", args.opening_ids])
     subprocess.run(command, check=True)
@@ -159,12 +174,14 @@ def main() -> None:
     decision = {"schema_version": 2, "decision": "accept" if accepted else "reject",
                 "candidate_kind": args.candidate_kind, "reference_kind": args.reference_kind,
                 "gates": gates, "thresholds": {
-                    "maximum_performance_regression": args.max_performance_regression,
+                   "maximum_performance_regression": args.max_performance_regression,
+                    "maximum_search_slowdown": args.max_search_slowdown,
                     "minimum_lower_score": args.minimum_lower_score,
                     "minimum_independent_samples": args.minimum_independent_samples},
                 "correctness": rules, "benchmark": {"reference": reference_benchmark,
                     "candidate": candidate_benchmark, "relative_nps": nps_ratio,
                     "nps_slowdown_ratio": performance_ratio,
+                    "search_time_ratio": latency_ratio,
                     "candidate_artifact_bytes": candidate_copy.stat().st_size},
                 "match": {"metadata": str(match_dir / "metadata.json"),
                           "statistics": statistics}, "training_report": training,

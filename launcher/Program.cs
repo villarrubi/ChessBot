@@ -59,18 +59,6 @@ internal sealed class MainForm : Form
         BorderStyle = BorderStyle.FixedSingle,
         Font = new Font("Segoe UI", 10f, FontStyle.Bold)
     };
-    private readonly Label lastMoveSummary = new()
-    {
-        AutoSize = false,
-        Text = "Aún no hay movimientos",
-        TextAlign = ContentAlignment.MiddleLeft,
-        Padding = new Padding(10, 5, 10, 5),
-        Width = 270,
-        Height = 34,
-        BorderStyle = BorderStyle.FixedSingle,
-        BackColor = Color.FromArgb(250, 244, 220),
-        ForeColor = Color.FromArgb(102, 72, 37)
-    };
     private readonly ComboBox playerColor = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown thinkTime = new() { Minimum = 100, Maximum = 10000, Value = 750, Increment = 100 };
     private readonly RichTextBox log = new() { Dock = DockStyle.Fill, MinimumSize = new Size(100, 100), ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
@@ -79,16 +67,16 @@ internal sealed class MainForm : Form
     private readonly Button resignButton = new() { Text = "Rendirse", AutoSize = true, Enabled = false };
     private readonly TextBox dataset = new() { Dock = DockStyle.Fill };
     private readonly TextBox trainingOutput = new() { Dock = DockStyle.Fill };
-    private readonly TextBox version = new() { Text = "mi-nnue-v1", Dock = DockStyle.Fill };
-    private readonly NumericUpDown hidden = new() { Minimum = 1, Maximum = 64, Value = 32 };
-    private readonly NumericUpDown epochs = new() { Minimum = 1, Maximum = 10000, Value = 20 };
+    private readonly TextBox version = new() { Text = "SegundoModelo-v2", Dock = DockStyle.Fill };
+    private readonly NumericUpDown hidden = new() { Minimum = 2, Maximum = 64, Value = 32 };
+    private readonly NumericUpDown epochs = new() { Minimum = 1, Maximum = 10000, Value = 60 };
     private readonly ComboBox generationMode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 340 };
     private readonly TextBox opponentEngine = new() { Dock = DockStyle.Fill, Enabled = false };
-    private readonly NumericUpDown selfplayGames = new() { Minimum = 20, Maximum = 10000, Value = 100, Increment = 2 };
-    private readonly NumericUpDown evaluationGames = new() { Minimum = 2, Maximum = 10000, Value = 20, Increment = 2 };
+    private readonly NumericUpDown selfplayGames = new() { Minimum = 20, Maximum = 10000, Value = 1000, Increment = 2 };
+    private readonly NumericUpDown evaluationGames = new() { Minimum = 2, Maximum = 10000, Value = 100, Increment = 2 };
     private readonly NumericUpDown searchDepth = new() { Minimum = 1, Maximum = 12, Value = 3 };
-    private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 160, Increment = 10 };
-    private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 60 };
+    private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 240, Increment = 10 };
+    private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 300 };
     private readonly ComboBox trainingTarget = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 290 };
     private readonly TextBox stockfishEngine = new() { Dock = DockStyle.Fill, Width = 320 };
     private readonly NumericUpDown eloGames = new() { Minimum = 2, Maximum = 1000, Value = 16, Increment = 2 };
@@ -129,24 +117,24 @@ internal sealed class MainForm : Form
 
         dataset.Text = Path.Combine(root, "build", "phase8-dataset.csv");
         trainingOutput.Text = NewOutput("entrenamiento");
-        cycleConfig.Text = Path.Combine(root, "data", "training", "phase10-config-v1.json");
+        cycleConfig.Text = Path.Combine(root, "data", "training", "learning-v2.json");
         cycleOutput.Text = NewOutput("ciclo");
         playerColor.Items.AddRange(["Blancas", "Negras"]);
         playerColor.SelectedIndex = 0;
         generationMode.Items.AddRange(["Autojuego: ChessBot contra sí mismo", "Partidas contra otro motor UCI"]);
         generationMode.SelectedIndex = 0;
         generationMode.SelectedIndexChanged += (_, _) => opponentEngine.Enabled = generationMode.SelectedIndex == 1;
-        trainingTarget.Items.AddRange(["Solo resultado de las partidas", "Mixto: resultado y evaluación manual", "Evaluación de búsqueda"]);
-        trainingTarget.SelectedIndex = 0;
+        trainingTarget.Items.AddRange(["Solo resultado de las partidas", "Mixto: resultado y evaluación", "Evaluación de búsqueda"]);
+        trainingTarget.SelectedIndex = 1;
         PopulateOpenings();
         tips.SetToolTip(dataset, "Tabla de posiciones usada por el entrenamiento directo. El ciclo completo la crea automáticamente con sus partidas nuevas.");
         tips.SetToolTip(hidden, "Tamaño de la capa oculta. 16 o 32 es una buena base; 64 necesita más partidas y reduce la velocidad del motor.");
-        tips.SetToolTip(epochs, "Número de pasadas sobre el dataset. Más épocas no compensan pocos datos y pueden sobreajustar.");
+        tips.SetToolTip(epochs, "Máximo de pasadas. Se conserva la mejor época de validación y se detiene si deja de mejorar.");
         tips.SetToolTip(selfplayGames, "Partidas nuevas que generarán los datos de aprendizaje. Se ejecutan por parejas con colores invertidos y se redondean para cubrir cada apertura.");
         tips.SetToolTip(evaluationGames, "Partidas independientes para decidir si la red nueva es mejor que la referencia. Se ejecutan por parejas y se redondean para cubrir cada apertura.");
         tips.SetToolTip(searchDepth, "Profundidad usada para cada jugada. Una profundidad mayor mejora las partidas, pero multiplica el tiempo necesario.");
         tips.SetToolTip(maxPlies, "Límite de medias jugadas por partida; 160 plies equivalen a 80 movimientos completos.");
-        tips.SetToolTip(trainingTarget, "Resultado aprende solo de victoria/tablas/derrota. Mixto añade la evaluación manual y converge con menos partidas.");
+        tips.SetToolTip(trainingTarget, "Mixto combina resultado y evaluación de búsqueda; usa la evaluación manual si no hay etiqueta de búsqueda.");
         tips.SetToolTip(openingSelection, "Marca las aperturas que se usarán en las partidas de aprendizaje y evaluación. Todas vienen marcadas al inicio.");
         tips.SetToolTip(customOpening, "Opcional: añade una línea propia. Ejemplo: Gambito de Rey | e4 e5 f4. Usa SAN o UCI separados por espacios.");
         tips.SetToolTip(stockfishEngine, "Ejecutable UCI nativo de Stockfish para medir la fuerza aproximada de ChessBot.");
@@ -249,9 +237,6 @@ internal sealed class MainForm : Form
         side.Controls.Add(resignButton);
         side.Controls.Add(Spacer());
         side.Controls.Add(gameStatus);
-        side.Controls.Add(new Label { Text = "Último movimiento", AutoSize = true, Font = new Font(Font, FontStyle.Bold), Margin = new Padding(3, 18, 3, 2) });
-        side.Controls.Add(lastMoveSummary);
-        side.Controls.Add(new Label { Text = "Las casillas doradas marcan el movimiento más reciente. Los puntos verdes muestran destinos legales.", MaximumSize = new Size(270, 0), AutoSize = true, ForeColor = Color.FromArgb(91, 102, 99), Margin = new Padding(3, 0, 3, 3) });
         side.Controls.Add(new Label { Text = "Selecciona una pieza y después su casilla de destino. Las promociones se realizan a dama.", MaximumSize = new Size(270, 0), AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(3, 14, 3, 3) });
         layout.Controls.Add(side, 1, 0);
         page.Controls.Add(layout);
@@ -345,9 +330,11 @@ internal sealed class MainForm : Form
         build.Click += async (_, _) => await BuildEngineAsync();
         Button results = new() { Text = "Abrir resultados", AutoSize = true };
         results.Click += (_, _) => OpenFolder(Path.Combine(root, "build"));
+        Button trainingHistory = new() { Text = "Historial de entrenamientos", AutoSize = true };
+        trainingHistory.Click += (_, _) => OpenTrainingHistory();
         Button project = new() { Text = "Abrir proyecto", AutoSize = true };
         project.Click += (_, _) => OpenFolder(root);
-        buttons.Controls.AddRange([benchmark, build, results, project]);
+        buttons.Controls.AddRange([benchmark, build, results, trainingHistory, project]);
         FlowLayoutPanel eloControls = new()
         {
             AutoSize = true,
@@ -381,6 +368,8 @@ internal sealed class MainForm : Form
             "Configura y compila el motor C++ en modo Release. Úsalo después de cambiar el código del motor.\n\n" +
             "ABRIR RESULTADOS\n" +
             "Abre la carpeta build, donde se guardan datasets, redes, partidas, logs y ciclos de aprendizaje.\n\n" +
+            "HISTORIAL DE ENTRENAMIENTOS\n" +
+            "Abre el registro durable de todas las ejecuciones, incluidas las que quedaron interrumpidas por un apagado o crash.\n\n" +
             "ABRIR PROYECTO\n" +
             "Abre la carpeta raíz del proyecto para editar el código o revisar la configuración.\n\n" +
             "Ejecutable UCI actual:\n" + engine
@@ -399,7 +388,6 @@ internal sealed class MainForm : Form
         currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         board.Position = currentFen;
         board.LastMove = null;
-        lastMoveSummary.Text = "Aún no hay movimientos";
         board.SelectedSquare = null;
         board.CheckedSquare = null;
         board.Flipped = playerColor.SelectedIndex == 1;
@@ -528,9 +516,6 @@ internal sealed class MainForm : Form
             board.CheckedSquare = inCheck ? FindKingSquare(currentFen) : null;
             board.Position = currentFen;
             board.LastMove = moves.LastOrDefault();
-            lastMoveSummary.Text = board.LastMove is { Length: >= 4 } lastMove
-                ? $"{lastMove[..2]}  →  {lastMove.Substring(2, 2)}"
-                : "Aún no hay movimientos";
             board.Invalidate();
             if (status == "ongoing")
             {
@@ -620,7 +605,8 @@ internal sealed class MainForm : Form
         await RunTaskAsync(python,
             ["tools/train_nnue.py", "--dataset", dataset.Text, "--output-dir", trainingOutput.Text,
              "--version", version.Text.Trim(), "--hidden", hidden.Value.ToString(), "--epochs", epochs.Value.ToString(),
-             "--target", TargetValue(), "--teacher-weight", "0.25", "--seed", "7"], "Entrenamiento NNUE");
+             "--target", TargetValue(), "--teacher-weight", "1.0", "--learning-rate", "0.0003",
+             "--seed", "7"], "Entrenamiento NNUE");
     }
 
     private async Task RunCycleAsync()
@@ -646,9 +632,27 @@ internal sealed class MainForm : Form
             MessageBox.Show("No se pudo preparar la configuración: " + exception.Message, "Ciclo de aprendizaje", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
-        await RunTaskAsync(python,
+        bool completed = await RunTaskAsync(python,
             ["tools/learning_cycle.py", "--config", generatedConfig, "--engine", engine, "--output-dir", cycleOutput.Text],
-            "Ciclo completo");
+            "Ciclo completo", false);
+        string decisionPath = Path.Combine(cycleOutput.Text, "evaluation", "decision.json");
+        if (completed && File.Exists(decisionPath))
+        {
+            JsonObject decision = JsonNode.Parse(File.ReadAllText(decisionPath))!.AsObject();
+            bool accepted = decision["decision"]?.GetValue<string>() == "accept";
+            bool promoted = decision["artifacts"]?["promoted_to"] is not null;
+            string message = accepted
+                ? (promoted ? "Red ACEPTADA y guardada como referencia activa." : "Red ACEPTADA; no se configuró promoción.")
+                : "Red RECHAZADA. La referencia activa se conserva.\nLa candidata y sus informes siguen guardados.";
+            AppendLog(message + "\nInforme: " + decisionPath + "\n");
+            MessageBox.Show(message + "\n\nInforme: " + decisionPath, "Resultado del ciclo",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        else
+        {
+            MessageBox.Show("El ciclo no terminó correctamente. Revisa el registro.", "Resultado del ciclo",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
     }
 
     private async Task RunEloLadderAsync()
@@ -762,7 +766,9 @@ internal sealed class MainForm : Form
         else
             evaluation.Remove("opening_ids");
         evaluation["minimum_lower_score"] = 0.5;
-        evaluation["minimum_independent_samples"] = Math.Max(4, adjustedEvaluation / 2);
+        // Repeated games from the same opening do not create independent samples.
+        // Count distinct generated prefixes, not merely the number of game pairs.
+        evaluation["minimum_independent_samples"] = 16;
 
         string configDirectory = Path.Combine(root, "build", "launcher-configs");
         Directory.CreateDirectory(configDirectory);
@@ -965,6 +971,18 @@ internal sealed class MainForm : Form
     private static string UniqueOutput(string path) => Directory.Exists(path) || File.Exists(path) ? path + "-" + DateTime.Now.ToString("HHmmss") : path;
     private string StatusText() => $"Proyecto: {root}\nMotor: {(File.Exists(engine) ? "listo" : "pendiente de compilar")}\nPython de entrenamiento: {(File.Exists(python) ? "listo" : "no instalado")}";
 
+    private void OpenTrainingHistory()
+    {
+        string path = Path.Combine(root, "build", "training-history.jsonl");
+        if (!File.Exists(path))
+        {
+            MessageBox.Show("Todavía no hay ejecuciones registradas.", "Historial de entrenamientos",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
+    }
+
     private void SetGameStatus(string text, bool warning = false, bool finished = false)
     {
         gameStatus.Text = text;
@@ -1069,12 +1087,14 @@ internal sealed class ChessBoard : Control
 {
     private static readonly Dictionary<char, string> Symbols = new()
     {
-        ['K'] = "♔",
-        ['Q'] = "♕",
-        ['R'] = "♖",
-        ['B'] = "♗",
-        ['N'] = "♘",
-        ['P'] = "♙",
+        // Usamos los glifos BLACK CHESS para ambos bandos: a diferencia de
+        // WHITE CHESS, estos tienen una silueta sólida que sí admite relleno.
+        ['K'] = "♚",
+        ['Q'] = "♛",
+        ['R'] = "♜",
+        ['B'] = "♝",
+        ['N'] = "♞",
+        ['P'] = "♟",
         ['k'] = "♚",
         ['q'] = "♛",
         ['r'] = "♜",
@@ -1129,7 +1149,7 @@ internal sealed class ChessBoard : Control
         int top = (ClientSize.Height - boardSize) / 2;
         using SolidBrush frameBrush = new(Color.FromArgb(39, 49, 48));
         e.Graphics.FillRectangle(frameBrush, new Rectangle(left - 5, top - 5, boardSize + 10, boardSize + 10));
-        using Font pieceFont = new("Segoe UI Symbol", cell * 0.73f, FontStyle.Regular, GraphicsUnit.Pixel);
+        using Font pieceFont = new("Segoe UI Symbol", cell * 0.68f, FontStyle.Regular, GraphicsUnit.Pixel);
         using Font coordinateFont = new("Segoe UI", Math.Max(8, cell * 0.13f), FontStyle.Bold, GraphicsUnit.Pixel);
         using StringFormat centered = new() { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
         (string? from, string? to) = LastMove is { Length: >= 4 } move
@@ -1177,23 +1197,19 @@ internal sealed class ChessBoard : Control
                 if (pieces.TryGetValue(square, out char piece))
                 {
                     bool whitePiece = char.IsUpper(piece);
-                    Color outlineColor = whitePiece ? Color.FromArgb(26, 36, 34) : Color.FromArgb(250, 242, 218);
-                    Color pieceColor = whitePiece ? Color.FromArgb(255, 255, 250) : Color.FromArgb(22, 27, 26);
-                    using SolidBrush shadow = new(Color.FromArgb(55, 0, 0, 0));
+                    Color outlineColor = whitePiece ? Color.FromArgb(38, 48, 46) : Color.FromArgb(250, 248, 242);
+                    Color pieceColor = whitePiece ? Color.FromArgb(255, 255, 250) : Color.FromArgb(25, 29, 28);
+                    using SolidBrush shadow = new(Color.FromArgb(30, 0, 0, 0));
                     e.Graphics.DrawString(Symbols[piece], pieceFont, shadow,
-                                          new Rectangle(rectangle.X + 2, rectangle.Y + 3, rectangle.Width, rectangle.Height), centered);
+                                          new Rectangle(rectangle.X + 1, rectangle.Y + 1, rectangle.Width, rectangle.Height), centered);
                     using SolidBrush outline = new(outlineColor);
-                    int outlineWidth = Math.Max(2, (int)Math.Round(cell * 0.025f));
-                    for (int offsetX = -outlineWidth; offsetX <= outlineWidth; ++offsetX)
+                    int outlineWidth = Math.Max(1, (int)Math.Round(cell * 0.012f));
+                    foreach ((int offsetX, int offsetY) in new[]
+                             { (-outlineWidth, 0), (outlineWidth, 0), (0, -outlineWidth), (0, outlineWidth) })
                     {
-                        for (int offsetY = -outlineWidth; offsetY <= outlineWidth; ++offsetY)
-                        {
-                            if (offsetX == 0 && offsetY == 0)
-                                continue;
-                            Rectangle outlineRect = new(rectangle.X + offsetX, rectangle.Y + offsetY,
-                                                        rectangle.Width, rectangle.Height);
-                            e.Graphics.DrawString(Symbols[piece], pieceFont, outline, outlineRect, centered);
-                        }
+                        Rectangle outlineRect = new(rectangle.X + offsetX, rectangle.Y + offsetY,
+                                                    rectangle.Width, rectangle.Height);
+                        e.Graphics.DrawString(Symbols[piece], pieceFont, outline, outlineRect, centered);
                     }
                     using SolidBrush foreground = new(pieceColor);
                     e.Graphics.DrawString(Symbols[piece], pieceFont, foreground, rectangle, centered);

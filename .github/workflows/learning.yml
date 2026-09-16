@@ -24,7 +24,9 @@ jobs:
       - name: Run immutable learning cycle
         run: python tools/learning_cycle.py --config "${{ inputs.config }}" --engine build/chessbot --output-dir build/learning-cycle
       - name: Test learning-cycle safeguards
-        run: python tools/test_learning_cycle.py --engine build/chessbot
+        run: |
+          python tools/test_training_regressions.py
+          python tools/test_learning_cycle.py --engine build/chessbot
       - uses: actions/upload-artifact@v4
         if: always()
         with:

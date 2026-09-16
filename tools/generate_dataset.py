@@ -81,7 +81,8 @@ def metadata_scores(paths: Iterable[Path]) -> dict[tuple[str, int, int], tuple[i
             round_number = int(game.get("round", 0))
             for move in game.get("moves", []):
                 perspective = move.get("side", "white" if int(move["ply"]) % 2 else "black")
-                scores[(str(pgn), round_number, int(move["ply"]))] = (move.get("score_cp"),
+                # UCI scores describe the root BEFORE the recorded move (including legacy logs).
+                scores[(str(pgn), round_number, int(move["ply"]) - 1)] = (move.get("score_cp"),
                                                                       perspective)
     return scores
 
@@ -104,20 +105,23 @@ def read_games(paths: Iterable[Path],
                 game_id = f"{absolute}#{index}"
                 origin = game.headers.get("Source", game.headers.get("Event", path.stem))
                 board = game.board()
-                selected = 0
+                eligible: list[Sample] = []
                 for relative_ply, move in enumerate(game.mainline_moves(), start=1):
                     board.push(move)
                     ply = board.ply()
-                    if relative_ply <= skip_plies or (relative_ply - skip_plies - 1) % sample_every:
+                    skip = max(skip_plies, int(game.headers.get("ReleasePly", "0")))
+                    if relative_ply <= skip or (relative_ply - skip - 1) % sample_every:
                         continue
                     if board.is_game_over(claim_draw=True):
                         continue
                     score, perspective = scores.get((absolute, index, ply), (None, None))
-                    samples.append(Sample(game_id, absolute, origin, outcome, ply, board.fen(),
+                    eligible.append(Sample(game_id, absolute, origin, outcome, ply, board.fen(),
                                           score, perspective))
-                    selected += 1
-                    if max_per_game and selected >= max_per_game:
-                        break
+                # Cover middlegames and endings, rather than retaining only early positions.
+                if max_per_game and len(eligible) > max_per_game:
+                    eligible = [eligible[i * len(eligible) // max_per_game]
+                                for i in range(max_per_game)]
+                samples.extend(eligible)
     return samples
 
 

@@ -70,6 +70,15 @@ características binarias: color × tipo de pieza × casilla. La capa oculta ReL
 neuronas y produce una puntuación en centipeones orientada a blancas; C++ cambia el signo según el
 turno. La etiqueta puede ser resultado, puntuación de búsqueda o una mezcla documentada de ambas.
 
+El entrenador inicia por defecto con valores de material (peón 100, caballo 320, alfil 330,
+torre 500, dama 900), representados por dos neuronas; todos los pesos siguen siendo entrenables.
+Esto requiere al menos dos neuronas. `--initialization random` permite experimentar con una sola.
+La salida interna se escala a centipeones por un factor 400 y ese factor se incorpora a los pesos
+exportados: el formato C++ sigue siendo `CHESSBOT_NNUE 1`. Se comprueba que no haya pesos recortados.
+Cada época mide validación; se exporta la mejor, incluida la inicial si ninguna mejora.
+`--patience 10` detiene tras diez épocas sin mejora. El checkpoint incluye `output_scale` y
+`selected_epoch`, pero no permite reanudar el optimizador automáticamente.
+
 El número máximo de neuronas no es automáticamente el mejor. Una red de 64 neuronas tarda más en
 evaluarse, reduce los nodos por segundo y necesita más posiciones distintas para no memorizar el
 dataset. `16` sirve para pruebas rápidas y `32` es el punto de partida recomendado; `64` tiene
@@ -127,8 +136,11 @@ El lanzador vacía `source_pgns`, por lo que cada ciclo iniciado desde la interf
 nuevas. Esas partidas se convierten necesariamente en un dataset temporal: una tabla de posiciones,
 turno y resultado que PyTorch puede leer. No es una colección externa que ChessBot memoriza; es el
 registro estructurado de lo que acaba de jugar. Con objetivo `result`, la red aprende únicamente de
-victoria, tablas o derrota. `mixed` añade como profesor la evaluación manual y suele necesitar menos
-partidas; `search` usa las puntuaciones calculadas durante las partidas.
+victoria, tablas o derrota. `mixed` añade como profesor la evaluación de búsqueda cuando existe y
+la evaluación manual como alternativa; `search` usa solo las puntuaciones de búsqueda disponibles.
+Las puntuaciones UCI corresponden a la posición anterior a la jugada registrada. El generador
+respeta esa correspondencia también al importar metadatos antiguos. Muestrea toda la partida,
+incluidos sus finales, y omite el prefijo forzado.
 
 La profundidad se aplica a cada jugada tanto en la generación como en la evaluación del candidato.
 Subirla produce partidas de mayor calidad, pero el coste crece con rapidez. Profundidad `3` es una
@@ -165,11 +177,60 @@ pasan corrección/táctica, validación, rendimiento y fuerza; antes de reemplaz
 una copia en el directorio del experimento. Un rechazo conserva el candidato y deja intacta la
 referencia activa.
 
+## Historial y diagnósticos
+
+Todas las ejecuciones iniciadas por `train_nnue.py` o `learning_cycle.py` escriben eventos durables
+en `build/training-history.jsonl`: inicio, fase/época, finalización correcta, error o interrupción.
+Cada evento incluye fecha, proceso, máquina, comando y carpeta de salida. La escritura se fuerza a
+disco para conservar el último estado posible.
+
+Para consultar el resumen desde PowerShell:
+
+```powershell
+python tools/training_history.py
+```
+
+El comando comprueba también ejecuciones que quedaron abiertas. Si el proceso ya no existe, las
+marca como `INTERRUPTED` (apagado, reinicio, crash o terminación forzada). Si el PC se apaga justo
+antes de escribir un evento, puede quedar una última línea incompleta; se ignora sin invalidar el
+resto del historial. El botón **Historial de entrenamientos** del lanzador abre el mismo archivo.
+
+Para una ejecución completa, `build/<ciclo>/manifest.json` es el informe final; para entrenamiento
+directo, `build/<entrenamiento>/training.json` confirma que se exportaron `candidate.nnue` y
+`checkpoint.pt`. La ausencia de esos archivos no basta por sí sola para diagnosticar un crash:
+el historial central es la fuente de estado y permite localizar la última fase conocida.
+
+## Configuración corregida de septiembre de 2026
+
+El lanzador utiliza `data/training/learning-v2.json`: 32 neuronas, hasta 60 épocas, objetivo mixto,
+tasa de aprendizaje 0,0003, peso del profesor 1,0 y hasta 64 posiciones distribuidas por partida.
+El límite de 500 muestras por bucket se desactiva para evitar descartar miles de posiciones.
+Las cifras visibles de 1000/100 partidas se redondean a 1008/108 para cubrir las 18 aperturas.
+
+La generación añade seis medias jugadas elegidas entre las tres mejores alternativas a profundidad
+2, a un máximo de 80 cp de la mejor. La semilla hace reproducibles las variantes y ambos colores
+reciben el mismo prefijo en cada pareja. Las partidas se reinician con `ucinewgame` para evitar
+arrastrar la tabla de transposición entre partidas. La evaluación emplea variantes generadas por
+la referencia con otra semilla y no comparte sus partidas con el dataset.
+
+La puerta de fuerza exige al menos 16 posiciones iniciales independientes y un límite inferior de
+confianza mayor que 50 %. Repetir una apertura no aumenta el número de muestras independientes.
+El intervalo conservador de Hoeffding evita la falsa incertidumbre cero de una derrota total;
+el Elo extremo mostrado sigue recortado numéricamente y se marca `elo_is_clipped`.
+La puerta de rendimiento comprueba NPS, finalización de profundidad y un coste total no superior
+a tres veces la referencia; el benchmark tiene un límite de dos millones de nodos por posición.
+La prueba de captura de dama acepta tanto `Qxe2` como `Kxe2`, ambas correctas en esa posición.
+El popup distingue ahora una red aceptada de una rechazada.
+
+La configuración es un punto de partida comprobable, no una garantía de ganar Elo. La validación
+sigue separándose por partidas, no por familias enteras de aperturas. La evaluación a profundidad
+fija y su suite corta tampoco sustituyen una campaña amplia a igualdad de tiempo.
+
 El CI rápido compila y comprueba reglas, UCI, análisis, NNUE y formato sin instalar PyTorch. El
 workflow manual `learning.yml` instala el extra `training`, ejecuta la campaña y publica todos sus
-artefactos durante 30 días. Para diagnosticar un fallo, se consulta `manifest.json`, después el
-registro del comando de la etapa fallida y finalmente `engine.log` si el problema ocurrió durante
-una partida.
+artefactos durante 30 días. Para diagnosticar un fallo, se consulta primero
+`training-history.jsonl`, después `manifest.json`, el registro del comando de la etapa fallida y
+finalmente `engine.log` si el problema ocurrió durante una partida.
 
 La campaña `nnue-phase9-v1` perdió 0–16 y quedó rechazada. La ejecución registrada de fase 10 creó
 1.406 muestras, entrenó una red `768×16×1`, pasó PERFT y táctica, pero logró solo el 43,2 % del NPS

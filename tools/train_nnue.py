@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import copy
 import hashlib
 import json
 import math
@@ -11,6 +12,7 @@ import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+import sys
 
 import chess
 import numpy as np
@@ -18,19 +20,37 @@ import torch
 from torch import nn
 
 from nnue_format import INPUT_SIZE, QuantizedNetwork, write_network
+from training_log import DEFAULT_LOG_PATH, TrainingLogger, recover_stale_runs
 
 
 WDL_SLOPE = math.log(10) / 400
 
 
 class SparseNet(nn.Module):
-    def __init__(self, hidden: int):
+    def __init__(self, hidden: int, initialization: str = "material"):
         super().__init__()
+        self.output_scale = 400.0
         self.hidden = nn.Linear(INPUT_SIZE, hidden)
         self.output = nn.Linear(hidden, 1)
+        if initialization == "material":
+            if hidden < 2:
+                raise ValueError("material initialization requires at least two hidden neurons")
+            # ReLU(x) - ReLU(-x) implements a material baseline exactly.
+            # Remaining neurons learn positional corrections; all weights are trainable.
+            values = torch.tensor([100, 320, 330, 500, 900, 0], dtype=torch.float32)
+            material = torch.cat((values.repeat_interleave(64),
+                                  -values.repeat_interleave(64))) / self.output_scale
+            with torch.no_grad():
+                self.hidden.weight[0].copy_(material)
+                self.hidden.weight[1].copy_(-material)
+                self.hidden.bias[:2].zero_()
+                self.output.weight.zero_()
+                self.output.weight[0, 0] = 1
+                self.output.weight[0, 1] = -1
+                self.output.bias.zero_()
 
     def forward(self, positions: torch.Tensor) -> torch.Tensor:
-        return self.output(torch.relu(self.hidden(positions))).squeeze(1)
+        return self.output(torch.relu(self.hidden(positions))).squeeze(1) * self.output_scale
 
 
 def load_rows(path: Path) -> list[dict[str, Any]]:
@@ -155,13 +175,13 @@ def quantized_metrics(network: QuantizedNetwork, rows: list[dict[str, Any]], tar
 
 
 def quantize(model: SparseNet, version: str) -> tuple[QuantizedNetwork, dict[str, int]]:
-    input_quant = output_quant = 256
+    input_quant, output_quant = 256, 16
     first_weight = torch.round(model.hidden.weight.detach() * input_quant).clamp(-32768, 32767)
     first_bias = torch.round(model.hidden.bias.detach() * input_quant).clamp(-100_000_000,
                                                                             100_000_000)
-    second_weight = torch.round(model.output.weight.detach().squeeze(0) *
+    second_weight = torch.round(model.output.weight.detach().squeeze(0) * model.output_scale *
                                 output_quant).clamp(-32768, 32767)
-    second_bias = torch.round(model.output.bias.detach().squeeze(0) * input_quant *
+    second_bias = torch.round(model.output.bias.detach().squeeze(0) * model.output_scale * input_quant *
                               output_quant).clamp(-10_000_000_000, 10_000_000_000)
     # C++ stores weights feature-major for sparse accumulator updates.
     weights = first_weight.t().contiguous().view(-1).to(torch.int16).tolist()
@@ -170,7 +190,7 @@ def quantize(model: SparseNet, version: str) -> tuple[QuantizedNetwork, dict[str
                                second_weight.to(torch.int16).tolist())
     clipped = {"input_weights": int(torch.sum(torch.abs(model.hidden.weight.detach() *
                                                           input_quant) > 32767)),
-               "output_weights": int(torch.sum(torch.abs(model.output.weight.detach() *
+               "output_weights": int(torch.sum(torch.abs(model.output.weight.detach() * model.output_scale *
                                                            output_quant) > 32767))}
     return network, clipped
 
@@ -191,7 +211,7 @@ def git_commit(root: Path) -> str | None:
         return None
 
 
-def main() -> None:
+def _run_training(logger: TrainingLogger) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -199,17 +219,27 @@ def main() -> None:
     parser.add_argument("--hidden", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=256)
-    parser.add_argument("--learning-rate", type=float, default=0.002)
+    parser.add_argument("--learning-rate", type=float, default=0.0003)
     parser.add_argument("--weight-decay", type=float, default=1e-5)
     parser.add_argument("--target", choices=("result", "search", "mixed"), default="mixed")
     parser.add_argument("--teacher-weight", type=float, default=0.25)
     parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--initialization", choices=("material", "random"), default="material")
+    parser.add_argument("--patience", type=int, default=10,
+                        help="stop after this many epochs without validation improvement; 0 disables")
     parser.add_argument("--shard-dir", type=Path,
                         help="optionally cache encoded arrays as compressed NPZ shards")
     parser.add_argument("--shard-size", type=int, default=100_000)
+    parser.add_argument("--log-file", type=Path, default=DEFAULT_LOG_PATH,
+                        help="durable JSONL history file")
     args = parser.parse_args()
     if not 1 <= args.hidden <= 64 or args.epochs < 1 or args.batch_size < 1:
         parser.error("hidden must be 1..64 and epoch/batch counts must be positive")
+    if args.initialization == "material" and args.hidden < 2:
+        parser.error("material initialization requires hidden >= 2")
+    if args.patience < 0 or args.learning_rate <= 0 or args.teacher_weight < 0:
+        parser.error("invalid optimizer parameters")
+    args.output_dir.mkdir(parents=True, exist_ok=True)
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -222,6 +252,8 @@ def main() -> None:
         parser.error("dataset needs non-empty train and validation splits")
     train = tensors(train_rows)
     validation = tensors(validation_rows)
+    logger.progress("prepare", {"rows": len(rows), "train": len(train_rows),
+                                 "validation": len(validation_rows)})
     if args.shard_dir:
         args.shard_dir.mkdir(parents=True, exist_ok=True)
         for split, data in (("train", train), ("validation", validation)):
@@ -231,11 +263,15 @@ def main() -> None:
                                     outcomes=data[1][index:index + args.shard_size].numpy(),
                                     teachers=data[2][index:index + args.shard_size].numpy(),
                                     searched=data[3][index:index + args.shard_size].numpy())
-    model = SparseNet(args.hidden)
+    model = SparseNet(args.hidden, args.initialization)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate,
                                   weight_decay=args.weight_decay)
     generator = torch.Generator().manual_seed(args.seed)
     history = []
+    initial_validation = metrics(model, validation, args.target, args.teacher_weight)
+    best_loss = initial_validation["loss"]
+    best_state = copy.deepcopy(model.state_dict())
+    best_epoch = 0
     for epoch in range(args.epochs):
         model.train()
         permutation = torch.randperm(len(train[0]), generator=generator)
@@ -249,15 +285,31 @@ def main() -> None:
             loss.backward()
             optimizer.step()
             epoch_loss += float(loss.detach()) * len(indices)
-        history.append({"epoch": epoch + 1, "train_loss": epoch_loss / len(permutation)})
+        validation_loss = metrics(model, validation, args.target, args.teacher_weight)["loss"]
+        history.append({"epoch": epoch + 1, "train_loss": epoch_loss / len(permutation),
+                        "validation_loss": validation_loss})
+        if validation_loss < best_loss:
+            best_loss, best_epoch = validation_loss, epoch + 1
+            best_state = copy.deepcopy(model.state_dict())
+        print(f"[epoch {epoch + 1}/{args.epochs}] train={history[-1]['train_loss']:.5f} "
+              f"validation={validation_loss:.5f} best={best_epoch}", flush=True)
+        logger.progress("training", {"epoch": epoch + 1, "epochs": args.epochs,
+                                      "train_loss": history[-1]["train_loss"],
+                                      "validation_loss": validation_loss,
+                                      "best_epoch": best_epoch})
+        if args.patience and epoch + 1 - best_epoch >= args.patience:
+            break
+    model.load_state_dict(best_state)
     version = args.version or datetime.now(UTC).strftime("nnue-%Y%m%dT%H%M%SZ")
-    args.output_dir.mkdir(parents=True, exist_ok=True)
     network, clipped = quantize(model, version)
+    if any(clipped.values()):
+        raise ValueError(f"quantization clipped weights: {clipped}")
     network_path = args.output_dir / "candidate.nnue"
     checkpoint_path = args.output_dir / "checkpoint.pt"
     write_network(network_path, network)
     torch.save({"version": version, "architecture": f"sparse_768x{args.hidden}_relu_1",
-                "state_dict": model.state_dict()}, checkpoint_path)
+                "state_dict": model.state_dict(), "output_scale": model.output_scale,
+                "selected_epoch": best_epoch}, checkpoint_path)
     report = {"schema_version": 1, "version": version,
               "architecture": f"sparse_768x{args.hidden}_relu_1",
               "features": "12 color-piece planes x 64 squares; white-oriented output",
@@ -268,10 +320,14 @@ def main() -> None:
                           "rows": len(rows), "train": len(train_rows),
                           "validation": len(validation_rows)},
               "training": {"seed": args.seed, "epochs": args.epochs,
+                           "completed_epochs": len(history), "selected_epoch": best_epoch,
+                           "initialization": args.initialization, "output_scale": model.output_scale,
+                           "patience": args.patience,
                            "batch_size": args.batch_size, "learning_rate": args.learning_rate,
                            "weight_decay": args.weight_decay, "torch": torch.__version__,
                            "device": "cpu", "deterministic": True, "history": history},
-              "metrics": {"train": metrics(model, train, args.target, args.teacher_weight),
+              "metrics": {"initial_validation": initial_validation,
+                          "train": metrics(model, train, args.target, args.teacher_weight),
                           "validation": metrics(model, validation, args.target,
                                                 args.teacher_weight),
                           "quantized_train": quantized_metrics(network, train_rows, args.target,
@@ -292,4 +348,31 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    output_value = None
+    log_value = None
+    for index, value in enumerate(sys.argv):
+        if value == "--output-dir" and index + 1 < len(sys.argv):
+            output_value = sys.argv[index + 1]
+        elif value == "--log-file" and index + 1 < len(sys.argv):
+            log_value = sys.argv[index + 1]
+    output_dir = Path(output_value).resolve() if output_value else None
+    log_path = Path(log_value).resolve() if log_value else DEFAULT_LOG_PATH
+    recover_stale_runs(log_path)
+    training_logger = TrainingLogger(
+        "nnue", output_dir, [sys.executable, *sys.argv], log_path,
+        {"dataset": next((sys.argv[index + 1] for index, value in enumerate(sys.argv[:-1])
+                           if value == "--dataset"), None)},
+    )
+    training_logger.start()
+    try:
+        _run_training(training_logger)
+    except KeyboardInterrupt:
+        training_logger.finish("interrupted", "keyboard interrupt")
+        raise
+    except BaseException as exception:
+        training_logger.finish("failed", f"{type(exception).__name__}: {exception}")
+        raise
+    else:
+        training_logger.finish("completed", details={"report": "training.json",
+                                                       "candidate": "candidate.nnue",
+                                                       "checkpoint": "checkpoint.pt"})

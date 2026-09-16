@@ -1,8 +1,10 @@
+param([string]$Destination = "build/launcher")
+
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $launcherProject = Join-Path $projectRoot "launcher\ChessBotLauncher.csproj"
-$outputDirectory = Join-Path $projectRoot "build\launcher"
+$outputDirectory = Join-Path $projectRoot $Destination
 
 dotnet publish $launcherProject -c Release --self-contained false `
     -p:DebugType=None -p:DebugSymbols=false -o $outputDirectory

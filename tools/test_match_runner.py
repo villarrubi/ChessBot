@@ -73,6 +73,18 @@ with tempfile.TemporaryDirectory() as directory:
     assert {game["engine_a_color"] for game in free["games"]} == {"white", "black"}
     assert all(game["opening"]["release_ply"] == 0 for game in free["games"])
 
+    explored = run(temporary / "explored", "--games", "12", "--depth", "1", "--max-plies", "10",
+                   "--exploration-plies", "4", "--exploration-depth", "1",
+                   "--exploration-max-loss-cp", "200", "--seed", "17")
+    prefixes = [tuple(game["opening"]["moves_uci"]) for game in explored["games"]]
+    assert all(prefixes[i] == prefixes[i + 1] for i in range(0, 12, 2))
+    assert len(set(prefixes)) > 1
+    repeated = run(temporary / "repeated", "--games", "12", "--depth", "1", "--max-plies", "10",
+                   "--exploration-plies", "4", "--exploration-depth", "1",
+                   "--exploration-max-loss-cp", "200", "--seed", "17")
+    assert prefixes == [tuple(game["opening"]["moves_uci"]) for game in repeated["games"]]
+    assert all(game["moves"][0]["score_fen"] for game in explored["games"])
+
     # B: a named Grünfeld line with ChessBot A fixed as Black.
     named = run(temporary / "named", "--games", "1", "--depth", "1", "--max-plies", "13",
                 "--color-mode", "a-black", "--openings",

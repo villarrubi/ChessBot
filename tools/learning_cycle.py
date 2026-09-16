@@ -16,6 +16,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from training_log import DEFAULT_LOG_PATH, TrainingLogger, recover_stale_runs
+
 
 def configure_utf8_stdio() -> None:
     """Keep streamed child output safe when the launcher runs on Windows."""
@@ -58,11 +60,16 @@ def compiler_metadata() -> dict[str, str]:
 
 
 class Cycle:
-    def __init__(self, config_path: Path, output: Path, engine_override: Path | None = None):
+    def __init__(self, config_path: Path, output: Path, engine_override: Path | None = None,
+                 log_path: Path = DEFAULT_LOG_PATH):
         self.config_path = config_path
         self.config = json.loads(config_path.read_text(encoding="utf-8"))
         self.output = output
         self.engine_override = engine_override
+        self.logger = TrainingLogger(
+            "cycle", output, [sys.executable, *sys.argv], log_path,
+            {"config": str(config_path), "experiment_id": self.config.get("id")},
+        )
         self.started = time.monotonic()
         self.commands: list[dict[str, Any]] = []
         self.budgets = self.config.get("budgets", {})
@@ -97,6 +104,7 @@ class Cycle:
         self.check_budgets()
         started = time.monotonic()
         print(f"[{stage}] iniciado", flush=True)
+        self.logger.progress(stage, {"state": "started", "command": command})
         process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT, text=True, encoding="utf-8",
                                    errors="replace", bufsize=1)
@@ -131,7 +139,10 @@ class Cycle:
                   "stdout": stdout[-4000:], "stderr": ""}
         self.commands.append(record)
         if code:
+            self.logger.progress(stage, {"state": "failed", "exit_code": code})
             raise RuntimeError(f"{stage} failed with exit code {code}: {stdout[-1000:]}")
+        self.logger.progress(stage, {"state": "completed", "exit_code": code,
+                                     "duration_seconds": record["duration_seconds"]})
         self.check_budgets()
 
     def options(self, kind: str, artifact: Path) -> dict[str, Any]:
@@ -188,6 +199,10 @@ class Cycle:
             if opening_ids:
                 command.extend(["--opening-ids", ",".join(map(str, opening_ids))])
             command.extend(["--engine-log-level", str(selfplay.get("engine_log_level", "WARNING"))])
+            for name in ("exploration_plies", "exploration_depth", "exploration_topk",
+                         "exploration_max_loss_cp"):
+                if name in selfplay:
+                    command.extend(["--" + name.replace("_", "-"), str(selfplay[name])])
             self.run("games", command)
             pgns.append(match / "games.pgn")
             metadata.append(match / "metadata.json")
@@ -223,6 +238,9 @@ class Cycle:
                        str(training_config.get("learning_rate", 0.002)), "--target",
                        str(training_config.get("target", "mixed")), "--teacher-weight",
                        str(training_config.get("teacher_weight", 0.25)), "--seed", str(seed)]
+            for name in ("initialization", "patience"):
+                if name in training_config:
+                    command.extend(["--" + name, str(training_config[name])])
             if training_config.get("binary_shards", False):
                 command.extend(["--shard-dir", str(training / "shards"), "--shard-size",
                                 str(training_config.get("shard_size", 100_000))])
@@ -250,7 +268,10 @@ class Cycle:
                    str(eval_config.get("max_performance_regression", 0.2)),
                    "--minimum-lower-score", str(eval_config.get("minimum_lower_score", 0.5)),
                    "--minimum-independent-samples",
-                   str(eval_config.get("minimum_independent_samples", 8))]
+                   str(eval_config.get("minimum_independent_samples", 8)),
+                   "--max-search-slowdown", str(eval_config.get("max_search_slowdown", 3.0)),
+                   "--exploration-plies", str(eval_config.get("exploration_plies", 0)),
+                   "--seed", str(eval_config.get("seed", seed + 1))]
         opening_ids = eval_config.get("opening_ids", [])
         if opening_ids:
             command.extend(["--opening-ids", ",".join(map(str, opening_ids))])
@@ -299,23 +320,34 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--engine", type=Path,
                         help="override the engine path from the config (useful in CI)")
+    parser.add_argument("--log-file", type=Path, default=DEFAULT_LOG_PATH,
+                        help="durable JSONL history file")
     args = parser.parse_args()
     config = args.config.resolve(strict=True)
     output = args.output_dir.resolve()
+    recover_stale_runs(args.log_file)
     if output.exists():
         parser.error("output directory already exists; use a new experiment directory")
-    cycle = Cycle(config, output, args.engine)
+    cycle = Cycle(config, output, args.engine, args.log_file)
+    cycle.logger.start()
     result = None
     error = None
     try:
         result = cycle.execute()
         status = "complete"
+    except KeyboardInterrupt:
+        status, error = "interrupted", "keyboard interrupt"
     except Exception as exception:
         status, error = "failed", str(exception)
     output.mkdir(parents=True, exist_ok=True)
     manifest = cycle.manifest(status, result, error)
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n",
                                            encoding="utf-8")
+    cycle.logger.finish(
+        "completed" if status == "complete" else status,
+        error,
+        {"manifest": str(output / "manifest.json"), "decision": manifest["decision"]},
+    )
     print(json.dumps({"status": status, "decision": manifest["decision"],
                       "manifest": str(output / "manifest.json"), "error": error}))
     if error:

@@ -43,12 +43,14 @@ with tempfile.TemporaryDirectory(prefix="chessbot-cycle-") as directory:
         "seed": 71,
         "budgets": {"selfplay_games": 4, "evaluation_games": 2, "max_seconds": 120,
                     "max_storage_mb": 20, "threads": 1},
-        "selfplay": {"enabled": True, "depth": 1, "max_plies": 8,
+        "selfplay": {"enabled": True, "depth": 1, "max_plies": 20,
+                     "exploration_plies": 2, "exploration_depth": 1,
                      "opponent_engine": str(engine), "opponent_name": "external-test"},
         "dataset": {"skip_plies": 0, "sample_every": 1, "max_per_game": 4,
                     "validation_fraction": 0.2},
         "training": {"hidden": 4, "epochs": 1, "batch_size": 128},
-        "evaluation": {"depth": 1, "benchmark_depth": 1, "max_plies": 4,
+        "evaluation": {"depth": 1, "benchmark_depth": 1, "max_plies": 12,
+                       "exploration_plies": 2,
                        "max_performance_regression": 10,
                        "minimum_lower_score": 0.999,
                        "minimum_independent_samples": 1},
@@ -70,6 +72,9 @@ with tempfile.TemporaryDirectory(prefix="chessbot-cycle-") as directory:
     games_command = manifest["commands"][0]["command"]
     assert games_command[games_command.index("--engine-b") + 1] == str(engine)
     assert games_command[games_command.index("--cwd-b") + 1] == str(engine.parent)
+    assert games_command[games_command.index("--exploration-plies") + 1] == "2"
+    evaluation_command = manifest["commands"][-1]["command"]
+    assert evaluation_command[evaluation_command.index("--exploration-plies") + 1] == "2"
     assert manifest["artifacts"] and all(row["sha256"] for row in manifest["artifacts"])
     assert decision["artifacts"]["promoted_to"] is None
     assert active.read_text(encoding="utf-8") == "preserve-active-network\n"
