@@ -17,6 +17,16 @@ from pathlib import Path
 from typing import Any
 
 
+def configure_utf8_stdio() -> None:
+    """Keep streamed child output safe when the launcher runs on Windows."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
+configure_utf8_stdio()
+
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

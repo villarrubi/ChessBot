@@ -108,8 +108,8 @@ internal sealed class MainForm : Form
         tips.SetToolTip(dataset, "Tabla de posiciones usada por el entrenamiento directo. El ciclo completo la crea automáticamente con sus partidas nuevas.");
         tips.SetToolTip(hidden, "Tamaño de la capa oculta. 16 o 32 es una buena base; 64 necesita más partidas y reduce la velocidad del motor.");
         tips.SetToolTip(epochs, "Número de pasadas sobre el dataset. Más épocas no compensan pocos datos y pueden sobreajustar.");
-        tips.SetToolTip(selfplayGames, "Partidas nuevas que generarán los datos de aprendizaje. Se ejecutan por parejas con colores invertidos.");
-        tips.SetToolTip(evaluationGames, "Partidas independientes para decidir si la red nueva es mejor que la referencia.");
+        tips.SetToolTip(selfplayGames, "Partidas nuevas que generarán los datos de aprendizaje. Se ejecutan por parejas con colores invertidos y se redondean para cubrir cada apertura.");
+        tips.SetToolTip(evaluationGames, "Partidas independientes para decidir si la red nueva es mejor que la referencia. Se ejecutan por parejas y se redondean para cubrir cada apertura.");
         tips.SetToolTip(searchDepth, "Profundidad usada para cada jugada. Una profundidad mayor mejora las partidas, pero multiplica el tiempo necesario.");
         tips.SetToolTip(maxPlies, "Límite de medias jugadas por partida; 160 plies equivalen a 80 movimientos completos.");
         tips.SetToolTip(trainingTarget, "Resultado aprende solo de victoria/tablas/derrota. Mixto añade la evaluación manual y converge con menos partidas.");
@@ -491,8 +491,12 @@ internal sealed class MainForm : Form
             ? CreateCustomOpeningSource(stamp, selectedOpenings)
             : null;
         int openingCount = selectedOpenings.Count + (hasCustomOpening ? 1 : 0);
-        budgets["selfplay_games"] = PairedCount(selfplayGames.Value, openingCount);
-        budgets["evaluation_games"] = PairedCount(evaluationGames.Value, openingCount);
+        int adjustedSelfplay = PairedCount(selfplayGames.Value, openingCount);
+        int adjustedEvaluation = PairedCount(evaluationGames.Value, openingCount);
+        budgets["selfplay_games"] = adjustedSelfplay;
+        budgets["evaluation_games"] = adjustedEvaluation;
+        if (adjustedSelfplay != (int)selfplayGames.Value || adjustedEvaluation != (int)evaluationGames.Value)
+            AppendLog($"Emparejado: {openingCount} aperturas × 2 colores; partidas ajustadas a {adjustedSelfplay} / {adjustedEvaluation}.\n");
         if (customOpeningsPath is not null)
             config["openings"] = customOpeningsPath;
 
@@ -532,7 +536,7 @@ internal sealed class MainForm : Form
         else
             evaluation.Remove("opening_ids");
         evaluation["minimum_lower_score"] = 0.5;
-        evaluation["minimum_independent_samples"] = Math.Max(4, PairedCount(evaluationGames.Value, openingCount) / 2);
+        evaluation["minimum_independent_samples"] = Math.Max(4, adjustedEvaluation / 2);
 
         string configDirectory = Path.Combine(root, "build", "launcher-configs");
         Directory.CreateDirectory(configDirectory);

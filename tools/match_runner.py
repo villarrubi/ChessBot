@@ -9,6 +9,7 @@ import os
 import platform
 import random
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -19,6 +20,16 @@ import chess
 import chess.engine
 import chess.pgn
 import chess.polyglot
+
+
+def configure_utf8_stdio() -> None:
+    """Keep progress output safe when a Windows parent uses a legacy code page."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
+configure_utf8_stdio()
 
 
 @dataclass
