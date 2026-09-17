@@ -55,6 +55,10 @@ with tempfile.TemporaryDirectory() as directory:
     polyglot.write_bytes(struct.pack(">QHHI", chess.polyglot.zobrist_hash(chess.Board()),
                                      raw_move, 10, 0))
     assert len(load_openings(root / "data" / "openings" / "core.json")) >= 4
+    eco_openings = load_openings(root / "data" / "openings" / "eco-500.json")
+    assert len(eco_openings) == 500
+    assert {opening.eco for opening in eco_openings} == {
+        f"{letter}{number:02d}" for letter in "ABCDE" for number in range(100)}
     assert len(load_openings(root / "tests" / "positions" / "analysis_sample.pgn")) == 1
     assert len(load_openings(epd)) == len(load_openings(fen)) == len(load_openings(uci)) == 1
     assert load_openings(native)[0].moves == ["e2e4", "e7e5", "f2f4"]
@@ -68,8 +72,10 @@ with tempfile.TemporaryDirectory() as directory:
 
     # A/F: free paired game, both engines think from move one without a book.
     free = run(temporary / "free", "--games", "2", "--depth", "1", "--max-plies", "4",
+               "--cores-a", "1", "--cores-b", "1",
                "--options-a", '{"OwnBook": false}', "--options-b", '{"OwnBook": false}')
     assert free["statistics"]["games"] == 2
+    assert free["engines"]["a"]["cores"] == 1 and free["engines"]["b"]["cores"] == 1
     assert {game["engine_a_color"] for game in free["games"]} == {"white", "black"}
     assert all(game["opening"]["release_ply"] == 0 for game in free["games"])
 

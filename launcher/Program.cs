@@ -60,8 +60,22 @@ internal sealed class MainForm : Form
         Font = new Font("Segoe UI", 10f, FontStyle.Bold)
     };
     private readonly ComboBox playerColor = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+    private readonly ComboBox playOpponent = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 250 };
+    private readonly TextBox playStockfish = new() { Width = 250, Enabled = false };
+    private readonly NumericUpDown playStockfishElo = new()
+    {
+        Minimum = 1320,
+        Maximum = 3190,
+        Value = 1800,
+        Increment = 10,
+        Enabled = false
+    };
+    private readonly Button playStockfishBrowse = new() { Text = "Examinar…", AutoSize = true, Enabled = false };
     private readonly NumericUpDown thinkTime = new() { Minimum = 100, Maximum = 10000, Value = 750, Increment = 100 };
-    private readonly RichTextBox log = new() { Dock = DockStyle.Fill, MinimumSize = new Size(100, 100), ReadOnly = true, BackColor = Color.FromArgb(24, 26, 31), ForeColor = Color.Gainsboro, Font = new Font("Consolas", 9.5f) };
+    private readonly NumericUpDown playThreads = ThreadSelector();
+    private readonly NumericUpDown playCores = CoreSelector();
+    private readonly RichTextBox trainingLog = CreateLogBox();
+    private readonly RichTextBox toolsLog = CreateLogBox();
     private readonly ToolTip tips = new() { AutoPopDelay = 12000, InitialDelay = 300, ReshowDelay = 100 };
     private readonly Button cancelButton = new() { Text = "Cancelar tarea", Enabled = false, AutoSize = true };
     private readonly Button resignButton = new() { Text = "Rendirse", AutoSize = true, Enabled = false };
@@ -75,19 +89,33 @@ internal sealed class MainForm : Form
     private readonly NumericUpDown selfplayGames = new() { Minimum = 20, Maximum = 10000, Value = 1000, Increment = 2 };
     private readonly NumericUpDown evaluationGames = new() { Minimum = 2, Maximum = 10000, Value = 100, Increment = 2 };
     private readonly NumericUpDown searchDepth = new() { Minimum = 1, Maximum = 12, Value = 3 };
+    private readonly NumericUpDown trainingThreads = ThreadSelector();
+    private readonly NumericUpDown trainingCores = CoreSelector();
     private readonly NumericUpDown maxPlies = new() { Minimum = 20, Maximum = 1000, Value = 240, Increment = 10 };
     private readonly NumericUpDown maxMinutes = new() { Minimum = 1, Maximum = 10080, Value = 300 };
     private readonly ComboBox trainingTarget = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 290 };
     private readonly TextBox stockfishEngine = new() { Dock = DockStyle.Fill, Width = 320 };
-    private readonly NumericUpDown eloGames = new() { Minimum = 2, Maximum = 1000, Value = 16, Increment = 2 };
+    private readonly NumericUpDown eloGames = new() { Minimum = 1000, Maximum = 10000, Value = 1000, Increment = 2 };
     private readonly NumericUpDown eloDepth = new() { Minimum = 1, Maximum = 12, Value = 3 };
+    private readonly NumericUpDown fixedMatchElo = new() { Minimum = 1320, Maximum = 3190, Value = 2800, Increment = 10 };
+    private readonly NumericUpDown fixedMatchGames = new() { Minimum = 2, Maximum = 10000, Value = 1000, Increment = 2 };
+    private readonly NumericUpDown fixedMatchDepth = new() { Minimum = 1, Maximum = 12, Value = 3 };
+    private readonly NumericUpDown fixedMatchMaxPlies = new() { Minimum = 20, Maximum = 1000, Value = 160, Increment = 10 };
+    private readonly ComboBox fixedMatchOpenings = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
     private readonly TextBox customOpening = new() { Dock = DockStyle.Fill };
+    private readonly TextBox openingFilter = new()
+    {
+        Width = 280,
+        PlaceholderText = "Buscar código ECO o nombre…"
+    };
+    private readonly List<OpeningChoice> availableOpenings = [];
+    private readonly HashSet<string> selectedOpeningIds = new(StringComparer.Ordinal);
     private readonly CheckedListBox openingSelection = new()
     {
         CheckOnClick = true,
         MultiColumn = true,
         ColumnWidth = 190,
-        Height = 62,
+        Height = 180,
         IntegralHeight = false,
         Dock = DockStyle.Fill
     };
@@ -95,15 +123,26 @@ internal sealed class MainForm : Form
     private readonly TextBox cycleOutput = new() { Dock = DockStyle.Fill };
     private Process? activeProcess;
     private readonly List<string> moves = [];
+    private readonly object processOutputGate = new();
+    private readonly StringBuilder processOutput = new();
+    private bool cancelRequested;
     private HashSet<string> legalMoves = [];
     private string? selectedSquare;
     private bool gameBusy;
     private bool gameFinished;
     private string currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    private RichTextBox activeLog;
+
+    private enum LogContext
+    {
+        Training,
+        Tools
+    }
 
     public MainForm(string projectRoot)
     {
         root = projectRoot;
+        activeLog = trainingLog;
         engine = Path.Combine(root, "build", "Release", "chessbot.exe");
         python = Path.Combine(root, ".venv", "Scripts", "python.exe");
         Text = "ChessBot — mesa de análisis";
@@ -121,11 +160,25 @@ internal sealed class MainForm : Form
         cycleOutput.Text = NewOutput("ciclo");
         playerColor.Items.AddRange(["Blancas", "Negras"]);
         playerColor.SelectedIndex = 0;
+        playOpponent.Items.AddRange(["ChessBot", "Stockfish (Elo fijo)"]);
+        playOpponent.SelectedIndex = 0;
+        playOpponent.SelectedIndexChanged += (_, _) =>
+        {
+            bool stockfish = playOpponent.SelectedIndex == 1;
+            playStockfish.Enabled = stockfish;
+            playStockfishElo.Enabled = stockfish;
+            playStockfishBrowse.Enabled = stockfish;
+        };
+        playStockfishBrowse.Click += (_, _) => ChooseFile(playStockfish, "Ejecutable Stockfish|*.exe|Todos|*.*");
         generationMode.Items.AddRange(["Autojuego: ChessBot contra sí mismo", "Partidas contra otro motor UCI"]);
         generationMode.SelectedIndex = 0;
         generationMode.SelectedIndexChanged += (_, _) => opponentEngine.Enabled = generationMode.SelectedIndex == 1;
+        openingFilter.TextChanged += (_, _) => RefreshOpeningSelection();
+        openingSelection.ItemCheck += OnOpeningItemCheck;
         trainingTarget.Items.AddRange(["Solo resultado de las partidas", "Mixto: resultado y evaluación", "Evaluación de búsqueda"]);
         trainingTarget.SelectedIndex = 1;
+        fixedMatchOpenings.Items.AddRange(["ECO A00-E99 · 500 aperturas", "Catálogo base"]);
+        fixedMatchOpenings.SelectedIndex = 0;
         PopulateOpenings();
         tips.SetToolTip(dataset, "Tabla de posiciones usada por el entrenamiento directo. El ciclo completo la crea automáticamente con sus partidas nuevas.");
         tips.SetToolTip(hidden, "Tamaño de la capa oculta. 16 o 32 es una buena base; 64 necesita más partidas y reduce la velocidad del motor.");
@@ -133,13 +186,26 @@ internal sealed class MainForm : Form
         tips.SetToolTip(selfplayGames, "Partidas nuevas que generarán los datos de aprendizaje. Se ejecutan por parejas con colores invertidos y se redondean para cubrir cada apertura.");
         tips.SetToolTip(evaluationGames, "Partidas independientes para decidir si la red nueva es mejor que la referencia. Se ejecutan por parejas y se redondean para cubrir cada apertura.");
         tips.SetToolTip(searchDepth, "Profundidad usada para cada jugada. Una profundidad mayor mejora las partidas, pero multiplica el tiempo necesario.");
+        tips.SetToolTip(playThreads, "Hilos de búsqueda del motor. Usa varios núcleos de la CPU; deja uno libre si quieres mantener fluida la aplicación.");
+        tips.SetToolTip(trainingThreads, "Hilos de CPU usados por cada instancia de ChessBot durante las partidas y evaluaciones.");
+        tips.SetToolTip(playCores, "Núcleos lógicos donde podrá ejecutarse el motor durante la partida.");
+        tips.SetToolTip(playOpponent, "Elige ChessBot o un Stockfish configurado a un nivel UCI_Elo fijo.");
+        tips.SetToolTip(playStockfish, "Ejecutable UCI de Stockfish para jugar una partida individual.");
+        tips.SetToolTip(playStockfishElo, "Nivel UCI_Elo que Stockfish usará en esta partida; no ejecuta la escalera completa.");
+        tips.SetToolTip(trainingCores, "Núcleos lógicos asignados a cada proceso del motor durante el entrenamiento.");
         tips.SetToolTip(maxPlies, "Límite de medias jugadas por partida; 160 plies equivalen a 80 movimientos completos.");
         tips.SetToolTip(trainingTarget, "Mixto combina resultado y evaluación de búsqueda; usa la evaluación manual si no hay etiqueta de búsqueda.");
+        tips.SetToolTip(openingFilter, "Filtra por código ECO (por ejemplo, C50) o por nombre. Los botones actúan sobre lo visible.");
         tips.SetToolTip(openingSelection, "Marca las aperturas que se usarán en las partidas de aprendizaje y evaluación. Todas vienen marcadas al inicio.");
         tips.SetToolTip(customOpening, "Opcional: añade una línea propia. Ejemplo: Gambito de Rey | e4 e5 f4. Usa SAN o UCI separados por espacios.");
         tips.SetToolTip(stockfishEngine, "Ejecutable UCI nativo de Stockfish para medir la fuerza aproximada de ChessBot.");
-        tips.SetToolTip(eloGames, "Partidas por nivel de Stockfish. Siempre se juegan en parejas con colores invertidos.");
+        tips.SetToolTip(eloGames, "Partidas por nivel de Stockfish. El mínimo de 1000 cubre las 500 aperturas ECO A00-E99 con ambos colores.");
         tips.SetToolTip(eloDepth, "Profundidad fija usada por ChessBot y Stockfish en la escalera Elo.");
+        tips.SetToolTip(fixedMatchElo, "Nivel UCI_Elo fijo para toda la campaña.");
+        tips.SetToolTip(fixedMatchGames, "Número de partidas de la campaña. Con ECO A00-E99, 1000 son 500 aperturas × 2 colores.");
+        tips.SetToolTip(fixedMatchDepth, "Profundidad fija usada por ambos motores en la campaña.");
+        tips.SetToolTip(fixedMatchMaxPlies, "Límite de medias jugadas por partida.");
+        tips.SetToolTip(fixedMatchOpenings, "Catálogo de aperturas que se repasa en parejas, alternando el color de ChessBot.");
 
         TabControl tabs = new() { Dock = DockStyle.Fill };
         tabs.TabPages.Add(BuildPlayTab());
@@ -178,7 +244,7 @@ internal sealed class MainForm : Form
 
     private void StyleControls(Control parent)
     {
-        if (parent is not ChessBoard && parent != log)
+        if (parent is not ChessBoard && parent != trainingLog && parent != toolsLog)
         {
             parent.BackColor = parent is TextBoxBase or ComboBox or NumericUpDown or CheckedListBox
                 ? Field : Paper;
@@ -231,8 +297,28 @@ internal sealed class MainForm : Form
         side.Controls.Add(Spacer());
         side.Controls.Add(new Label { Text = "Tu color", AutoSize = true });
         side.Controls.Add(playerColor);
+        side.Controls.Add(new Label { Text = "Rival", AutoSize = true, Margin = new Padding(3, 12, 3, 3) });
+        side.Controls.Add(playOpponent);
+        side.Controls.Add(new Label { Text = "Stockfish", AutoSize = true, Margin = new Padding(3, 12, 3, 3) });
+        FlowLayoutPanel stockfishSettings = new()
+        {
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = true,
+            MaximumSize = new Size(270, 0),
+            Margin = new Padding(3, 0, 3, 0)
+        };
+        stockfishSettings.Controls.Add(playStockfish);
+        stockfishSettings.Controls.Add(playStockfishBrowse);
+        stockfishSettings.Controls.Add(new Label { Text = "Elo fijo", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
+        stockfishSettings.Controls.Add(playStockfishElo);
+        side.Controls.Add(stockfishSettings);
         side.Controls.Add(new Label { Text = "Tiempo del motor (ms)", AutoSize = true, Margin = new Padding(3, 12, 3, 3) });
         side.Controls.Add(thinkTime);
+        side.Controls.Add(new Label { Text = "Hilos de CPU", AutoSize = true, Margin = new Padding(3, 12, 3, 3) });
+        side.Controls.Add(playThreads);
+        side.Controls.Add(new Label { Text = "Núcleos de CPU", AutoSize = true, Margin = new Padding(3, 12, 3, 3) });
+        side.Controls.Add(playCores);
         side.Controls.Add(newGame);
         side.Controls.Add(resignButton);
         side.Controls.Add(Spacer());
@@ -246,10 +332,7 @@ internal sealed class MainForm : Form
     private TabPage BuildTrainingTab()
     {
         TabPage page = new("Entrenar");
-        TableLayoutPanel outer = new() { Dock = DockStyle.Fill, RowCount = 3, Padding = new Padding(14) };
-        outer.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        outer.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        outer.RowStyles.Add(new RowStyle(SizeType.Absolute, 100));
+        page.AutoScroll = true;
         Label explanation = new()
         {
             AutoSize = true,
@@ -258,7 +341,14 @@ internal sealed class MainForm : Form
             Text = "El ciclo completo genera partidas nuevas, extrae sus posiciones a un dataset, entrena una red y la enfrenta a la referencia. " +
                    "Elige autojuego o un ejecutable UCI rival. Pasa el ratón sobre cada parámetro para ver su explicación."
         };
-        TableLayoutPanel form = new() { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 3, Padding = new Padding(0, 0, 0, 12) };
+        TableLayoutPanel form = new()
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            MinimumSize = new Size(980, 0),
+            ColumnCount = 3,
+            Padding = new Padding(0, 0, 0, 12)
+        };
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         form.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -287,13 +377,49 @@ internal sealed class MainForm : Form
         FlowLayoutPanel search = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
         search.Controls.Add(new Label { Text = "Profundidad", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
         search.Controls.Add(searchDepth);
+        search.Controls.Add(new Label { Text = "Hilos", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
+        search.Controls.Add(trainingThreads);
+        search.Controls.Add(new Label { Text = "Núcleos", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
+        search.Controls.Add(trainingCores);
         search.Controls.Add(new Label { Text = "Máx. plies", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
         search.Controls.Add(maxPlies);
         search.Controls.Add(new Label { Text = "Minutos", AutoSize = true, Margin = new Padding(18, 7, 5, 0) });
         search.Controls.Add(maxMinutes);
         AddFieldRow(form, 7, "Búsqueda", search);
         AddFieldRow(form, 8, "Objetivo", trainingTarget);
-        AddFieldRow(form, 9, "Aperturas", openingSelection);
+        TableLayoutPanel openingPicker = new()
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            ColumnCount = 1,
+            RowCount = 2,
+            Margin = new Padding(0)
+        };
+        openingPicker.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        openingPicker.RowStyles.Add(new RowStyle(SizeType.Absolute, 180));
+        FlowLayoutPanel openingToolbar = new()
+        {
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            Margin = new Padding(0, 0, 0, 4)
+        };
+        openingToolbar.Controls.Add(new Label { Text = "Buscar", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
+        openingToolbar.Controls.Add(openingFilter);
+        Button selectAllOpenings = new() { Text = "Todas", AutoSize = true };
+        Button clearAllOpenings = new() { Text = "Ninguna", AutoSize = true };
+        Button selectVisibleOpenings = new() { Text = "Marcar visibles", AutoSize = true };
+        Button clearVisibleOpenings = new() { Text = "Quitar visibles", AutoSize = true };
+        selectAllOpenings.Click += (_, _) => SetAllOpenings(true);
+        clearAllOpenings.Click += (_, _) => SetAllOpenings(false);
+        selectVisibleOpenings.Click += (_, _) => SetVisibleOpenings(true);
+        clearVisibleOpenings.Click += (_, _) => SetVisibleOpenings(false);
+        openingToolbar.Controls.Add(selectAllOpenings);
+        openingToolbar.Controls.Add(clearAllOpenings);
+        openingToolbar.Controls.Add(selectVisibleOpenings);
+        openingToolbar.Controls.Add(clearVisibleOpenings);
+        openingPicker.Controls.Add(openingToolbar, 0, 0);
+        openingPicker.Controls.Add(openingSelection, 0, 1);
+        AddFieldRow(form, 9, "Aperturas", openingPicker);
         AddFieldRow(form, 10, "Apertura propia", customOpening);
         AddPathRow(form, 11, "Config. base", cycleConfig, "Examinar…", () => ChooseFile(cycleConfig, "JSON|*.json|Todos|*.*"));
         AddPathRow(form, 12, "Salida ciclo", cycleOutput, "Elegir…", () => ChooseFolder(cycleOutput));
@@ -307,25 +433,53 @@ internal sealed class MainForm : Form
         actions.Controls.Add(cycle);
         actions.Controls.Add(cancelButton);
         form.Controls.Add(actions, 1, 13);
-        outer.Controls.Add(explanation, 0, 0);
-        outer.Controls.Add(form, 0, 1);
-        outer.Controls.Add(log, 0, 2);
-        page.Controls.Add(outer);
+
+        Control trainingLogPanel = BuildLogPanel(trainingLog, "Registro de entrenamiento");
+        trainingLogPanel.Height = 260;
+        TableLayoutPanel content = new()
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            RowCount = 3,
+            MinimumSize = new Size(980, 0),
+            Padding = new Padding(14)
+        };
+        content.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        content.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        content.RowStyles.Add(new RowStyle(SizeType.Absolute, 260));
+        content.Controls.Add(explanation, 0, 0);
+        content.Controls.Add(form, 0, 1);
+        content.Controls.Add(trainingLogPanel, 0, 2);
+        Panel viewport = new() { Dock = DockStyle.Fill, AutoScroll = true };
+        viewport.Controls.Add(content);
+        page.Controls.Add(viewport);
+        page.Resize += (_, _) =>
+        {
+            int height = Math.Max(220, page.ClientSize.Height / 3);
+            trainingLogPanel.Height = height;
+            content.RowStyles[2].Height = height;
+        };
         return page;
     }
 
     private TabPage BuildToolsTab()
     {
         TabPage page = new("Herramientas");
-        TableLayoutPanel layout = new() { Dock = DockStyle.Fill, RowCount = 4, Padding = new Padding(18) };
+        page.AutoScroll = true;
+        TableLayoutPanel layout = new() { Dock = DockStyle.Fill, RowCount = 6, Padding = new Padding(18), AutoScroll = true, MinimumSize = new Size(980, 0) };
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 190));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         Label state = new() { AutoSize = true, Text = StatusText(), MaximumSize = new Size(850, 0) };
         FlowLayoutPanel buttons = new() { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 16, 0, 16) };
         Button benchmark = new() { Text = "Benchmark rápido", AutoSize = true };
-        benchmark.Click += async (_, _) => await RunTaskAsync(engine, ["bench", "5"], "Benchmark");
+        benchmark.Click += async (_, _) => await RunTaskAsync(engine, ["bench", "5"], "Benchmark", true, LogContext.Tools);
         Button build = new() { Text = "Compilar/actualizar", AutoSize = true };
         build.Click += async (_, _) => await BuildEngineAsync();
         Button results = new() { Text = "Abrir resultados", AutoSize = true };
@@ -347,20 +501,47 @@ internal sealed class MainForm : Form
         Button browseStockfish = new() { Text = "Examinar…", AutoSize = true };
         browseStockfish.Click += (_, _) => ChooseFile(stockfishEngine, "Ejecutable Stockfish|*.exe|Todos|*.*");
         eloControls.Controls.Add(browseStockfish);
-        eloControls.Controls.Add(new Label { Text = "Partidas/nivel", AutoSize = true, Margin = new Padding(14, 7, 6, 0) });
+        eloControls.Controls.Add(new Label { Text = "Partidas/nivel (A00-E99)", AutoSize = true, Margin = new Padding(14, 7, 6, 0) });
         eloControls.Controls.Add(eloGames);
         eloControls.Controls.Add(new Label { Text = "Profundidad", AutoSize = true, Margin = new Padding(14, 7, 6, 0) });
         eloControls.Controls.Add(eloDepth);
         Button elo = new() { Text = "Medir Elo aproximado", AutoSize = true };
         elo.Click += async (_, _) => await RunEloLadderAsync();
         eloControls.Controls.Add(elo);
+
+        FlowLayoutPanel fixedMatchControls = new()
+        {
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = true,
+            Margin = new Padding(0, 0, 0, 12)
+        };
+        fixedMatchControls.Controls.Add(new Label { Text = "Campaña fija", AutoSize = true, Font = new Font(Font, FontStyle.Bold), Margin = new Padding(0, 7, 12, 0) });
+        fixedMatchControls.Controls.Add(new Label { Text = "Elo", AutoSize = true, Margin = new Padding(0, 7, 5, 0) });
+        fixedMatchControls.Controls.Add(fixedMatchElo);
+        fixedMatchControls.Controls.Add(new Label { Text = "Partidas", AutoSize = true, Margin = new Padding(14, 7, 5, 0) });
+        fixedMatchControls.Controls.Add(fixedMatchGames);
+        fixedMatchControls.Controls.Add(new Label { Text = "Profundidad", AutoSize = true, Margin = new Padding(14, 7, 5, 0) });
+        fixedMatchControls.Controls.Add(fixedMatchDepth);
+        fixedMatchControls.Controls.Add(new Label { Text = "Máx. plies", AutoSize = true, Margin = new Padding(14, 7, 5, 0) });
+        fixedMatchControls.Controls.Add(fixedMatchMaxPlies);
+        fixedMatchControls.Controls.Add(new Label { Text = "Aperturas", AutoSize = true, Margin = new Padding(14, 7, 5, 0) });
+        fixedMatchControls.Controls.Add(fixedMatchOpenings);
+        Button fixedMatch = new() { Text = "Jugar campaña", AutoSize = true };
+        fixedMatch.Click += async (_, _) => await RunFixedStockfishMatchAsync();
+        fixedMatchControls.Controls.Add(fixedMatch);
         layout.Controls.Add(state, 0, 0);
         layout.Controls.Add(buttons, 0, 1);
         layout.Controls.Add(eloControls, 0, 2);
-        layout.Controls.Add(new RichTextBox
+        layout.Controls.Add(fixedMatchControls, 0, 3);
+        RichTextBox information = new()
         {
             Dock = DockStyle.Fill,
             ReadOnly = true,
+            BackColor = Field,
+            ForeColor = Ink,
+            BorderStyle = BorderStyle.FixedSingle,
+            ScrollBars = RichTextBoxScrollBars.Vertical,
             Text =
             "BENCHMARK RÁPIDO\n" +
             "Mide velocidad y nodos por segundo del motor. Sirve para comprobar que la compilación funciona y comparar cambios.\n\n" +
@@ -372,8 +553,18 @@ internal sealed class MainForm : Form
             "Abre el registro durable de todas las ejecuciones, incluidas las que quedaron interrumpidas por un apagado o crash.\n\n" +
             "ABRIR PROYECTO\n" +
             "Abre la carpeta raíz del proyecto para editar el código o revisar la configuración.\n\n" +
+            "CAMPAÑA CONTRA STOCKFISH\n" +
+            "Permite jugar un número concreto de partidas contra un único nivel UCI_Elo. Con el catálogo ECO A00-E99, " +
+            "1000 partidas recorren las 500 aperturas dos veces: una con ChessBot blancas y otra con ChessBot negras. " +
+            "El progreso muestra la apertura, el color y los movimientos de cada partida.\n\n" +
+            "CÁLCULO DEL ELO\n" +
+            "La escalera juega contra Stockfish limitado a varios niveles UCI_Elo. Para cada nivel calcula " +
+            "p = (victorias + 0,5 × tablas) / partidas y la diferencia es 400 × log10(p / (1 − p)). " +
+            "El Elo estimado de ChessBot es nivel de Stockfish + diferencia; el intervalo refleja la incertidumbre de la muestra.\n\n" +
             "Ejecutable UCI actual:\n" + engine
-        }, 0, 3);
+        };
+        layout.Controls.Add(information, 0, 4);
+        layout.Controls.Add(BuildLogPanel(toolsLog, "Registro de herramientas"), 0, 5);
         page.Controls.Add(layout);
         return page;
     }
@@ -392,9 +583,12 @@ internal sealed class MainForm : Form
         board.CheckedSquare = null;
         board.Flipped = playerColor.SelectedIndex == 1;
         board.Invalidate();
-        if (!File.Exists(engine))
+        string opponentPath = PlayEnginePath();
+        if (!File.Exists(opponentPath))
         {
-            gameStatus.Text = "Falta el motor. Usa Herramientas → Compilar/actualizar.";
+            gameStatus.Text = UsePlayStockfish()
+                ? "Selecciona un stockfish.exe para jugar con Elo fijo."
+                : "Falta el motor. Usa Herramientas → Compilar/actualizar.";
             return;
         }
         resignButton.Enabled = true;
@@ -414,7 +608,7 @@ internal sealed class MainForm : Form
         board.TargetSquares.Clear();
         board.Invalidate();
         resignButton.Enabled = false;
-        SetGameStatus("Te has rendido · gana ChessBot", finished: true);
+        SetGameStatus($"Te has rendido · gana {PlayEngineName()}", finished: true);
     }
 
     private async void OnBoardClick(object? sender, string square)
@@ -552,7 +746,7 @@ internal sealed class MainForm : Form
         if (gameFinished)
             return;
         gameBusy = true;
-        gameStatus.Text = "ChessBot está pensando…";
+        gameStatus.Text = $"{PlayEngineName()} está pensando…";
         try
         {
             string bestMove = await SearchBestMoveAsync((int)thinkTime.Value);
@@ -571,10 +765,27 @@ internal sealed class MainForm : Form
 
     private async Task<string> SearchBestMoveAsync(int milliseconds)
     {
-        ProcessStartInfo start = HiddenProcess(engine);
+        string opponentPath = PlayEnginePath();
+        if (!File.Exists(opponentPath))
+            throw new InvalidOperationException("No se encuentra el ejecutable del rival seleccionado.");
+        ProcessStartInfo start = HiddenProcess(opponentPath);
         using Process process = Process.Start(start) ?? throw new InvalidOperationException("No se pudo iniciar el motor");
+        try
+        {
+            process.ProcessorAffinity = ProcessorMask((int)playCores.Value);
+        }
+        catch (Exception exception)
+        {
+            AppendLog("No se pudo fijar la afinidad de CPU: " + exception.Message + "\n");
+        }
         await process.StandardInput.WriteLineAsync("uci");
         await ReadUntilAsync(process, line => line == "uciok");
+        await process.StandardInput.WriteLineAsync($"setoption name Threads value {(int)playThreads.Value}");
+        if (UsePlayStockfish())
+        {
+            await process.StandardInput.WriteLineAsync("setoption name UCI_LimitStrength value true");
+            await process.StandardInput.WriteLineAsync($"setoption name UCI_Elo value {(int)playStockfishElo.Value}");
+        }
         await process.StandardInput.WriteLineAsync("isready");
         await ReadUntilAsync(process, line => line == "readyok");
         string position = moves.Count == 0 ? "position startpos" : "position startpos moves " + string.Join(' ', moves);
@@ -667,16 +878,77 @@ internal sealed class MainForm : Form
         await RunTaskAsync(python,
             ["tools/elo_ladder.py", "--engine", engine, "--stockfish", stockfishEngine.Text,
              "--games-per-level", eloGames.Value.ToString(), "--depth", eloDepth.Value.ToString(),
-             "--output-dir", output], "Escalera Elo");
+             "--threads", trainingThreads.Value.ToString(),
+             "--cores", trainingCores.Value.ToString(),
+             "--output-dir", output], "Escalera Elo", true, LogContext.Tools);
+    }
+
+    private async Task RunFixedStockfishMatchAsync()
+    {
+        if (!File.Exists(stockfishEngine.Text))
+        {
+            MessageBox.Show("Selecciona un ejecutable stockfish.exe.", "Campaña contra Stockfish",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        if (!File.Exists(engine))
+        {
+            MessageBox.Show("No se encuentra ChessBot. Usa Herramientas → Compilar/actualizar.",
+                            "Campaña contra Stockfish", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        string openings = FixedMatchOpeningsPath();
+        if (!File.Exists(openings))
+        {
+            MessageBox.Show("No se encuentra el catálogo de aperturas: " + openings,
+                            "Campaña contra Stockfish", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+        int openingCount = CountOpenings(openings);
+        int games = PairedCount(fixedMatchGames.Value, openingCount);
+        string output = NewOutput($"stockfish-{(int)fixedMatchElo.Value}");
+        string optionsA = JsonSerializer.Serialize(new { Threads = (int)trainingThreads.Value });
+        string optionsB = JsonSerializer.Serialize(new
+        {
+            UCI_LimitStrength = true,
+            UCI_Elo = (int)fixedMatchElo.Value,
+            Threads = (int)trainingThreads.Value
+        });
+        AppendLog($"Campaña preparada: Stockfish {(int)fixedMatchElo.Value} Elo · {games} partidas · " +
+                  $"{openingCount} aperturas × 2 colores\nCatálogo: {openings}\n");
+        bool completed = await RunTaskAsync(python,
+            ["tools/match_runner.py", "--engine-a", engine, "--engine-b", stockfishEngine.Text,
+             "--name-a", "ChessBot", "--name-b", $"Stockfish {(int)fixedMatchElo.Value}",
+             "--options-a", optionsA, "--options-b", optionsB,
+             "--cores-a", trainingCores.Value.ToString(), "--cores-b", trainingCores.Value.ToString(),
+             "--games", games.ToString(), "--depth", fixedMatchDepth.Value.ToString(),
+             "--max-plies", fixedMatchMaxPlies.Value.ToString(), "--color-mode", "paired",
+             "--openings", openings, "--engine-log-level", "WARNING", "--output-dir", output],
+            $"Campaña Stockfish {(int)fixedMatchElo.Value} Elo", true, LogContext.Tools);
+        if (completed)
+            AppendLog($"Resultados guardados en: {output}\nAperturas y colores: metadata.json / progress.log / games.pgn\n");
+    }
+
+    private string FixedMatchOpeningsPath() => fixedMatchOpenings.SelectedIndex == 1
+        ? Path.Combine(root, "data", "openings", "core.json")
+        : Path.Combine(root, "data", "openings", "eco-500.json");
+
+    private static int CountOpenings(string path)
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        return document.RootElement.GetProperty("openings").GetArrayLength();
     }
 
     private void PopulateOpenings()
     {
-        string path = Path.Combine(root, "data", "openings", "core.json");
+        string path = OpeningCatalogPath();
         if (!File.Exists(path))
             return;
         try
         {
+            availableOpenings.Clear();
+            selectedOpeningIds.Clear();
             using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
             foreach (JsonElement item in document.RootElement.GetProperty("openings").EnumerateArray())
             {
@@ -685,13 +957,88 @@ internal sealed class MainForm : Form
                 string eco = item.TryGetProperty("eco", out JsonElement ecoElement) &&
                              ecoElement.ValueKind != JsonValueKind.Null ? $" ({ecoElement.GetString()})" : string.Empty;
                 if (!string.IsNullOrWhiteSpace(id))
-                    openingSelection.Items.Add(new OpeningChoice(id, name + eco), true);
+                {
+                    OpeningChoice opening = new(id, eco.Trim(' ', '(', ')') is { Length: > 0 } code
+                        ? $"{code} · {name}"
+                        : name);
+                    availableOpenings.Add(opening);
+                    selectedOpeningIds.Add(id);
+                }
             }
+            RefreshOpeningSelection();
         }
         catch (Exception exception)
         {
             AppendLog($"No se pudieron cargar las aperturas: {exception.Message}\n");
         }
+    }
+
+    private string OpeningCatalogPath()
+    {
+        string ecoCatalog = Path.Combine(root, "data", "openings", "eco-500.json");
+        return File.Exists(ecoCatalog) ? ecoCatalog : Path.Combine(root, "data", "openings", "core.json");
+    }
+
+    private void OnOpeningItemCheck(object? sender, ItemCheckEventArgs eventArgs)
+    {
+        if (eventArgs.Index < 0 || eventArgs.Index >= openingSelection.Items.Count)
+            return;
+        if (openingSelection.Items[eventArgs.Index] is not OpeningChoice opening)
+            return;
+        if (eventArgs.NewValue == CheckState.Checked)
+            selectedOpeningIds.Add(opening.Id);
+        else
+            selectedOpeningIds.Remove(opening.Id);
+    }
+
+    private void RefreshOpeningSelection()
+    {
+        string query = openingFilter.Text.Trim();
+        IEnumerable<OpeningChoice> visible = availableOpenings;
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            visible = visible.Where(opening => opening.DisplayName.Contains(query,
+                StringComparison.OrdinalIgnoreCase));
+        }
+
+        openingSelection.BeginUpdate();
+        try
+        {
+            openingSelection.Items.Clear();
+            foreach (OpeningChoice opening in visible)
+            {
+                int index = openingSelection.Items.Add(opening);
+                openingSelection.SetItemChecked(index, selectedOpeningIds.Contains(opening.Id));
+            }
+        }
+        finally
+        {
+            openingSelection.EndUpdate();
+        }
+    }
+
+    private void SetAllOpenings(bool selected)
+    {
+        foreach (OpeningChoice opening in availableOpenings)
+        {
+            if (selected)
+                selectedOpeningIds.Add(opening.Id);
+            else
+                selectedOpeningIds.Remove(opening.Id);
+        }
+        RefreshOpeningSelection();
+    }
+
+    private void SetVisibleOpenings(bool selected)
+    {
+        foreach (OpeningChoice opening in openingSelection.Items.OfType<OpeningChoice>())
+        {
+            if (selected)
+                selectedOpeningIds.Add(opening.Id);
+            else
+                selectedOpeningIds.Remove(opening.Id);
+        }
+        RefreshOpeningSelection();
     }
 
     private string CreateCycleConfig()
@@ -725,6 +1072,8 @@ internal sealed class MainForm : Form
         int adjustedEvaluation = PairedCount(evaluationGames.Value, openingCount);
         budgets["selfplay_games"] = adjustedSelfplay;
         budgets["evaluation_games"] = adjustedEvaluation;
+        budgets["threads"] = (int)trainingThreads.Value;
+        budgets["cores"] = (int)trainingCores.Value;
         if (adjustedSelfplay != (int)selfplayGames.Value || adjustedEvaluation != (int)evaluationGames.Value)
             AppendLog($"Emparejado: {openingCount} aperturas × 2 colores; partidas ajustadas a {adjustedSelfplay} / {adjustedEvaluation}.\n");
         if (customOpeningsPath is not null)
@@ -778,7 +1127,7 @@ internal sealed class MainForm : Form
     }
 
     private List<OpeningChoice> SelectedOpenings() =>
-        openingSelection.CheckedItems.OfType<OpeningChoice>().ToList();
+        availableOpenings.Where(opening => selectedOpeningIds.Contains(opening.Id)).ToList();
 
     private static JsonArray OpeningIds(IEnumerable<OpeningChoice> openings)
     {
@@ -790,7 +1139,7 @@ internal sealed class MainForm : Form
 
     private string CreateCustomOpeningSource(string stamp, IReadOnlyCollection<OpeningChoice> selected)
     {
-        string corePath = Path.Combine(root, "data", "openings", "core.json");
+        string corePath = OpeningCatalogPath();
         JsonObject core = JsonNode.Parse(File.ReadAllText(corePath))?.AsObject() ??
                           throw new InvalidDataException("El catálogo de aperturas está vacío");
         JsonArray openings = [];
@@ -870,12 +1219,13 @@ internal sealed class MainForm : Form
         string cmake = Path.Combine(root, ".venv", "Scripts", "cmake.exe");
         if (!File.Exists(cmake))
             cmake = "cmake";
-        bool configured = await RunTaskAsync(cmake, ["-S", ".", "-B", "build", "-A", "x64", "-DCHESSBOT_SLOW_TESTS=ON"], "Configurar", false);
+        bool configured = await RunTaskAsync(cmake, ["-S", ".", "-B", "build", "-A", "x64", "-DCHESSBOT_SLOW_TESTS=ON"], "Configurar", false, LogContext.Tools);
         if (configured)
-            await RunTaskAsync(cmake, ["--build", "build", "--config", "Release", "--parallel"], "Compilar");
+            await RunTaskAsync(cmake, ["--build", "build", "--config", "Release", "--parallel"], "Compilar", true, LogContext.Tools);
     }
 
-    private async Task<bool> RunTaskAsync(string executable, IReadOnlyList<string> arguments, string name, bool notify = true)
+    private async Task<bool> RunTaskAsync(string executable, IReadOnlyList<string> arguments, string name,
+                                          bool notify = true, LogContext context = LogContext.Training)
     {
         if (activeProcess is not null)
         {
@@ -887,7 +1237,11 @@ internal sealed class MainForm : Form
             MessageBox.Show("No se encuentra: " + executable, "ChessBot", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return false;
         }
+        activeLog = context == LogContext.Tools ? toolsLog : trainingLog;
         AppendLog($"\n[{DateTime.Now:HH:mm:ss}] {name}\n");
+        lock (processOutputGate)
+            processOutput.Clear();
+        cancelRequested = false;
         ProcessStartInfo start = HiddenProcess(executable);
         foreach (string argument in arguments)
             start.ArgumentList.Add(argument);
@@ -895,19 +1249,28 @@ internal sealed class MainForm : Form
         try
         {
             activeProcess = new Process { StartInfo = start, EnableRaisingEvents = true };
-            activeProcess.OutputDataReceived += (_, eventArgs) => { if (eventArgs.Data is not null) AppendLog(eventArgs.Data + "\n"); };
-            activeProcess.ErrorDataReceived += (_, eventArgs) => { if (eventArgs.Data is not null) AppendLog(eventArgs.Data + "\n"); };
+            activeProcess.OutputDataReceived += (_, eventArgs) => RecordProcessOutput(eventArgs.Data);
+            activeProcess.ErrorDataReceived += (_, eventArgs) => RecordProcessOutput(eventArgs.Data);
             activeProcess.Start();
             cancelButton.Enabled = true;
             activeProcess.BeginOutputReadLine();
             activeProcess.BeginErrorReadLine();
             await activeProcess.WaitForExitAsync();
             int code = activeProcess.ExitCode;
-            AppendLog($"[{DateTime.Now:HH:mm:ss}] {(code == 0 ? "Completado" : "Terminó con error " + code)}\n");
+            string details;
+            lock (processOutputGate)
+                details = processOutput.ToString().Trim();
+            if (details.Length > 4000)
+                details = details[^4000..];
+            string result = code == 0 ? "Completado" : cancelRequested ? "Cancelado por el usuario" : "Terminó con error " + code;
+            AppendLog($"[{DateTime.Now:HH:mm:ss}] {result}\n");
             if (notify)
-                MessageBox.Show(code == 0 ? name + " completado." : name + " terminó con errores. Revisa el registro.",
+                MessageBox.Show(code == 0 ? name + " completado." : cancelRequested
+                                    ? name + " cancelado por el usuario."
+                                    : name + " terminó con error " + code + ".\n\n" +
+                                      (string.IsNullOrWhiteSpace(details) ? "El proceso no proporcionó detalles." : details),
                                 "ChessBot", MessageBoxButtons.OK,
-                                code == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Error);
+                                code == 0 || cancelRequested ? MessageBoxIcon.Information : MessageBoxIcon.Error);
             return code == 0;
         }
         catch (Exception exception)
@@ -922,6 +1285,7 @@ internal sealed class MainForm : Form
             activeProcess?.Dispose();
             activeProcess = null;
             cancelButton.Enabled = false;
+            cancelRequested = false;
         }
     }
 
@@ -930,12 +1294,28 @@ internal sealed class MainForm : Form
         try
         {
             if (activeProcess is { HasExited: false })
+            {
+                cancelRequested = true;
                 activeProcess.Kill(true);
+            }
         }
         catch
         {
             // The process may finish between the state check and Kill.
         }
+    }
+
+    private void RecordProcessOutput(string? line)
+    {
+        if (line is null)
+            return;
+        lock (processOutputGate)
+        {
+            processOutput.AppendLine(line);
+            if (processOutput.Length > 12000)
+                processOutput.Remove(0, processOutput.Length - 12000);
+        }
+        AppendLog(line + "\n");
     }
 
     private static ProcessStartInfo HiddenProcess(string executable) => new()
@@ -966,10 +1346,38 @@ internal sealed class MainForm : Form
     }
 
     private bool PlayerIsWhite() => playerColor.SelectedIndex == 0;
+    private bool UsePlayStockfish() => playOpponent.SelectedIndex == 1;
+    private string PlayEnginePath() => UsePlayStockfish() ? playStockfish.Text.Trim() : engine;
+    private string PlayEngineName() => UsePlayStockfish() ? $"Stockfish {playStockfishElo.Value} Elo" : "ChessBot";
     private bool SideToMoveIsWhite() => currentFen.Split(' ', StringSplitOptions.RemoveEmptyEntries).ElementAtOrDefault(1) == "w";
     private string NewOutput(string prefix) => Path.Combine(root, "build", $"{prefix}-{DateTime.Now:yyyyMMdd-HHmmss}");
     private static string UniqueOutput(string path) => Directory.Exists(path) || File.Exists(path) ? path + "-" + DateTime.Now.ToString("HHmmss") : path;
     private string StatusText() => $"Proyecto: {root}\nMotor: {(File.Exists(engine) ? "listo" : "pendiente de compilar")}\nPython de entrenamiento: {(File.Exists(python) ? "listo" : "no instalado")}";
+
+    private static NumericUpDown ThreadSelector() => new()
+    {
+        Minimum = 1,
+        Maximum = Math.Clamp(Environment.ProcessorCount, 1, 256),
+        Value = 1
+    };
+
+    private static NumericUpDown CoreSelector() => new()
+    {
+        Minimum = 1,
+        Maximum = Math.Clamp(Environment.ProcessorCount, 1, 64),
+        Value = 1
+    };
+
+    private static IntPtr ProcessorMask(int cores)
+    {
+        int bits = IntPtr.Size * 8;
+        if (cores >= bits)
+            return new IntPtr(-1);
+        ulong mask = (1UL << cores) - 1;
+        return IntPtr.Size == 8
+            ? new IntPtr(unchecked((long)mask))
+            : new IntPtr(unchecked((int)mask));
+    }
 
     private void OpenTrainingHistory()
     {
@@ -1015,6 +1423,83 @@ internal sealed class MainForm : Form
         return null;
     }
 
+    private static RichTextBox CreateLogBox() => new()
+    {
+        Dock = DockStyle.Fill,
+        MinimumSize = new Size(100, 170),
+        ReadOnly = true,
+        BackColor = Color.FromArgb(24, 26, 31),
+        ForeColor = Color.Gainsboro,
+        Font = new Font("Consolas", 9.5f),
+        BorderStyle = BorderStyle.FixedSingle,
+        DetectUrls = false,
+        WordWrap = false,
+        ScrollBars = RichTextBoxScrollBars.Both,
+        HideSelection = false
+    };
+
+    private Control BuildLogPanel(RichTextBox target, string title)
+    {
+        TableLayoutPanel panel = new()
+        {
+            Dock = DockStyle.Fill,
+            RowCount = 2,
+            ColumnCount = 1,
+            BackColor = Paper,
+            Margin = new Padding(0, 6, 0, 0)
+        };
+        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        FlowLayoutPanel toolbar = new()
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            FlowDirection = FlowDirection.LeftToRight,
+            WrapContents = false,
+            Margin = new Padding(0, 0, 0, 5)
+        };
+        toolbar.Controls.Add(new Label
+        {
+            Text = title,
+            AutoSize = true,
+            Font = new Font(Font, FontStyle.Bold),
+            Margin = new Padding(0, 7, 12, 0)
+        });
+        toolbar.Controls.Add(new Label
+        {
+            Text = "La vista se mantiene al consultar líneas antiguas.",
+            AutoSize = true,
+            ForeColor = Color.FromArgb(91, 102, 99),
+            Margin = new Padding(0, 7, 12, 0)
+        });
+        Button tail = new() { Text = "Ir al final", AutoSize = true, Margin = new Padding(0, 0, 0, 0) };
+        tail.Click += (_, _) => JumpLogToEnd(target);
+        toolbar.Controls.Add(tail);
+        panel.Controls.Add(toolbar, 0, 0);
+        panel.Controls.Add(target, 0, 1);
+        return panel;
+    }
+
+    private static bool IsAtLogEnd(RichTextBox target)
+    {
+        if (target.TextLength == 0 || target.ClientSize.Height <= 0)
+            return true;
+        int firstChar = target.GetCharIndexFromPosition(new Point(2, 2));
+        int firstLine = target.GetLineFromCharIndex(Math.Max(0, firstChar));
+        int lastLine = target.GetLineFromCharIndex(Math.Max(0, target.TextLength - 1));
+        int visibleLines = Math.Max(1, (target.ClientSize.Height - 6) / Math.Max(1, target.Font.Height));
+        return lastLine - firstLine <= visibleLines;
+    }
+
+    private static void JumpLogToEnd(RichTextBox target)
+    {
+        target.Focus();
+        target.SelectionStart = target.TextLength;
+        target.SelectionLength = 0;
+        target.ScrollToCaret();
+    }
+
     private void AppendLog(string text)
     {
         if (InvokeRequired)
@@ -1022,9 +1507,20 @@ internal sealed class MainForm : Form
             BeginInvoke(() => AppendLog(text));
             return;
         }
-        log.AppendText(text);
-        log.SelectionStart = log.TextLength;
-        log.ScrollToCaret();
+        RichTextBox target = activeLog;
+        bool followTail = IsAtLogEnd(target);
+        int selectionStart = target.SelectionStart;
+        int selectionLength = target.SelectionLength;
+        target.AppendText(text);
+        if (followTail)
+        {
+            JumpLogToEnd(target);
+        }
+        else
+        {
+            target.Select(Math.Min(selectionStart, target.TextLength),
+                          Math.Min(selectionLength, Math.Max(0, target.TextLength - selectionStart)));
+        }
     }
 
     private static string TranslateStatus(string status) => status switch

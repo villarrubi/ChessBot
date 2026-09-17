@@ -1,0 +1,9721 @@
+{
+  "schema_version": 1,
+  "version": "eco-500-lichess-v1",
+  "source": "lichess-org/chess-openings (CC0)",
+  "source_url": "https://github.com/lichess-org/chess-openings",
+  "description": "Una línea representativa para cada código ECO A00-E99.",
+  "openings": [
+    {
+      "id": "eco_a00",
+      "name": "Grob Opening: Grob Gambit, Fritz Gambit, Romford Countergambit",
+      "eco": "A00",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g2g4",
+        "d7d5",
+        "f1g2",
+        "c8g4",
+        "c2c4",
+        "d5d4",
+        "g2b7",
+        "b8d7",
+        "b7a8",
+        "d8a8"
+      ]
+    },
+    {
+      "id": "eco_a01",
+      "name": "Nimzo-Larsen Attack: Modern Variation",
+      "eco": "A01",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "b2b3",
+        "e7e5",
+        "c1b2",
+        "b8c6",
+        "c2c4",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_a02",
+      "name": "Bird Opening: From's Gambit, Lipke Variation",
+      "eco": "A02",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "f2f4",
+        "e7e5",
+        "f4e5",
+        "d7d6",
+        "e5d6",
+        "f8d6",
+        "g1f3",
+        "g8h6",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_a03",
+      "name": "Bird Opening: Thomas Gambit",
+      "eco": "A03",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "f2f4",
+        "d7d5",
+        "b2b3",
+        "g8f6",
+        "c1b2",
+        "d5d4",
+        "g1f3",
+        "c7c5",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_a04",
+      "name": "Modern Defense: Semi-Averbakh Variation, Pterodactyl Variation Accepted",
+      "eco": "A04",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g1f3",
+        "g7g6",
+        "d2d4",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "c2c4",
+        "c7c5",
+        "d4c5",
+        "d8a5"
+      ]
+    },
+    {
+      "id": "eco_a05",
+      "name": "King's Indian Attack: Wahls Defense",
+      "eco": "A05",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g1f3",
+        "g8f6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "e1g1",
+        "e8g8",
+        "d2d3",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_a06",
+      "name": "Zukertort Opening: Tennison Gambit, Brigg's Trap",
+      "eco": "A06",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "d7d5",
+        "g1f3",
+        "d5e4",
+        "f3g5",
+        "g8f6",
+        "b1c3",
+        "c8f5",
+        "d1e2",
+        "d8d4"
+      ]
+    },
+    {
+      "id": "eco_a07",
+      "name": "King's Indian Attack, with Bf5",
+      "eco": "A07",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g1f3",
+        "g8f6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "c7c6",
+        "e1g1",
+        "c8f5",
+        "d2d3",
+        "h7h6"
+      ]
+    },
+    {
+      "id": "eco_a08",
+      "name": "King's Indian Attack: Sicilian Variation",
+      "eco": "A08",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g1f3",
+        "d7d5",
+        "g2g3",
+        "c7c5",
+        "f1g2",
+        "g8f6",
+        "e1g1",
+        "e7e6",
+        "d2d3"
+      ]
+    },
+    {
+      "id": "eco_a09",
+      "name": "Réti Opening: Reversed Blumenfeld Gambit",
+      "eco": "A09",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g1f3",
+        "d7d5",
+        "c2c4",
+        "d5d4",
+        "e2e3",
+        "c7c5",
+        "b2b4"
+      ]
+    },
+    {
+      "id": "eco_a10",
+      "name": "English Opening: Porcupine Variation",
+      "eco": "A10",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "f7f5",
+        "b1c3",
+        "g8f6",
+        "e2e4",
+        "f5e4",
+        "g2g4"
+      ]
+    },
+    {
+      "id": "eco_a11",
+      "name": "Réti Opening: Anglo-Slav Variation, Gurevich System",
+      "eco": "A11",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "d7d5",
+        "e2e3",
+        "g8f6",
+        "b1c3",
+        "b8d7",
+        "b2b3",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_a12",
+      "name": "Réti Opening: Anglo-Slav Variation, Capablanca Variation",
+      "eco": "A12",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "g1f3",
+        "c7c6",
+        "b2b3",
+        "d7d5",
+        "c1b2",
+        "c8g4",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_a13",
+      "name": "English Opening: Agincourt Defense",
+      "eco": "A13",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b2b3",
+        "g8f6",
+        "c1b2",
+        "f8e7",
+        "e2e3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_a14",
+      "name": "English Opening: Agincourt Defense, Neo-Catalan Declined, Early b3",
+      "eco": "A14",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "g2g3",
+        "g8f6",
+        "f1g2",
+        "f8e7",
+        "b2b3",
+        "b7b6"
+      ]
+    },
+    {
+      "id": "eco_a15",
+      "name": "English Opening: Anglo-Indian Defense, King's Indian Formation, Double Fianchetto",
+      "eco": "A15",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "g1f3",
+        "g7g6",
+        "g2g3",
+        "b7b6",
+        "f1g2",
+        "c8b7"
+      ]
+    },
+    {
+      "id": "eco_a16",
+      "name": "English Opening: Anglo-Indian Defense, Anglo-Grünfeld Variation",
+      "eco": "A16",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "d5b6"
+      ]
+    },
+    {
+      "id": "eco_a17",
+      "name": "English Opening: Anglo-Indian Defense",
+      "eco": "A17",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "g1f3",
+        "c7c5",
+        "e2e3",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_a18",
+      "name": "English Opening: Mikenas-Carls Variation",
+      "eco": "A18",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "e2e4",
+        "d7d5",
+        "e4e5"
+      ]
+    },
+    {
+      "id": "eco_a19",
+      "name": "English Opening: Anglo-Indian Defense, Flohr-Mikenas-Carls Variation, Nei Gambit",
+      "eco": "A19",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "e2e4",
+        "c7c5",
+        "e4e5",
+        "f6g8"
+      ]
+    },
+    {
+      "id": "eco_a20",
+      "name": "English Opening: King's English Variation, Kahiko-Hula Gambit",
+      "eco": "A20",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "e2e3",
+        "g8f6",
+        "f2f4",
+        "e5f4",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_a21",
+      "name": "English Opening: King's English Variation, Troger Defense",
+      "eco": "A21",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "d7d6",
+        "f1g2",
+        "c8e6"
+      ]
+    },
+    {
+      "id": "eco_a22",
+      "name": "English Opening: King's English Variation, Adhiban Gambit",
+      "eco": "A22",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "g1f3",
+        "e5e4",
+        "f3g5",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_a23",
+      "name": "English Opening: King's English Variation, Two Knights Variation, Keres Variation",
+      "eco": "A23",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "g2g3",
+        "f8c5",
+        "f1g2",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_a24",
+      "name": "English Opening: King's English Variation, Two Knights Variation, Fianchetto Line",
+      "eco": "A24",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "g2g3",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_a25",
+      "name": "English Opening: Closed, Taimanov Variation",
+      "eco": "A25",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "a1b1",
+        "g8h6",
+        "f1g2",
+        "f8g7"
+      ]
+    },
+    {
+      "id": "eco_a26",
+      "name": "English Opening: King's English Variation, Closed System, Full Symmetry",
+      "eco": "A26",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "d2d3",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_a27",
+      "name": "English Opening: King's English Variation, Three Knights System",
+      "eco": "A27",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "b8c6",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_a28",
+      "name": "English Opening: King's English Variation, Four Knights Variation, Quiet Line",
+      "eco": "A28",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "g1f3",
+        "b8c6",
+        "e2e3",
+        "f8b4",
+        "d1c2",
+        "b4c3"
+      ]
+    },
+    {
+      "id": "eco_a29",
+      "name": "English Opening: King's English Variation, Four Knights Variation, Fianchetto Line",
+      "eco": "A29",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e5",
+        "g2g3",
+        "g8f6",
+        "f1g2",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "g1f3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_a30",
+      "name": "English Opening: Symmetrical Variation, Hedgehog Defense",
+      "eco": "A30",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "c7c5",
+        "g2g3",
+        "b7b6",
+        "f1g2",
+        "c8b7",
+        "e1g1",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_a31",
+      "name": "English Opening: Symmetrical Variation, Anti-Benoni Variation",
+      "eco": "A31",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "d2d4",
+        "c7c5",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_a32",
+      "name": "English Opening: Symmetrical Variation, Anti-Benoni Variation, Spielmann Defense",
+      "eco": "A32",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "d2d4",
+        "c7c5",
+        "g1f3",
+        "c5d4",
+        "f3d4",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_a33",
+      "name": "English Opening: Symmetrical Variation, Anti-Benoni Variation, Spielmann Defense",
+      "eco": "A33",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "c7c5",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_a34",
+      "name": "English Opening: Symmetrical Variation",
+      "eco": "A34",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "c7c5",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "d7d5",
+        "d2d4",
+        "c5d4"
+      ]
+    },
+    {
+      "id": "eco_a35",
+      "name": "English Opening: Symmetrical Variation, Four Knights Variation, Keres-Parma System",
+      "eco": "A35",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "c7c5",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_a36",
+      "name": "English Opening: Symmetrical Variation, Botvinnik System Reversed, with e3",
+      "eco": "A36",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "e2e3",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_a37",
+      "name": "English Opening: Symmetrical Variation, Botvinnik System Reversed, with Nf3",
+      "eco": "A37",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "g1f3",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_a38",
+      "name": "English Opening: Symmetrical Variation, Full Symmetry Line",
+      "eco": "A38",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "g1f3",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7"
+      ]
+    },
+    {
+      "id": "eco_a39",
+      "name": "English Opening: Symmetrical Variation, Mecking Variation",
+      "eco": "A39",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "g8f6",
+        "g1f3",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "e1g1",
+        "e8g8",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_a40",
+      "name": "Colle System: Siroccopteryx Variation",
+      "eco": "A40",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "e2e3",
+        "c7c5",
+        "f1d3",
+        "c5d4",
+        "f3d4",
+        "d8a5"
+      ]
+    },
+    {
+      "id": "eco_a41",
+      "name": "Robatsch Defense: Rossolimo Variation",
+      "eco": "A41",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d6",
+        "g1f3",
+        "g7g6",
+        "c2c4",
+        "f8g7",
+        "e2e4",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_a42",
+      "name": "Pterodactyl Defense",
+      "eco": "A42",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "g1f3",
+        "c7c5",
+        "c2c4",
+        "g7g6",
+        "d2d4",
+        "f8g7",
+        "e2e4",
+        "d8a5",
+        "b1c3",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_a43",
+      "name": "Benoni Defense: Hawk Variation",
+      "eco": "A43",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "c5c4"
+      ]
+    },
+    {
+      "id": "eco_a44",
+      "name": "Benoni Defense: Semi-Benoni",
+      "eco": "A44",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "c7c5",
+        "d4d5",
+        "e7e5",
+        "e2e4",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_a45",
+      "name": "Indian Defense: Gibbins-Weidenhagen Gambit, Stummer Gambit",
+      "eco": "A45",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g2g4",
+        "f6g4",
+        "e2e4",
+        "d7d6",
+        "f1e2",
+        "g4f6",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_a46",
+      "name": "Queen's Pawn Game: Torre Attack, Breyer Variation",
+      "eco": "A46",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "e7e6",
+        "c1g5",
+        "d7d5",
+        "e2e3",
+        "c7c5",
+        "c2c3",
+        "d8b6"
+      ]
+    },
+    {
+      "id": "eco_a47",
+      "name": "Marienbad System: Berg Variation",
+      "eco": "A47",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "b7b6",
+        "g2g3",
+        "c8b7",
+        "f1g2",
+        "c7c5",
+        "c2c4",
+        "c5d4",
+        "d1d4"
+      ]
+    },
+    {
+      "id": "eco_a48",
+      "name": "London System, with Be2",
+      "eco": "A48",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "g7g6",
+        "c1f4",
+        "f8g7",
+        "e2e3",
+        "d7d6",
+        "f1e2",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_a49",
+      "name": "Indian Defense: Przepiorka Variation",
+      "eco": "A49",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "g7g6",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_a50",
+      "name": "Mexican Defense: Horsefly Gambit",
+      "eco": "A50",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "b8c6",
+        "d4d5",
+        "c6e5",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_a51",
+      "name": "Indian Defense: Budapest Gambit Accepted, Fajarowicz Defense, Bonsdorf Variation",
+      "eco": "A51",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e5",
+        "d4e5",
+        "f6e4",
+        "a2a3"
+      ]
+    },
+    {
+      "id": "eco_a52",
+      "name": "Indian Defense: Budapest Gambit Accepted, Main Line, Alekhine Variation, Abonyi Variation",
+      "eco": "A52",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e5",
+        "d4e5",
+        "f6g4",
+        "e2e4",
+        "g4e5"
+      ]
+    },
+    {
+      "id": "eco_a53",
+      "name": "Old Indian Defense: Janowski Variation, Fianchetto Variation",
+      "eco": "A53",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "d7d6",
+        "b1c3",
+        "c8f5",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_a54",
+      "name": "Old Indian Defense: Duz-Khotimirsky Variation",
+      "eco": "A54",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "d7d6",
+        "b1c3",
+        "e7e5",
+        "e2e3",
+        "b8d7",
+        "f1d3"
+      ]
+    },
+    {
+      "id": "eco_a55",
+      "name": "Old Indian Defense: Normal Variation",
+      "eco": "A55",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "d7d6",
+        "b1c3",
+        "b8d7",
+        "e2e4",
+        "e7e5",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_a56",
+      "name": "Benoni Defense: King's Indian System",
+      "eco": "A56",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e5",
+        "b1c3",
+        "d7d6",
+        "e2e4",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_a57",
+      "name": "Benko Gambit Accepted: Dlugy Variation",
+      "eco": "A57",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "b7b5",
+        "c4b5",
+        "a7a6",
+        "f2f3"
+      ]
+    },
+    {
+      "id": "eco_a58",
+      "name": "Benko Gambit Accepted: Fully Accepted Variation",
+      "eco": "A58",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "b7b5",
+        "c4b5",
+        "a7a6",
+        "b5a6"
+      ]
+    },
+    {
+      "id": "eco_a59",
+      "name": "Benko Gambit Accepted: Yugoslav",
+      "eco": "A59",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "b7b5",
+        "c4b5",
+        "a7a6",
+        "b5a6",
+        "c8a6",
+        "b1c3",
+        "d7d6",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_a60",
+      "name": "Benoni Defense: Modern Variation, Snake Variation",
+      "eco": "A60",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "f8d6"
+      ]
+    },
+    {
+      "id": "eco_a61",
+      "name": "Benoni Defense",
+      "eco": "A61",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_a62",
+      "name": "Benoni Defense: Fianchetto Variation",
+      "eco": "A62",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "g1f3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_a63",
+      "name": "Benoni Defense: Fianchetto Variation, Hastings Defense",
+      "eco": "A63",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_a64",
+      "name": "Benoni Defense: Fianchetto Variation, Hastings Defense, Main Line",
+      "eco": "A64",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "a7a6",
+        "a2a4",
+        "b8d7",
+        "f3d2",
+        "f8e8"
+      ]
+    },
+    {
+      "id": "eco_a65",
+      "name": "Benoni Defense: King's Pawn Line",
+      "eco": "A65",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_a66",
+      "name": "Benoni Defense: Pawn Storm Variation",
+      "eco": "A66",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_a67",
+      "name": "Benoni Defense: Taimanov Variation",
+      "eco": "A67",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "f2f4",
+        "f8g7",
+        "f1b5"
+      ]
+    },
+    {
+      "id": "eco_a68",
+      "name": "Benoni Defense: Four Pawns Attack",
+      "eco": "A68",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "f2f4",
+        "f8g7",
+        "g1f3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_a69",
+      "name": "Benoni Defense: Four Pawns Attack, Main Line",
+      "eco": "A69",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "f2f4",
+        "f8g7",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "f8e8"
+      ]
+    },
+    {
+      "id": "eco_a70",
+      "name": "Benoni Defense: Classical Variation",
+      "eco": "A70",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_a71",
+      "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack",
+      "eco": "A71",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "e2e4",
+        "f8g7",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_a72",
+      "name": "Benoni Defense: Classical Variation",
+      "eco": "A72",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_a73",
+      "name": "Benoni Defense: Classical Variation, Main Line",
+      "eco": "A73",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_a74",
+      "name": "Benoni Defense: Classical Variation, Full Line",
+      "eco": "A74",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1",
+        "a7a6",
+        "a2a4"
+      ]
+    },
+    {
+      "id": "eco_a75",
+      "name": "Benoni Defense: Classical Variation, Argentine Counterattack",
+      "eco": "A75",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "e2e4",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1",
+        "a7a6",
+        "a2a4",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_a76",
+      "name": "Benoni Defense: Classical Variation, Czerniak Defense",
+      "eco": "A76",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1",
+        "f8e8"
+      ]
+    },
+    {
+      "id": "eco_a77",
+      "name": "Benoni Defense: Classical Variation, Czerniak Defense, Tal Line",
+      "eco": "A77",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1",
+        "f8e8",
+        "f3d2"
+      ]
+    },
+    {
+      "id": "eco_a78",
+      "name": "Benoni Defense: Classical Variation, Czerniak Defense",
+      "eco": "A78",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "b1c3",
+        "g7g6",
+        "e2e4",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1",
+        "f8e8",
+        "f3d2",
+        "b8a6"
+      ]
+    },
+    {
+      "id": "eco_a79",
+      "name": "Benoni Defense: Classical Variation, Czerniak Defense",
+      "eco": "A79",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "c7c5",
+        "d4d5",
+        "e7e6",
+        "b1c3",
+        "e6d5",
+        "c4d5",
+        "d7d6",
+        "e2e4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2",
+        "e8g8",
+        "e1g1",
+        "f8e8",
+        "f3d2",
+        "b8a6",
+        "f2f3"
+      ]
+    },
+    {
+      "id": "eco_a80",
+      "name": "Dutch Defense: Krejcik Gambit, Tate Gambit",
+      "eco": "A80",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "g2g4",
+        "f5g4",
+        "e2e4",
+        "d7d5",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_a81",
+      "name": "Dutch Defense: Leningrad, Basman System",
+      "eco": "A81",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "g2g3",
+        "c7c6",
+        "f1g2",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "e1g1",
+        "g8h6"
+      ]
+    },
+    {
+      "id": "eco_a82",
+      "name": "Dutch Defense: Blackmar's Second Gambit",
+      "eco": "A82",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "e2e4",
+        "f5e4",
+        "b1c3",
+        "g8f6",
+        "f2f3"
+      ]
+    },
+    {
+      "id": "eco_a83",
+      "name": "Dutch Defense: Staunton Gambit, Alekhine Variation",
+      "eco": "A83",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "e2e4",
+        "f5e4",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "g7g6",
+        "h2h4"
+      ]
+    },
+    {
+      "id": "eco_a84",
+      "name": "Dutch Defense: Krause Variation",
+      "eco": "A84",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "g1f3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_a85",
+      "name": "Dutch Defense: Queen's Knight Variation",
+      "eco": "A85",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_a86",
+      "name": "Dutch Defense: Hort-Antoshin System",
+      "eco": "A86",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "d7d6",
+        "f1g2",
+        "c7c6",
+        "b1c3",
+        "d8c7"
+      ]
+    },
+    {
+      "id": "eco_a87",
+      "name": "Dutch Defense: Leningrad Variation",
+      "eco": "A87",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_a88",
+      "name": "Dutch Defense: Leningrad Variation, Warsaw Variation",
+      "eco": "A88",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "g2g3",
+        "g8f6",
+        "f1g2",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "e1g1",
+        "e8g8",
+        "c2c4",
+        "d7d6",
+        "b1c3",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_a89",
+      "name": "Dutch Defense: Leningrad Variation, Matulovic Variation",
+      "eco": "A89",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "g2g3",
+        "g8f6",
+        "f1g2",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "e1g1",
+        "e8g8",
+        "c2c4",
+        "d7d6",
+        "b1c3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_a90",
+      "name": "Dutch Defense: Nimzo-Dutch Variation, Alekhine Variation",
+      "eco": "A90",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8b4",
+        "c1d2",
+        "b4e7"
+      ]
+    },
+    {
+      "id": "eco_a91",
+      "name": "Dutch Defense: Classical Variation, Blackburne Attack",
+      "eco": "A91",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1h3"
+      ]
+    },
+    {
+      "id": "eco_a92",
+      "name": "Dutch Defense: Classical Variation",
+      "eco": "A92",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_a93",
+      "name": "Dutch Defense: Stonewall Variation, Botvinnik Variation",
+      "eco": "A93",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d5",
+        "b2b3"
+      ]
+    },
+    {
+      "id": "eco_a94",
+      "name": "Dutch Defense: Stonewall Variation",
+      "eco": "A94",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d5",
+        "b2b3",
+        "c7c6",
+        "c1a3"
+      ]
+    },
+    {
+      "id": "eco_a95",
+      "name": "Dutch Defense: Stonewall Variation",
+      "eco": "A95",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d5",
+        "b1c3",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_a96",
+      "name": "Dutch Defense: Classical Variation",
+      "eco": "A96",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_a97",
+      "name": "Dutch Defense: Classical Variation, Ilyin-Zhenevsky Variation",
+      "eco": "A97",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d6",
+        "b1c3",
+        "d8e8"
+      ]
+    },
+    {
+      "id": "eco_a98",
+      "name": "Dutch Defense: Classical Variation, Ilyin-Zhenevsky Variation, Alatortsev-Lisitsyn Line",
+      "eco": "A98",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d6",
+        "b1c3",
+        "d8e8",
+        "d1c2"
+      ]
+    },
+    {
+      "id": "eco_a99",
+      "name": "Dutch Defense: Classical Variation, Ilyin-Zhenevsky Variation, Modern Main Line",
+      "eco": "A99",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "f7f5",
+        "c2c4",
+        "g8f6",
+        "g2g3",
+        "e7e6",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "d7d6",
+        "b1c3",
+        "d8e8",
+        "b2b3"
+      ]
+    },
+    {
+      "id": "eco_b00",
+      "name": "Owen Defense: Matovinsky Gambit",
+      "eco": "B00",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "b7b6",
+        "d2d4",
+        "c8b7",
+        "f1d3",
+        "f7f5",
+        "e4f5",
+        "b7g2",
+        "d1h5",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_b01",
+      "name": "Scandinavian Defense: Anderssen Counterattack, Collijn Variation",
+      "eco": "B01",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "d7d5",
+        "e4d5",
+        "d8d5",
+        "b1c3",
+        "d5a5",
+        "d2d4",
+        "e7e5",
+        "g1f3",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_b02",
+      "name": "Alekhine Defense: Kmoch Variation",
+      "eco": "B02",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "g8f6",
+        "e4e5",
+        "f6d5",
+        "f1c4",
+        "d5b6",
+        "c4b3",
+        "c7c5",
+        "d2d3"
+      ]
+    },
+    {
+      "id": "eco_b03",
+      "name": "Alekhine Defense: Four Pawns Attack, Cambridge Gambit",
+      "eco": "B03",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "g8f6",
+        "e4e5",
+        "f6d5",
+        "d2d4",
+        "d7d6",
+        "c2c4",
+        "d5b6",
+        "f2f4",
+        "g7g5"
+      ]
+    },
+    {
+      "id": "eco_b04",
+      "name": "Alekhine Defense: Modern Variation, Alburt Variation",
+      "eco": "B04",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "g8f6",
+        "e4e5",
+        "f6d5",
+        "d2d4",
+        "d7d6",
+        "g1f3",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_b05",
+      "name": "Alekhine Defense: Modern Variation, Flohr Variation",
+      "eco": "B05",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "g8f6",
+        "e4e5",
+        "f6d5",
+        "d2d4",
+        "d7d6",
+        "g1f3",
+        "c8g4",
+        "f1e2",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_b06",
+      "name": "Modern Defense: Dunworthy Variation",
+      "eco": "B06",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "g7g6",
+        "d2d4",
+        "f8g7",
+        "c2c4",
+        "d7d5",
+        "e4d5",
+        "c7c6",
+        "d5c6",
+        "g7d4"
+      ]
+    },
+    {
+      "id": "eco_b07",
+      "name": "Pirc Defense: 150 Attack, Inner Doll Defense",
+      "eco": "B07",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "d7d6",
+        "d2d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3",
+        "c7c6",
+        "d1d2",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_b08",
+      "name": "Pirc Defense: Classical Variation, Quiet System",
+      "eco": "B08",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "d7d6",
+        "d2d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_b09",
+      "name": "Pirc Defense: Austrian Attack",
+      "eco": "B09",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "d7d6",
+        "d2d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "f2f4",
+        "f8g7",
+        "g1f3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_b10",
+      "name": "Caro-Kann Defense: Endgame Variation",
+      "eco": "B10",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "g1f3",
+        "d7d5",
+        "d2d3",
+        "d5e4",
+        "d3e4",
+        "d8d1",
+        "e1d1"
+      ]
+    },
+    {
+      "id": "eco_b11",
+      "name": "Caro-Kann Defense: Two Knights Attack, Mindeno Variation, Exchange Line",
+      "eco": "B11",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "c8g4",
+        "h2h3",
+        "g4f3"
+      ]
+    },
+    {
+      "id": "eco_b12",
+      "name": "Caro-Kann Defense: Advance, Short Variation",
+      "eco": "B12",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "e4e5",
+        "c8f5",
+        "c2c3",
+        "e7e6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_b13",
+      "name": "Caro-Kann Defense: Panov Attack, Modern Defense",
+      "eco": "B13",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "e4d5",
+        "c6d5",
+        "c2c4",
+        "g8f6",
+        "b1c3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_b14",
+      "name": "Caro-Kann Defense: Panov Attack",
+      "eco": "B14",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "e4d5",
+        "c6d5",
+        "c2c4",
+        "g8f6",
+        "b1c3",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_b15",
+      "name": "Caro-Kann Defense: Tartakower Variation",
+      "eco": "B15",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "d5e4",
+        "c3e4",
+        "g8f6",
+        "e4f6",
+        "e7f6"
+      ]
+    },
+    {
+      "id": "eco_b16",
+      "name": "Caro-Kann Defense: Bronstein-Larsen Variation",
+      "eco": "B16",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "d5e4",
+        "c3e4",
+        "g8f6",
+        "e4f6",
+        "g7f6"
+      ]
+    },
+    {
+      "id": "eco_b17",
+      "name": "Caro-Kann Defense: Karpov Variation, Modern Variation, Ivanchuk Defense",
+      "eco": "B17",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "d5e4",
+        "d2e4",
+        "b8d7",
+        "e4g5",
+        "d7f6"
+      ]
+    },
+    {
+      "id": "eco_b18",
+      "name": "Caro-Kann Defense: Classical Variation, Flohr Variation",
+      "eco": "B18",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "d5e4",
+        "d2e4",
+        "c8f5",
+        "e4g3",
+        "f5g6",
+        "g1h3"
+      ]
+    },
+    {
+      "id": "eco_b19",
+      "name": "Caro-Kann Defense: Classical Variation",
+      "eco": "B19",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "d5e4",
+        "d2e4",
+        "c8f5",
+        "e4g3",
+        "f5g6",
+        "h2h4",
+        "h7h6",
+        "g1f3",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_b20",
+      "name": "Sicilian Defense: Wing Gambit, Marienbad Variation",
+      "eco": "B20",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "b2b4",
+        "c5b4",
+        "a2a3",
+        "d7d5",
+        "e4d5",
+        "d8d5",
+        "c1b2"
+      ]
+    },
+    {
+      "id": "eco_b21",
+      "name": "Sicilian Defense: Smith-Morra Gambit Accepted, Fianchetto Defense",
+      "eco": "B21",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "d2d4",
+        "c5d4",
+        "c2c3",
+        "d4c3",
+        "b1c3",
+        "b8c6",
+        "g1f3",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_b22",
+      "name": "Sicilian Defense: Alapin Variation, Barmen Defense, Modern Line",
+      "eco": "B22",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "c2c3",
+        "d7d5",
+        "e4d5",
+        "d8d5",
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_b23",
+      "name": "Sicilian Defense: Closed, Carlsen Variation",
+      "eco": "B23",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "b1c3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "d1d4",
+        "b8c6",
+        "d4d2"
+      ]
+    },
+    {
+      "id": "eco_b24",
+      "name": "Sicilian Defense: Closed",
+      "eco": "B24",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7"
+      ]
+    },
+    {
+      "id": "eco_b25",
+      "name": "Sicilian Defense: Closed",
+      "eco": "B25",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "d2d3",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_b26",
+      "name": "Sicilian Defense: Closed",
+      "eco": "B26",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "g7g6",
+        "f1g2",
+        "f8g7",
+        "d2d3",
+        "d7d6",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b27",
+      "name": "Pterodactyl Defense: Sicilian, Anhanguera",
+      "eco": "B27",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "g7g6",
+        "d2d4",
+        "f8g7",
+        "b1c3",
+        "d8a5",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b28",
+      "name": "Sicilian Defense: O'Kelly Variation, Normal System, Taimanov Line",
+      "eco": "B28",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "a7a6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_b29",
+      "name": "Sicilian Defense: Nimzowitsch Variation, Exchange Variation",
+      "eco": "B29",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "g8f6",
+        "e4e5",
+        "f6d5",
+        "b1c3",
+        "d5c3"
+      ]
+    },
+    {
+      "id": "eco_b30",
+      "name": "Sicilian Defense: Closed, Anti-Sveshnikov Variation, with Nf6",
+      "eco": "B30",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "b1c3",
+        "e7e5",
+        "f1c4",
+        "f8e7",
+        "d2d3",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_b31",
+      "name": "Sicilian Defense: Nyezhmetdinov-Rossolimo Attack, Fianchetto Variation, Gufeld Gambit",
+      "eco": "B31",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "g7g6",
+        "e1g1",
+        "f8g7",
+        "c2c3",
+        "e7e5",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_b32",
+      "name": "Sicilian Defense: Kalashnikov Variation",
+      "eco": "B32",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "e7e5",
+        "d4b5",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_b33",
+      "name": "Sicilian Defense: Lasker-Pelikan Variation",
+      "eco": "B33",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_b34",
+      "name": "Sicilian Defense: Accelerated Dragon, Exchange Variation",
+      "eco": "B34",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g7g6",
+        "d4c6"
+      ]
+    },
+    {
+      "id": "eco_b35",
+      "name": "Sicilian Defense: Accelerated Dragon, Modern Bc4 Variation",
+      "eco": "B35",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "c1e3",
+        "g8f6",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_b36",
+      "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind",
+      "eco": "B36",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g7g6",
+        "c2c4"
+      ]
+    },
+    {
+      "id": "eco_b37",
+      "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind",
+      "eco": "B37",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g7g6",
+        "c2c4",
+        "f8g7"
+      ]
+    },
+    {
+      "id": "eco_b38",
+      "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind",
+      "eco": "B38",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g7g6",
+        "c2c4",
+        "f8g7",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b39",
+      "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation",
+      "eco": "B39",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g7g6",
+        "c2c4",
+        "f8g7",
+        "c1e3",
+        "g8f6",
+        "b1c3",
+        "f6g4"
+      ]
+    },
+    {
+      "id": "eco_b40",
+      "name": "Sicilian Defense: Alapin Variation, Sherzer Variation",
+      "eco": "B40",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "c2c3",
+        "g8f6",
+        "e4e5",
+        "f6d5",
+        "d2d4",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_b41",
+      "name": "Sicilian Defense: Kan Variation, Maróczy Bind, Hedgehog Variation",
+      "eco": "B41",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "a7a6",
+        "c2c4",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_b42",
+      "name": "Sicilian Defense: Kan Variation, Polugaevsky Variation",
+      "eco": "B42",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "a7a6",
+        "f1d3",
+        "f8c5"
+      ]
+    },
+    {
+      "id": "eco_b43",
+      "name": "Sicilian Defense: Kan Variation, Wing Attack",
+      "eco": "B43",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "a7a6",
+        "b1c3",
+        "b7b5"
+      ]
+    },
+    {
+      "id": "eco_b44",
+      "name": "Sicilian Defense: Taimanov Variation, Szén Variation",
+      "eco": "B44",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "d4b5"
+      ]
+    },
+    {
+      "id": "eco_b45",
+      "name": "Sicilian Defense: Four Knights Variation",
+      "eco": "B45",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "b1c3",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_b46",
+      "name": "Sicilian Defense: Taimanov Variation",
+      "eco": "B46",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "b1c3",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_b47",
+      "name": "Sicilian Defense: Taimanov Variation, Bastrikov Variation",
+      "eco": "B47",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "b1c3",
+        "d8c7"
+      ]
+    },
+    {
+      "id": "eco_b48",
+      "name": "Sicilian Defense: Taimanov Variation, Bastrikov Variation, English Attack",
+      "eco": "B48",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "b1c3",
+        "d8c7",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b49",
+      "name": "Sicilian Defense: Taimanov Variation, Bastrikov Variation",
+      "eco": "B49",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "b1c3",
+        "d8c7",
+        "c1e3",
+        "a7a6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_b50",
+      "name": "Sicilian Defense: Modern Variations, Anti-Qxd4 Move Order Accepted",
+      "eco": "B50",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "g8f6",
+        "d4c5",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_b51",
+      "name": "Sicilian Defense: Moscow Variation, Dorfman Gambit",
+      "eco": "B51",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "f1b5",
+        "b8c6",
+        "e1g1",
+        "c8d7",
+        "d1e2",
+        "g7g6",
+        "e4e5"
+      ]
+    },
+    {
+      "id": "eco_b52",
+      "name": "Sicilian Defense: Moscow Variation, Sokolsky Variation",
+      "eco": "B52",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "f1b5",
+        "c8d7",
+        "b5d7",
+        "d8d7",
+        "c2c4"
+      ]
+    },
+    {
+      "id": "eco_b53",
+      "name": "Sicilian Defense: Chekhover Variation, Zaitsev Defense",
+      "eco": "B53",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "d1d4",
+        "b8c6",
+        "f1b5",
+        "d8d7"
+      ]
+    },
+    {
+      "id": "eco_b54",
+      "name": "Sicilian Defense: Modern Variations, Ginsberg Gambit",
+      "eco": "B54",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_b55",
+      "name": "Sicilian Defense: Prins Variation, Venice Attack",
+      "eco": "B55",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "f2f3",
+        "e7e5",
+        "f1b5"
+      ]
+    },
+    {
+      "id": "eco_b56",
+      "name": "Sicilian Defense: Classical Variation",
+      "eco": "B56",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_b57",
+      "name": "Sicilian Defense: Classical Variation, Sozin Attack",
+      "eco": "B57",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_b58",
+      "name": "Sicilian Defense: Classical Variation",
+      "eco": "B58",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_b59",
+      "name": "Sicilian Defense: Boleslavsky Variation",
+      "eco": "B59",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "f1e2",
+        "e7e5",
+        "d4b3"
+      ]
+    },
+    {
+      "id": "eco_b60",
+      "name": "Sicilian Defense: Richter-Rauzer Variation",
+      "eco": "B60",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_b61",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Modern Variation",
+      "eco": "B61",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "c1g5",
+        "c8d7",
+        "d1d2"
+      ]
+    },
+    {
+      "id": "eco_b62",
+      "name": "Sicilian Defense: Richter-Rauzer Variation",
+      "eco": "B62",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "c1g5",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_b63",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Traditional Variation",
+      "eco": "B63",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "c1g5",
+        "e7e6",
+        "d1d2"
+      ]
+    },
+    {
+      "id": "eco_b64",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Classical Variation",
+      "eco": "B64",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "c1g5",
+        "e7e6",
+        "d1d2",
+        "f8e7",
+        "e1c1",
+        "e8g8",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_b65",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Rauzer Attack",
+      "eco": "B65",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "c1g5",
+        "e7e6",
+        "d1d2",
+        "f8e7",
+        "e1c1",
+        "e8g8",
+        "f2f4",
+        "c6d4"
+      ]
+    },
+    {
+      "id": "eco_b66",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Neo-Modern Variation, Early Deviations",
+      "eco": "B66",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "c1g5",
+        "e7e6",
+        "d1d2",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_b67",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Neo-Modern Variation",
+      "eco": "B67",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "c1g5",
+        "e7e6",
+        "d1d2",
+        "a7a6",
+        "e1c1",
+        "c8d7"
+      ]
+    },
+    {
+      "id": "eco_b68",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Neo-Modern Variation",
+      "eco": "B68",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "c1g5",
+        "e7e6",
+        "d1d2",
+        "a7a6",
+        "e1c1",
+        "c8d7",
+        "f2f4",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_b69",
+      "name": "Sicilian Defense: Richter-Rauzer Variation, Neo-Modern Variation, Nyezhmetdinov Attack",
+      "eco": "B69",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "c1g5",
+        "e7e6",
+        "d1d2",
+        "a7a6",
+        "e1c1",
+        "c8d7",
+        "f2f4",
+        "f8e7",
+        "d4f3",
+        "b7b5",
+        "g5f6"
+      ]
+    },
+    {
+      "id": "eco_b70",
+      "name": "Sicilian Defense: Dragon Variation",
+      "eco": "B70",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_b71",
+      "name": "Sicilian Defense: Dragon Variation, Levenfish Variation",
+      "eco": "B71",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_b72",
+      "name": "Sicilian Defense: Dragon Variation",
+      "eco": "B72",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b73",
+      "name": "Sicilian Defense: Dragon Variation, Classical Variation",
+      "eco": "B73",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "f1e2",
+        "f8g7",
+        "e1g1",
+        "b8c6",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b74",
+      "name": "Sicilian Defense: Dragon Variation, Classical Variation, Normal Line",
+      "eco": "B74",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "f1e2",
+        "f8g7",
+        "e1g1",
+        "e8g8",
+        "c1e3",
+        "b8c6",
+        "d4b3"
+      ]
+    },
+    {
+      "id": "eco_b75",
+      "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Early Deviations",
+      "eco": "B75",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3",
+        "f8g7",
+        "f2f3"
+      ]
+    },
+    {
+      "id": "eco_b76",
+      "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack",
+      "eco": "B76",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3",
+        "f8g7",
+        "f2f3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_b77",
+      "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Main Line",
+      "eco": "B77",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3",
+        "f8g7",
+        "f2f3",
+        "e8g8",
+        "d1d2",
+        "b8c6",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_b78",
+      "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack",
+      "eco": "B78",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3",
+        "f8g7",
+        "f2f3",
+        "e8g8",
+        "d1d2",
+        "b8c6",
+        "f1c4",
+        "c8d7",
+        "e1c1"
+      ]
+    },
+    {
+      "id": "eco_b79",
+      "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack",
+      "eco": "B79",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "g7g6",
+        "c1e3",
+        "f8g7",
+        "f2f3",
+        "e8g8",
+        "d1d2",
+        "b8c6",
+        "f1c4",
+        "c8d7",
+        "h2h4",
+        "d8a5",
+        "e1c1",
+        "f8c8",
+        "c4b3"
+      ]
+    },
+    {
+      "id": "eco_b80",
+      "name": "Sicilian Defense: Scheveningen Variation",
+      "eco": "B80",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_b81",
+      "name": "Sicilian Defense: Scheveningen Variation, Keres Attack",
+      "eco": "B81",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "g2g4"
+      ]
+    },
+    {
+      "id": "eco_b82",
+      "name": "Sicilian Defense: Scheveningen Variation, Matanovic Attack",
+      "eco": "B82",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_b83",
+      "name": "Sicilian Defense: Scheveningen Variation, Classical Variation",
+      "eco": "B83",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_b84",
+      "name": "Sicilian Defense: Scheveningen Variation, Classical Variation",
+      "eco": "B84",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "f1e2",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_b85",
+      "name": "Sicilian Defense: Scheveningen Variation, Classical Variation, Paulsen Variation",
+      "eco": "B85",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "f2f4",
+        "e7e6",
+        "f1e2",
+        "d8c7",
+        "e1g1",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_b86",
+      "name": "Sicilian Defense: Sozin Attack",
+      "eco": "B86",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "e7e6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_b87",
+      "name": "Sicilian Defense: Sozin Attack, Flank Variation",
+      "eco": "B87",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "f1c4",
+        "e7e6",
+        "c4b3",
+        "b7b5"
+      ]
+    },
+    {
+      "id": "eco_b88",
+      "name": "Sicilian Defense: Sozin Attack, Leonhardt Variation",
+      "eco": "B88",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "f1c4",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_b89",
+      "name": "Sicilian Defense: Sozin Attack, Main Line",
+      "eco": "B89",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "d7d6",
+        "f1c4",
+        "e7e6",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_b90",
+      "name": "Sicilian Defense: Najdorf Variation",
+      "eco": "B90",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_b91",
+      "name": "Sicilian Defense: Najdorf Variation, Zagreb Variation",
+      "eco": "B91",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_b92",
+      "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation",
+      "eco": "B92",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_b93",
+      "name": "Sicilian Defense: Najdorf Variation, Amsterdam Variation",
+      "eco": "B93",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_b94",
+      "name": "Sicilian Defense: Najdorf Variation",
+      "eco": "B94",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_b95",
+      "name": "Sicilian Defense: Najdorf Variation",
+      "eco": "B95",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "c1g5",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_b96",
+      "name": "Sicilian Defense: Najdorf Variation",
+      "eco": "B96",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "c1g5",
+        "e7e6",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_b97",
+      "name": "Sicilian Defense: Najdorf Variation, Poisoned Pawn Variation",
+      "eco": "B97",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "c1g5",
+        "e7e6",
+        "f2f4",
+        "d8b6"
+      ]
+    },
+    {
+      "id": "eco_b98",
+      "name": "Sicilian Defense: Najdorf Variation",
+      "eco": "B98",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "c1g5",
+        "e7e6",
+        "f2f4",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_b99",
+      "name": "Sicilian Defense: Najdorf Variation, Main Line",
+      "eco": "B99",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "c7c5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "c5d4",
+        "f3d4",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "c1g5",
+        "e7e6",
+        "f2f4",
+        "f8e7",
+        "d1f3",
+        "d8c7",
+        "e1c1",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_c00",
+      "name": "French Defense: Reversed Philidor Formation",
+      "eco": "C00",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d3",
+        "d7d5",
+        "b1d2",
+        "g8f6",
+        "g1f3",
+        "b8c6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_c01",
+      "name": "French Defense: Exchange Variation, Bogoljubow Variation",
+      "eco": "C01",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "e4d5",
+        "e6d5",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_c02",
+      "name": "French Defense: Advance Variation, Euwe Variation",
+      "eco": "C02",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "e4e5",
+        "c7c5",
+        "c2c3",
+        "b8c6",
+        "g1f3",
+        "c8d7"
+      ]
+    },
+    {
+      "id": "eco_c03",
+      "name": "French Defense: Tarrasch Variation, Guimard Defense, Thunderbunny Variation",
+      "eco": "C03",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "b8c6",
+        "c2c3",
+        "d5e4",
+        "d2e4",
+        "e6e5"
+      ]
+    },
+    {
+      "id": "eco_c04",
+      "name": "French Defense: Tarrasch Variation, Guimard Defense, Main Line",
+      "eco": "C04",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "b8c6",
+        "g1f3",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_c05",
+      "name": "French Defense: Tarrasch Variation, Pawn Center Variation",
+      "eco": "C05",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "g8f6",
+        "e4e5",
+        "f6d7",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_c06",
+      "name": "French Defense: Tarrasch Variation, Closed Variation, Main Line",
+      "eco": "C06",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "g8f6",
+        "e4e5",
+        "f6d7",
+        "f1d3",
+        "c7c5",
+        "c2c3",
+        "b8c6",
+        "g1e2",
+        "c5d4",
+        "c3d4"
+      ]
+    },
+    {
+      "id": "eco_c07",
+      "name": "French Defense: Tarrasch Variation, Chistyakov Defense",
+      "eco": "C07",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "c7c5",
+        "e4d5",
+        "d8d5"
+      ]
+    },
+    {
+      "id": "eco_c08",
+      "name": "French Defense: Tarrasch Variation, Open System, Advance Line",
+      "eco": "C08",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "c7c5",
+        "e4d5",
+        "e6d5",
+        "g1f3",
+        "c5c4"
+      ]
+    },
+    {
+      "id": "eco_c09",
+      "name": "French Defense: Tarrasch Variation, Open System, Main Line",
+      "eco": "C09",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1d2",
+        "c7c5",
+        "e4d5",
+        "e6d5",
+        "g1f3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_c10",
+      "name": "French Defense: Rubinstein Variation, Fort Knox Variation",
+      "eco": "C10",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "d5e4",
+        "c3e4",
+        "c8d7",
+        "g1f3",
+        "d7c6"
+      ]
+    },
+    {
+      "id": "eco_c11",
+      "name": "French Defense: Steinitz Variation",
+      "eco": "C11",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "a7a6",
+        "g1f3",
+        "g8f6",
+        "e4e5",
+        "f6d7"
+      ]
+    },
+    {
+      "id": "eco_c12",
+      "name": "French Defense: McCutcheon Variation, Advance Variation",
+      "eco": "C12",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "f8b4",
+        "e4e5"
+      ]
+    },
+    {
+      "id": "eco_c13",
+      "name": "French Defense: Classical Variation",
+      "eco": "C13",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "d5e4",
+        "c3e4",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_c14",
+      "name": "French Defense: Classical Variation",
+      "eco": "C14",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "a7a6",
+        "g1f3",
+        "g8f6",
+        "e4e5",
+        "f6d7",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_c15",
+      "name": "French Defense: Winawer Variation, Alekhine Gambit Accepted",
+      "eco": "C15",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "g1e2",
+        "d5e4",
+        "a2a3",
+        "b4c3"
+      ]
+    },
+    {
+      "id": "eco_c16",
+      "name": "French Defense: Winawer Variation, Petrosian Variation",
+      "eco": "C16",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "e4e5",
+        "d8d7"
+      ]
+    },
+    {
+      "id": "eco_c17",
+      "name": "French Defense: Winawer Variation, Retreat Variation",
+      "eco": "C17",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "e4e5",
+        "c7c5",
+        "a2a3",
+        "b4a5"
+      ]
+    },
+    {
+      "id": "eco_c18",
+      "name": "French Defense: Winawer Variation, Advance Variation",
+      "eco": "C18",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "e4e5",
+        "c7c5",
+        "a2a3",
+        "b4c3",
+        "b2c3"
+      ]
+    },
+    {
+      "id": "eco_c19",
+      "name": "French Defense: Winawer Variation, Advance Variation, Smyslov Variation",
+      "eco": "C19",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e6",
+        "d2d4",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "e4e5",
+        "g8e7",
+        "a2a3",
+        "b4c3",
+        "b2c3",
+        "c7c5",
+        "a3a4"
+      ]
+    },
+    {
+      "id": "eco_c20",
+      "name": "King's Pawn Game: Weber Gambit",
+      "eco": "C20",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "d2d3",
+        "d7d5",
+        "e4d5",
+        "c7c6",
+        "d5c6",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_c21",
+      "name": "Danish Gambit Accepted: Chigorin Defense",
+      "eco": "C21",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "d2d4",
+        "e5d4",
+        "c2c3",
+        "d4c3",
+        "f1c4",
+        "c3b2",
+        "c1b2",
+        "d8e7"
+      ]
+    },
+    {
+      "id": "eco_c22",
+      "name": "Center Game: Charousek Variation",
+      "eco": "C22",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "d2d4",
+        "e5d4",
+        "d1d4",
+        "b8c6",
+        "d4e3",
+        "f8b4",
+        "c2c3",
+        "b4e7"
+      ]
+    },
+    {
+      "id": "eco_c23",
+      "name": "Bishop's Opening: Lewis Countergambit, Walker Variation",
+      "eco": "C23",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f1c4",
+        "f8c5",
+        "c2c3",
+        "d7d5",
+        "c4d5",
+        "g8f6",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_c24",
+      "name": "Bishop's Opening: Krejcik Gambit",
+      "eco": "C24",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f1c4",
+        "g8f6",
+        "f2f3",
+        "f8c5",
+        "g1e2",
+        "b8c6",
+        "b2b4"
+      ]
+    },
+    {
+      "id": "eco_c25",
+      "name": "Vienna Gambit, with Max Lange Defense: Steinitz Gambit, Fraser-Minckwitz Defense",
+      "eco": "C25",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "b1c3",
+        "b8c6",
+        "f2f4",
+        "e5f4",
+        "d2d4",
+        "d8h4",
+        "e1e2",
+        "b7b6"
+      ]
+    },
+    {
+      "id": "eco_c26",
+      "name": "Vienna Game: Paulsen Variation, Pollock Gambit",
+      "eco": "C26",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "g2g3",
+        "f8c5",
+        "f1g2",
+        "b8c6",
+        "g1e2",
+        "d7d5",
+        "e4d5"
+      ]
+    },
+    {
+      "id": "eco_c27",
+      "name": "Vienna Game: Stanley Variation, Monster Declined",
+      "eco": "C27",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "f1c4",
+        "f6e4",
+        "d1h5",
+        "e4d6",
+        "c4b3",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_c28",
+      "name": "Bishop's Opening: Vienna Hybrid, Hromádka Variation",
+      "eco": "C28",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "b1c3",
+        "b8c6",
+        "f1c4",
+        "g8f6",
+        "d2d3",
+        "f8b4",
+        "g1e2"
+      ]
+    },
+    {
+      "id": "eco_c29",
+      "name": "Vienna Game: Vienna Gambit, Bardeleben Variation",
+      "eco": "C29",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "b1c3",
+        "g8f6",
+        "f2f4",
+        "d7d5",
+        "f4e5",
+        "f6e4",
+        "d1f3",
+        "f7f5"
+      ]
+    },
+    {
+      "id": "eco_c30",
+      "name": "King's Gambit Declined: Norwalde Variation, Bücker Gambit",
+      "eco": "C30",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "d8f6",
+        "b1c3",
+        "f6f4",
+        "g1f3",
+        "f8b4",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_c31",
+      "name": "King's Gambit Declined: Falkbeer Countergambit, Rubinstein Variation",
+      "eco": "C31",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "d7d5",
+        "e4d5",
+        "e5e4",
+        "b1c3",
+        "g8f6",
+        "d1e2"
+      ]
+    },
+    {
+      "id": "eco_c32",
+      "name": "King's Gambit Declined: Falkbeer Countergambit, Charousek Gambit Accepted",
+      "eco": "C32",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "d7d5",
+        "e4d5",
+        "e5e4",
+        "d2d3",
+        "g8f6",
+        "d3e4"
+      ]
+    },
+    {
+      "id": "eco_c33",
+      "name": "King's Gambit Accepted: Bishop's Gambit, Boren-Svenonius Variation",
+      "eco": "C33",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "f1c4",
+        "d7d5",
+        "c4d5",
+        "d8h4",
+        "e1f1",
+        "f8d6"
+      ]
+    },
+    {
+      "id": "eco_c34",
+      "name": "King's Gambit Accepted: Fischer Defense, Spanish Variation",
+      "eco": "C34",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "g8f6",
+        "f1d3"
+      ]
+    },
+    {
+      "id": "eco_c35",
+      "name": "King's Gambit Accepted: Cunningham Defense, Bertin Gambit",
+      "eco": "C35",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "g1f3",
+        "f8e7",
+        "f1c4",
+        "e7h4",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_c36",
+      "name": "King's Gambit Accepted: Abbazia Defense",
+      "eco": "C36",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "g1f3",
+        "d7d5",
+        "e4d5",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_c37",
+      "name": "King's Gambit Accepted: Muzio Gambit, Brentano Defense",
+      "eco": "C37",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "g1f3",
+        "g7g5",
+        "f1c4",
+        "g5g4",
+        "e1g1",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_c38",
+      "name": "King's Gambit Accepted: Hanstein Gambit",
+      "eco": "C38",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "g1f3",
+        "g7g5",
+        "f1c4",
+        "f8g7",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_c39",
+      "name": "King's Gambit Accepted: Allgaier, Schlechter Defense",
+      "eco": "C39",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f2f4",
+        "e5f4",
+        "g1f3",
+        "g7g5",
+        "h2h4",
+        "g5g4",
+        "f3g5",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_c40",
+      "name": "Latvian Gambit: Mayet Attack, Poisoned Pawn Variation",
+      "eco": "C40",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "f7f5",
+        "f1c4",
+        "f5e4",
+        "f3e5",
+        "d8g5",
+        "d2d4",
+        "g5g2"
+      ]
+    },
+    {
+      "id": "eco_c41",
+      "name": "Philidor Defense: Hanham Variation, Delmar Variation",
+      "eco": "C41",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "d7d6",
+        "d2d4",
+        "b8d7",
+        "f1c4",
+        "c7c6",
+        "c2c3"
+      ]
+    },
+    {
+      "id": "eco_c42",
+      "name": "Petrov's Defense: Classical Attack, Closed Variation",
+      "eco": "C42",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "g8f6",
+        "f3e5",
+        "d7d6",
+        "e5f3",
+        "f6e4",
+        "d2d4",
+        "e4f6"
+      ]
+    },
+    {
+      "id": "eco_c43",
+      "name": "Bishop's Opening: Urusov Gambit, Keidansky Gambit",
+      "eco": "C43",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "f1c4",
+        "g8f6",
+        "d2d4",
+        "e5d4",
+        "g1f3",
+        "f6e4",
+        "d1d4"
+      ]
+    },
+    {
+      "id": "eco_c44",
+      "name": "Ponziani Opening: Vukovic Gambit",
+      "eco": "C44",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "c2c3",
+        "g8f6",
+        "d2d4",
+        "f6e4",
+        "d4d5",
+        "f8c5"
+      ]
+    },
+    {
+      "id": "eco_c45",
+      "name": "Scotch Game: Classical Variation, Intermezzo Variation",
+      "eco": "C45",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "d2d4",
+        "e5d4",
+        "f3d4",
+        "f8c5",
+        "d4c6",
+        "d8f6"
+      ]
+    },
+    {
+      "id": "eco_c46",
+      "name": "Three Knights Opening: Steinitz-Rosenthal Variation",
+      "eco": "C46",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "b1c3",
+        "g7g6",
+        "d2d4",
+        "e5d4",
+        "c3d5"
+      ]
+    },
+    {
+      "id": "eco_c47",
+      "name": "Four Knights Game: Scotch Variation, Krause Gambit, Leonhardt Defense",
+      "eco": "C47",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "b1c3",
+        "g8f6",
+        "d2d4",
+        "f8b4",
+        "f3e5",
+        "d8e7"
+      ]
+    },
+    {
+      "id": "eco_c48",
+      "name": "Four Knights Game: Spanish Variation, Ranken Variation",
+      "eco": "C48",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "b1c3",
+        "g8f6",
+        "f1b5",
+        "a7a6",
+        "b5c6"
+      ]
+    },
+    {
+      "id": "eco_c49",
+      "name": "Four Knights Game: Spanish Variation, Double Spanish",
+      "eco": "C49",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "b1c3",
+        "g8f6",
+        "f1b5",
+        "f8b4",
+        "e1g1",
+        "e8g8",
+        "d2d3"
+      ]
+    },
+    {
+      "id": "eco_c50",
+      "name": "Italian Game: Giuoco Pianissimo",
+      "eco": "C50",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "f8c5",
+        "b1c3",
+        "g8f6",
+        "e1g1",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_c51",
+      "name": "Italian Game: Evans Gambit, Anderssen Variation",
+      "eco": "C51",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "f8c5",
+        "b2b4",
+        "c5b4",
+        "c2c3",
+        "b4e7"
+      ]
+    },
+    {
+      "id": "eco_c52",
+      "name": "Italian Game: Evans Gambit, Main Line",
+      "eco": "C52",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "f8c5",
+        "b2b4",
+        "c5b4",
+        "c2c3",
+        "b4a5"
+      ]
+    },
+    {
+      "id": "eco_c53",
+      "name": "Italian Game: Classical Variation, Center Holding Variation",
+      "eco": "C53",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "f8c5",
+        "c2c3",
+        "d8e7",
+        "d2d4",
+        "c5b6"
+      ]
+    },
+    {
+      "id": "eco_c54",
+      "name": "Italian Game: Classical Variation, Giuoco Pianissimo",
+      "eco": "C54",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "f8c5",
+        "c2c3",
+        "g8f6",
+        "d2d3",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_c55",
+      "name": "Italian Game: Two Knights Defense",
+      "eco": "C55",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "g8f6",
+        "b1c3",
+        "f6e4",
+        "c3e4",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_c56",
+      "name": "Italian Game: Scotch Gambit, Double Gambit Accepted",
+      "eco": "C56",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "g8f6",
+        "d2d4",
+        "e5d4",
+        "e1g1",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_c57",
+      "name": "Italian Game: Two Knights Defense, Fritz Variation",
+      "eco": "C57",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "g8f6",
+        "f3g5",
+        "d7d5",
+        "e4d5",
+        "c6d4"
+      ]
+    },
+    {
+      "id": "eco_c58",
+      "name": "Italian Game: Two Knights Defense, Polerio Defense",
+      "eco": "C58",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "g8f6",
+        "f3g5",
+        "d7d5",
+        "e4d5",
+        "c6a5"
+      ]
+    },
+    {
+      "id": "eco_c59",
+      "name": "Italian Game: Two Knights Defense, Polerio Defense, Suhle Defense",
+      "eco": "C59",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1c4",
+        "g8f6",
+        "f3g5",
+        "d7d5",
+        "e4d5",
+        "c6a5",
+        "c4b5",
+        "c7c6",
+        "d5c6",
+        "b7c6",
+        "b5e2",
+        "h7h6"
+      ]
+    },
+    {
+      "id": "eco_c60",
+      "name": "Ruy Lopez: Alapin Defense, Alapin Gambit",
+      "eco": "C60",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "f8b4",
+        "c2c3",
+        "b4a5",
+        "b5c6",
+        "d7c6"
+      ]
+    },
+    {
+      "id": "eco_c61",
+      "name": "Ruy Lopez: Bird Variation, Paulsen Variation",
+      "eco": "C61",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "c6d4",
+        "f3d4",
+        "e5d4",
+        "e1g1",
+        "g8e7"
+      ]
+    },
+    {
+      "id": "eco_c62",
+      "name": "Ruy Lopez: Steinitz Defense, Center Gambit",
+      "eco": "C62",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "d7d6",
+        "d2d4",
+        "e5d4",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_c63",
+      "name": "Ruy Lopez: Schliemann Defense, Kostić Defense",
+      "eco": "C63",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "f7f5",
+        "b1c3",
+        "f5e4",
+        "c3e4",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_c64",
+      "name": "Ruy Lopez: Classical Defense, Zaitsev Variation",
+      "eco": "C64",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "f8c5",
+        "e1g1",
+        "c6d4",
+        "b2b4"
+      ]
+    },
+    {
+      "id": "eco_c65",
+      "name": "Ruy Lopez: Berlin Defense, Anti-Berlin Variation, Mortimer Trap",
+      "eco": "C65",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "g8f6",
+        "d2d3",
+        "c6e7",
+        "f3e5",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_c66",
+      "name": "Ruy Lopez: Closed Berlin Defense, Chigorin Variation",
+      "eco": "C66",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "g8f6",
+        "e1g1",
+        "d7d6",
+        "d2d4",
+        "f6d7"
+      ]
+    },
+    {
+      "id": "eco_c67",
+      "name": "Ruy Lopez: Berlin Defense, Rio de Janeiro Variation",
+      "eco": "C67",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "g8f6",
+        "e1g1",
+        "f6e4",
+        "d2d4",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_c68",
+      "name": "Ruy Lopez: Exchange Variation, Keres Variation",
+      "eco": "C68",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5c6",
+        "d7c6",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_c69",
+      "name": "Ruy Lopez: Exchange Variation, Bronstein Variation",
+      "eco": "C69",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5c6",
+        "d7c6",
+        "e1g1",
+        "d8d6"
+      ]
+    },
+    {
+      "id": "eco_c70",
+      "name": "Ruy Lopez: Morphy Defense, Graz Variation",
+      "eco": "C70",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "b7b5",
+        "a4b3",
+        "f8c5"
+      ]
+    },
+    {
+      "id": "eco_c71",
+      "name": "Ruy Lopez: Morphy Defense, Modern Steinitz Defense",
+      "eco": "C71",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "d7d6",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_c72",
+      "name": "Ruy Lopez: Morphy Defense, Modern Steinitz Defense",
+      "eco": "C72",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "d7d6",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_c73",
+      "name": "Ruy Lopez: Morphy Defense, Modern Steinitz Defense",
+      "eco": "C73",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "d7d6",
+        "a4c6",
+        "b7c6",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_c74",
+      "name": "Ruy Lopez: Morphy Defense, Modern Steinitz Defense, Siesta Variation",
+      "eco": "C74",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "d7d6",
+        "c2c3",
+        "f7f5"
+      ]
+    },
+    {
+      "id": "eco_c75",
+      "name": "Ruy Lopez: Morphy Defense, Modern Steinitz Defense",
+      "eco": "C75",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "d7d6",
+        "c2c3",
+        "c8d7"
+      ]
+    },
+    {
+      "id": "eco_c76",
+      "name": "Ruy Lopez: Morphy Defense, Modern Steinitz Defense, Fianchetto Variation",
+      "eco": "C76",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "g7g6",
+        "c2c3",
+        "a7a6",
+        "b5a4",
+        "d7d6",
+        "d2d4",
+        "c8d7"
+      ]
+    },
+    {
+      "id": "eco_c77",
+      "name": "Ruy Lopez: Morphy Defense, Anderssen Variation",
+      "eco": "C77",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "d2d3"
+      ]
+    },
+    {
+      "id": "eco_c78",
+      "name": "Ruy Lopez: Brix Variation",
+      "eco": "C78",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_c79",
+      "name": "Ruy Lopez: Morphy Defense, Steinitz Deferred",
+      "eco": "C79",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_c80",
+      "name": "Ruy Lopez: Open",
+      "eco": "C80",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_c81",
+      "name": "Ruy Lopez: Open, Howell Attack",
+      "eco": "C81",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f6e4",
+        "d2d4",
+        "b7b5",
+        "a4b3",
+        "d7d5",
+        "d4e5",
+        "c8e6",
+        "d1e2"
+      ]
+    },
+    {
+      "id": "eco_c82",
+      "name": "Ruy Lopez: Open",
+      "eco": "C82",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f6e4",
+        "d2d4",
+        "b7b5",
+        "a4b3",
+        "d7d5",
+        "d4e5",
+        "c8e6",
+        "c2c3"
+      ]
+    },
+    {
+      "id": "eco_c83",
+      "name": "Ruy Lopez: Open, Classical Defense",
+      "eco": "C83",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f6e4",
+        "d2d4",
+        "b7b5",
+        "a4b3",
+        "d7d5",
+        "d4e5",
+        "c8e6",
+        "c2c3",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_c84",
+      "name": "Ruy Lopez: Closed",
+      "eco": "C84",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_c85",
+      "name": "Ruy Lopez: Closed, Delayed Exchange",
+      "eco": "C85",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "a4c6"
+      ]
+    },
+    {
+      "id": "eco_c86",
+      "name": "Ruy Lopez: Closed, Worrall Attack",
+      "eco": "C86",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "d1e2"
+      ]
+    },
+    {
+      "id": "eco_c87",
+      "name": "Ruy Lopez: Closed, Averbakh Variation",
+      "eco": "C87",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_c88",
+      "name": "Ruy Lopez: Closed",
+      "eco": "C88",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3"
+      ]
+    },
+    {
+      "id": "eco_c89",
+      "name": "Ruy Lopez: Marshall Attack",
+      "eco": "C89",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "e8g8",
+        "c2c3",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_c90",
+      "name": "Ruy Lopez: Closed",
+      "eco": "C90",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_c91",
+      "name": "Ruy Lopez: Closed, Yates Variation",
+      "eco": "C91",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_c92",
+      "name": "Ruy Lopez: Closed",
+      "eco": "C92",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3"
+      ]
+    },
+    {
+      "id": "eco_c93",
+      "name": "Ruy Lopez: Closed, Smyslov Defense",
+      "eco": "C93",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "h7h6"
+      ]
+    },
+    {
+      "id": "eco_c94",
+      "name": "Ruy Lopez: Closed, Breyer Defense",
+      "eco": "C94",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "c6b8"
+      ]
+    },
+    {
+      "id": "eco_c95",
+      "name": "Ruy Lopez: Closed, Breyer",
+      "eco": "C95",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "c6b8",
+        "d2d4"
+      ]
+    },
+    {
+      "id": "eco_c96",
+      "name": "Ruy Lopez: Closed, Chigorin Defense",
+      "eco": "C96",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "c6a5",
+        "b3c2"
+      ]
+    },
+    {
+      "id": "eco_c97",
+      "name": "Ruy Lopez: Closed, Chigorin Defense",
+      "eco": "C97",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "c6a5"
+      ]
+    },
+    {
+      "id": "eco_c98",
+      "name": "Ruy Lopez: Closed, Chigorin Defense",
+      "eco": "C98",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "c6a5",
+        "b3c2",
+        "c7c5",
+        "d2d4",
+        "d8c7",
+        "b1d2",
+        "a5c6"
+      ]
+    },
+    {
+      "id": "eco_c99",
+      "name": "Ruy Lopez: Closed, Chigorin Defense, Panov System",
+      "eco": "C99",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6",
+        "f1b5",
+        "a7a6",
+        "b5a4",
+        "g8f6",
+        "e1g1",
+        "f8e7",
+        "f1e1",
+        "b7b5",
+        "a4b3",
+        "d7d6",
+        "c2c3",
+        "e8g8",
+        "h2h3",
+        "c6a5",
+        "b3c2",
+        "c7c5",
+        "d2d4",
+        "d8c7",
+        "b1d2",
+        "c5d4",
+        "c3d4"
+      ]
+    },
+    {
+      "id": "eco_d00",
+      "name": "Blackmar-Diemer Gambit Accepted: Bogoljubow Defense",
+      "eco": "D00",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "e2e4",
+        "d5e4",
+        "b1c3",
+        "g8f6",
+        "f2f3",
+        "e4f3",
+        "g1f3",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_d01",
+      "name": "Richter-Veresov Attack: Malich Gambit",
+      "eco": "D01",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "b1c3",
+        "d7d5",
+        "c1g5",
+        "c7c5",
+        "g5f6",
+        "g7f6",
+        "e2e4",
+        "d5e4",
+        "d4d5"
+      ]
+    },
+    {
+      "id": "eco_d02",
+      "name": "Queen's Pawn Game: London System, Pterodactyl Variation",
+      "eco": "D02",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "c1f4",
+        "c7c5",
+        "c2c3",
+        "c5d4",
+        "c3d4",
+        "d8a5"
+      ]
+    },
+    {
+      "id": "eco_d03",
+      "name": "Queen's Pawn Game: Torre Attack",
+      "eco": "D03",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "g1f3",
+        "g8f6",
+        "c1g5",
+        "e7e6",
+        "e2e3",
+        "c7c5",
+        "c2c3",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_d04",
+      "name": "Queen's Pawn Game: Colle System, Grünfeld Formation",
+      "eco": "D04",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "g7g6",
+        "f1d3",
+        "f8g7"
+      ]
+    },
+    {
+      "id": "eco_d05",
+      "name": "Queen's Pawn Game: Colle System",
+      "eco": "D05",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "b2b3",
+        "c7c5",
+        "c1b2",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_d06",
+      "name": "Queen's Gambit Declined: Austrian Defense, Haberditz Variation",
+      "eco": "D06",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c5",
+        "c4d5",
+        "g8f6",
+        "e2e4",
+        "f6e4",
+        "d4c5",
+        "d8a5"
+      ]
+    },
+    {
+      "id": "eco_d07",
+      "name": "Queen's Gambit Declined: Chigorin Defense, Modern Gambit",
+      "eco": "D07",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "b8c6",
+        "b1c3",
+        "d5c4",
+        "g1f3",
+        "g8f6"
+      ]
+    },
+    {
+      "id": "eco_d08",
+      "name": "Queen's Gambit Declined: Albin Countergambit, Balogh Variation",
+      "eco": "D08",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e5",
+        "d4e5",
+        "d5d4",
+        "g1f3",
+        "b8c6",
+        "b1d2",
+        "d8e7"
+      ]
+    },
+    {
+      "id": "eco_d09",
+      "name": "Queen's Gambit Declined: Albin Countergambit, Fianchetto Variation, Be6 Line",
+      "eco": "D09",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e5",
+        "d4e5",
+        "d5d4",
+        "g1f3",
+        "b8c6",
+        "g2g3",
+        "c8e6"
+      ]
+    },
+    {
+      "id": "eco_d10",
+      "name": "Slav Defense: Exchange Variation, Boor Attack",
+      "eco": "D10",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "c4d5",
+        "c6d5",
+        "b1c3",
+        "g8f6",
+        "f2f3"
+      ]
+    },
+    {
+      "id": "eco_d11",
+      "name": "Slav Defense: Modern Line",
+      "eco": "D11",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "g2g3",
+        "d5c4",
+        "f1g2",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_d12",
+      "name": "Slav Defense: Quiet Variation, Schallopp Defense",
+      "eco": "D12",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "c8f5",
+        "b1c3",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_d13",
+      "name": "Slav Defense: Exchange Variation, Schallopp Variation",
+      "eco": "D13",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "c8f5",
+        "c4d5",
+        "c6d5",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_d14",
+      "name": "Slav Defense: Exchange Variation, Symmetrical Line",
+      "eco": "D14",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "c4d5",
+        "c6d5",
+        "b1c3",
+        "g8f6",
+        "g1f3",
+        "b8c6",
+        "c1f4",
+        "c8f5"
+      ]
+    },
+    {
+      "id": "eco_d15",
+      "name": "Slav Defense: Chebanenko Variation",
+      "eco": "D15",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "a7a6",
+        "e2e3",
+        "c8f5"
+      ]
+    },
+    {
+      "id": "eco_d16",
+      "name": "Slav Defense: Smyslov Variation",
+      "eco": "D16",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "d5c4",
+        "a2a4",
+        "b8a6"
+      ]
+    },
+    {
+      "id": "eco_d17",
+      "name": "Slav Defense: Czech Variation",
+      "eco": "D17",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "d5c4",
+        "a2a4",
+        "c8f5"
+      ]
+    },
+    {
+      "id": "eco_d18",
+      "name": "Slav Defense: Czech Variation, Classical System",
+      "eco": "D18",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "d5c4",
+        "a2a4",
+        "c8f5",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_d19",
+      "name": "Slav Defense: Czech Variation, Dutch Variation",
+      "eco": "D19",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "d5c4",
+        "a2a4",
+        "c8f5",
+        "e2e3",
+        "e7e6",
+        "f1c4",
+        "f8b4",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_d20",
+      "name": "Queen's Gambit Accepted: Linares Variation",
+      "eco": "D20",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "e2e4",
+        "c7c5",
+        "d4d5",
+        "g8f6",
+        "b1c3",
+        "b7b5"
+      ]
+    },
+    {
+      "id": "eco_d21",
+      "name": "Queen's Gambit Accepted: Alekhine Defense, Borisenko-Furman Variation",
+      "eco": "D21",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "a7a6",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_d22",
+      "name": "Queen's Gambit Accepted: Alekhine Defense, Alatortsev Variation",
+      "eco": "D22",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "a7a6",
+        "e2e3",
+        "c8g4",
+        "f1c4",
+        "e7e6",
+        "d4d5"
+      ]
+    },
+    {
+      "id": "eco_d23",
+      "name": "Queen's Gambit Accepted: Mannheim Variation",
+      "eco": "D23",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "g8f6",
+        "d1a4"
+      ]
+    },
+    {
+      "id": "eco_d24",
+      "name": "Queen's Gambit Accepted",
+      "eco": "D24",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "d5c4",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_d25",
+      "name": "Queen's Gambit Accepted: Janowski-Larsen Variation",
+      "eco": "D25",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_d26",
+      "name": "Queen's Gambit Accepted: Classical Defense",
+      "eco": "D26",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "f1c4",
+        "c7c5"
+      ]
+    },
+    {
+      "id": "eco_d27",
+      "name": "Queen's Gambit Accepted: Classical Defense, Main Line",
+      "eco": "D27",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "f1c4",
+        "c7c5",
+        "e1g1",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_d28",
+      "name": "Queen's Gambit Accepted: Classical Defense, Alekhine System",
+      "eco": "D28",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "f1c4",
+        "c7c5",
+        "e1g1",
+        "a7a6",
+        "d1e2"
+      ]
+    },
+    {
+      "id": "eco_d29",
+      "name": "Queen's Gambit Accepted: Classical Defense, Alekhine System, Main Line",
+      "eco": "D29",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "d5c4",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "f1c4",
+        "c7c5",
+        "e1g1",
+        "a7a6",
+        "d1e2",
+        "b7b5",
+        "c4b3",
+        "c8b7"
+      ]
+    },
+    {
+      "id": "eco_d30",
+      "name": "Queen's Gambit Declined: Spielmann Variation",
+      "eco": "D30",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "g8f6",
+        "e2e3",
+        "c7c6",
+        "b1d2",
+        "g7g6"
+      ]
+    },
+    {
+      "id": "eco_d31",
+      "name": "Semi-Slav Defense: Noteboom Variation, Anti-Noteboom Variation, Belyavsky Line",
+      "eco": "D31",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "c7c6",
+        "g1f3",
+        "d5c4",
+        "c1g5",
+        "f7f6"
+      ]
+    },
+    {
+      "id": "eco_d32",
+      "name": "Tarrasch Defense: Symmetrical Variation",
+      "eco": "D32",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "c7c5",
+        "e2e3",
+        "g8f6",
+        "g1f3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_d33",
+      "name": "Tarrasch Defense: Rubinstein System",
+      "eco": "D33",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "c7c5",
+        "c4d5",
+        "e6d5",
+        "g1f3",
+        "b8c6",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_d34",
+      "name": "Tarrasch Defense: Prague Variation, Main Line",
+      "eco": "D34",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "c7c5",
+        "c4d5",
+        "e6d5",
+        "g1f3",
+        "b8c6",
+        "g2g3",
+        "g8f6",
+        "f1g2",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_d35",
+      "name": "Queen's Gambit Declined: Exchange Variation, Positional Variation",
+      "eco": "D35",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "e6d5",
+        "c1g5",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_d36",
+      "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation",
+      "eco": "D36",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "e6d5",
+        "c1g5",
+        "c7c6",
+        "d1c2"
+      ]
+    },
+    {
+      "id": "eco_d37",
+      "name": "Queen's Gambit Declined: Three Knights Variation",
+      "eco": "D37",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "g1f3",
+        "f8e7",
+        "e2e3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_d38",
+      "name": "Queen's Gambit Declined: Ragozin Defense, Alekhine Variation",
+      "eco": "D38",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "d1a4"
+      ]
+    },
+    {
+      "id": "eco_d39",
+      "name": "Queen's Gambit Declined: Ragozin Defense, Vienna Variation",
+      "eco": "D39",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8b4",
+        "c1g5",
+        "d5c4"
+      ]
+    },
+    {
+      "id": "eco_d40",
+      "name": "Queen's Gambit Declined: Semi-Tarrasch Defense, Pillsbury Variation",
+      "eco": "D40",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "g1f3",
+        "c7c5",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_d41",
+      "name": "Queen's Gambit Declined: Semi-Tarrasch Defense",
+      "eco": "D41",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "c2c4",
+        "c7c5",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "b8c6",
+        "g2g3",
+        "d7d5",
+        "d2d4",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_d42",
+      "name": "Queen's Gambit Declined: Semi-Tarrasch Defense, Main Line",
+      "eco": "D42",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "c7c5",
+        "c4d5",
+        "f6d5",
+        "e2e3",
+        "b8c6",
+        "f1d3"
+      ]
+    },
+    {
+      "id": "eco_d43",
+      "name": "Semi-Slav Defense: Anti-Moscow Gambit",
+      "eco": "D43",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "e7e6",
+        "c1g5",
+        "h7h6",
+        "g5h4"
+      ]
+    },
+    {
+      "id": "eco_d44",
+      "name": "Semi-Slav Defense Accepted",
+      "eco": "D44",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "e7e6",
+        "c1g5",
+        "d5c4"
+      ]
+    },
+    {
+      "id": "eco_d45",
+      "name": "Semi-Slav Defense: Accelerated Meran Variation",
+      "eco": "D45",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "b1c3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "g1f3",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_d46",
+      "name": "Semi-Slav Defense: Main Line",
+      "eco": "D46",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "b1c3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "g1f3",
+        "b8d7",
+        "f1d3"
+      ]
+    },
+    {
+      "id": "eco_d47",
+      "name": "Semi-Slav Defense: Semi-Meran Variation",
+      "eco": "D47",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "b1c3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "g1f3",
+        "b8d7",
+        "f1d3",
+        "d5c4",
+        "d3c4"
+      ]
+    },
+    {
+      "id": "eco_d48",
+      "name": "Semi-Slav Defense: Meran Variation",
+      "eco": "D48",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "b1c3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "g1f3",
+        "b8d7",
+        "f1d3",
+        "d5c4",
+        "d3c4",
+        "b7b5",
+        "c4d3",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_d49",
+      "name": "Semi-Slav Defense: Meran Variation, Blumenfeld Variation",
+      "eco": "D49",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "b1c3",
+        "g8f6",
+        "e2e3",
+        "e7e6",
+        "g1f3",
+        "b8d7",
+        "f1d3",
+        "d5c4",
+        "d3c4",
+        "b7b5",
+        "c4d3",
+        "a7a6",
+        "e3e4",
+        "c6c5",
+        "e4e5",
+        "c5d4",
+        "c3b5"
+      ]
+    },
+    {
+      "id": "eco_d50",
+      "name": "Queen's Gambit Declined: Pseudo-Tarrasch Variation, Canal Variation",
+      "eco": "D50",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "c7c5",
+        "c4d5",
+        "d8b6"
+      ]
+    },
+    {
+      "id": "eco_d51",
+      "name": "Queen's Gambit Declined: Manhattan Variation",
+      "eco": "D51",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "b8d7",
+        "e2e3",
+        "f8b4"
+      ]
+    },
+    {
+      "id": "eco_d52",
+      "name": "Queen's Gambit Declined",
+      "eco": "D52",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "c7c6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "e7e6",
+        "c1g5",
+        "b8d7",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_d53",
+      "name": "Queen's Gambit Declined",
+      "eco": "D53",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "g8f6",
+        "b1c3",
+        "d5c4",
+        "c1g5",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_d54",
+      "name": "Queen's Gambit Declined: Neo-Orthodox Variation",
+      "eco": "D54",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "d7d5",
+        "c1g5",
+        "f8e7",
+        "e2e3",
+        "e8g8",
+        "a1c1"
+      ]
+    },
+    {
+      "id": "eco_d55",
+      "name": "Queen's Gambit Declined: Modern Variation, Normal Line",
+      "eco": "D55",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "e8g8",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_d56",
+      "name": "Queen's Gambit Declined: Lasker Defense",
+      "eco": "D56",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8e7",
+        "g1f3",
+        "g8f6",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "e8g8",
+        "e2e3",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_d57",
+      "name": "Queen's Gambit Declined: Lasker Defense, Main Line",
+      "eco": "D57",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8e7",
+        "g1f3",
+        "g8f6",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "e8g8",
+        "e2e3",
+        "f6e4",
+        "h4e7",
+        "d8e7",
+        "c4d5",
+        "e4c3",
+        "b2c3"
+      ]
+    },
+    {
+      "id": "eco_d58",
+      "name": "Queen's Gambit Declined: Tartakower Defense",
+      "eco": "D58",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "e8g8",
+        "e2e3",
+        "b7b6"
+      ]
+    },
+    {
+      "id": "eco_d59",
+      "name": "Queen's Gambit Declined: Tartakower Defense, Makogonov Exchange Variation",
+      "eco": "D59",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8e7",
+        "g1f3",
+        "g8f6",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "e8g8",
+        "e2e3",
+        "b7b6",
+        "c4d5",
+        "f6d5"
+      ]
+    },
+    {
+      "id": "eco_d60",
+      "name": "Queen's Gambit Declined: Orthodox Defense",
+      "eco": "D60",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "e8g8",
+        "e2e3",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_d61",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Rubinstein Variation",
+      "eco": "D61",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "f8e7",
+        "e2e3",
+        "e8g8",
+        "g1f3",
+        "b8d7",
+        "d1c2"
+      ]
+    },
+    {
+      "id": "eco_d62",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Rubinstein Variation, Flohr Line",
+      "eco": "D62",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "e8g8",
+        "e2e3",
+        "b8d7",
+        "d1c2",
+        "c7c5",
+        "c4d5"
+      ]
+    },
+    {
+      "id": "eco_d63",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Main Line",
+      "eco": "D63",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "e8g8",
+        "e2e3",
+        "b8d7",
+        "a1c1"
+      ]
+    },
+    {
+      "id": "eco_d64",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Rubinstein Attack",
+      "eco": "D64",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "e8g8",
+        "e2e3",
+        "b8d7",
+        "a1c1",
+        "c7c6",
+        "d1c2"
+      ]
+    },
+    {
+      "id": "eco_d65",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Rubinstein Attack",
+      "eco": "D65",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "g1f3",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8e7",
+        "c1g5",
+        "e8g8",
+        "e2e3",
+        "b8d7",
+        "a1c1",
+        "c7c6",
+        "d1c2",
+        "a7a6",
+        "c4d5"
+      ]
+    },
+    {
+      "id": "eco_d66",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Bd3 Line",
+      "eco": "D66",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "f8e7",
+        "e2e3",
+        "e8g8",
+        "g1f3",
+        "b8d7",
+        "a1c1",
+        "c7c6",
+        "f1d3"
+      ]
+    },
+    {
+      "id": "eco_d67",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Capablanca System",
+      "eco": "D67",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "f8e7",
+        "e2e3",
+        "e8g8",
+        "g1f3",
+        "b8d7",
+        "a1c1",
+        "c7c6",
+        "f1d3",
+        "d5c4",
+        "d3c4",
+        "f6d5"
+      ]
+    },
+    {
+      "id": "eco_d68",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Classical Variation",
+      "eco": "D68",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "f8e7",
+        "e2e3",
+        "e8g8",
+        "g1f3",
+        "b8d7",
+        "a1c1",
+        "c7c6",
+        "f1d3",
+        "d5c4",
+        "d3c4",
+        "f6d5",
+        "g5e7",
+        "d8e7",
+        "e1g1",
+        "d5c3",
+        "c1c3",
+        "e6e5"
+      ]
+    },
+    {
+      "id": "eco_d69",
+      "name": "Queen's Gambit Declined: Orthodox Defense, Classical Variation",
+      "eco": "D69",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "d7d5",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "g8f6",
+        "c1g5",
+        "f8e7",
+        "e2e3",
+        "e8g8",
+        "g1f3",
+        "b8d7",
+        "a1c1",
+        "c7c6",
+        "f1d3",
+        "d5c4",
+        "d3c4",
+        "f6d5",
+        "g5e7",
+        "d8e7",
+        "e1g1",
+        "d5c3",
+        "c1c3",
+        "e6e5",
+        "d4e5",
+        "d7e5",
+        "f3e5",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_d70",
+      "name": "Neo-Grünfeld Defense: Goglidze Attack",
+      "eco": "D70",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "f2f3",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_d71",
+      "name": "Neo-Grünfeld Defense: Exchange Variation",
+      "eco": "D71",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g2g3",
+        "f8g7",
+        "f1g2",
+        "d7d5",
+        "c4d5",
+        "f6d5"
+      ]
+    },
+    {
+      "id": "eco_d72",
+      "name": "Neo-Grünfeld Defense: with g3",
+      "eco": "D72",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "f8g7",
+        "c4d5",
+        "f6d5",
+        "e2e4",
+        "d5b6",
+        "g1e2"
+      ]
+    },
+    {
+      "id": "eco_d73",
+      "name": "Neo-Grünfeld Defense: with g3",
+      "eco": "D73",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "f8g7",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_d74",
+      "name": "Neo-Grünfeld Defense: Delayed Exchange Variation",
+      "eco": "D74",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_d75",
+      "name": "Neo-Grünfeld Defense: Delayed Exchange Variation",
+      "eco": "D75",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "g1f3",
+        "e8g8",
+        "g2g3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "f1g2",
+        "c7c5",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_d76",
+      "name": "Neo-Grünfeld Defense: Delayed Exchange Variation",
+      "eco": "D76",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "e1g1",
+        "d5b6"
+      ]
+    },
+    {
+      "id": "eco_d77",
+      "name": "Neo-Grünfeld Defense: Classical Variation",
+      "eco": "D77",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "g1f3",
+        "g7g6",
+        "g2g3",
+        "f8g7",
+        "f1g2",
+        "e8g8",
+        "e1g1",
+        "d7d5",
+        "c2c4"
+      ]
+    },
+    {
+      "id": "eco_d78",
+      "name": "Neo-Grünfeld Defense: Classical Variation, Original Defense",
+      "eco": "D78",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "c7c6",
+        "e1g1",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_d79",
+      "name": "Neo-Grünfeld Defense: Ultra-Delayed Exchange Variation",
+      "eco": "D79",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "c7c6",
+        "e1g1",
+        "d7d5",
+        "c4d5",
+        "c6d5"
+      ]
+    },
+    {
+      "id": "eco_d80",
+      "name": "Grünfeld Defense: Lutikov Variation, Murrey Attack",
+      "eco": "D80",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "f2f3",
+        "c7c5",
+        "c4d5",
+        "f6d5",
+        "c3a4"
+      ]
+    },
+    {
+      "id": "eco_d81",
+      "name": "Grünfeld Defense: Russian Variation, Accelerated Variation",
+      "eco": "D81",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "d1b3"
+      ]
+    },
+    {
+      "id": "eco_d82",
+      "name": "Grünfeld Defense: Brinckmann Attack",
+      "eco": "D82",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c1f4"
+      ]
+    },
+    {
+      "id": "eco_d83",
+      "name": "Grünfeld Defense: Brinckmann Attack, Grünfeld Gambit",
+      "eco": "D83",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c1f4",
+        "f8g7",
+        "e2e3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_d84",
+      "name": "Grünfeld Defense: Brinckmann Attack, Grünfeld Gambit Accepted",
+      "eco": "D84",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c1f4",
+        "f8g7",
+        "e2e3",
+        "e8g8",
+        "c4d5",
+        "f6d5",
+        "c3d5",
+        "d8d5",
+        "f4c7"
+      ]
+    },
+    {
+      "id": "eco_d85",
+      "name": "Grünfeld Defense: Exchange Variation, Nadanian Attack",
+      "eco": "D85",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "c3a4"
+      ]
+    },
+    {
+      "id": "eco_d86",
+      "name": "Grünfeld Defense: Exchange Variation, Classical Variation",
+      "eco": "D86",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "e2e4",
+        "d5c3",
+        "b2c3",
+        "f8g7",
+        "f1c4"
+      ]
+    },
+    {
+      "id": "eco_d87",
+      "name": "Grünfeld Defense: Exchange Variation, Spassky Variation",
+      "eco": "D87",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "e2e4",
+        "d5c3",
+        "b2c3",
+        "f8g7",
+        "f1c4",
+        "c7c5",
+        "g1e2",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_d88",
+      "name": "Grünfeld Defense: Exchange Variation, Spassky Variation",
+      "eco": "D88",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "e2e4",
+        "d5c3",
+        "b2c3",
+        "f8g7",
+        "f1c4",
+        "c7c5",
+        "g1e2",
+        "b8c6",
+        "c1e3",
+        "e8g8",
+        "e1g1",
+        "c5d4",
+        "c3d4"
+      ]
+    },
+    {
+      "id": "eco_d89",
+      "name": "Grünfeld Defense: Exchange Variation, Spassky Variation",
+      "eco": "D89",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "c4d5",
+        "f6d5",
+        "e2e4",
+        "d5c3",
+        "b2c3",
+        "f8g7",
+        "f1c4",
+        "c7c5",
+        "g1e2",
+        "b8c6",
+        "c1e3",
+        "e8g8",
+        "e1g1",
+        "c8g4",
+        "f2f3",
+        "c6a5",
+        "c4d3",
+        "c5d4",
+        "c3d4",
+        "g4e6"
+      ]
+    },
+    {
+      "id": "eco_d90",
+      "name": "Grünfeld Defense: Flohr Variation",
+      "eco": "D90",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "d1a4"
+      ]
+    },
+    {
+      "id": "eco_d91",
+      "name": "Grünfeld Defense: Three Knights Variation, Petrosian System",
+      "eco": "D91",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_d92",
+      "name": "Grünfeld Defense: Three Knights Variation, Hungarian Attack",
+      "eco": "D92",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "c1f4"
+      ]
+    },
+    {
+      "id": "eco_d93",
+      "name": "Grünfeld Defense: Three Knights Variation, Hungarian Variation",
+      "eco": "D93",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "c1f4",
+        "e8g8",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_d94",
+      "name": "Grünfeld Defense: Three Knights Variation, Burille Variation",
+      "eco": "D94",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_d95",
+      "name": "Grünfeld Defense: Three Knights Variation, Vienna Variation",
+      "eco": "D95",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "e2e3",
+        "e8g8",
+        "d1b3"
+      ]
+    },
+    {
+      "id": "eco_d96",
+      "name": "Grünfeld Defense: Russian Variation",
+      "eco": "D96",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "d1b3"
+      ]
+    },
+    {
+      "id": "eco_d97",
+      "name": "Grünfeld Defense: Russian Variation",
+      "eco": "D97",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "d1b3",
+        "d5c4",
+        "b3c4",
+        "e8g8",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_d98",
+      "name": "Grünfeld Defense: Russian Variation, Smyslov Variation",
+      "eco": "D98",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "d1b3",
+        "d5c4",
+        "b3c4",
+        "e8g8",
+        "e2e4",
+        "c8g4"
+      ]
+    },
+    {
+      "id": "eco_d99",
+      "name": "Grünfeld Defense: Russian Variation, Smyslov Variation",
+      "eco": "D99",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "d7d5",
+        "g1f3",
+        "f8g7",
+        "d1b3",
+        "d5c4",
+        "b3c4",
+        "e8g8",
+        "e2e4",
+        "c8g4",
+        "c1e3",
+        "f6d7",
+        "c4b3"
+      ]
+    },
+    {
+      "id": "eco_e00",
+      "name": "Catalan Opening",
+      "eco": "E00",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_e01",
+      "name": "Catalan Opening: Tarrasch Defense",
+      "eco": "E01",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "c7c5",
+        "g1f3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_e02",
+      "name": "Catalan Opening: Open Defense",
+      "eco": "E02",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "d5c4"
+      ]
+    },
+    {
+      "id": "eco_e03",
+      "name": "Catalan Opening: Open Defense",
+      "eco": "E03",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "d5c4",
+        "d1a4",
+        "b8d7",
+        "a4c4"
+      ]
+    },
+    {
+      "id": "eco_e04",
+      "name": "Catalan Opening: Open Defense",
+      "eco": "E04",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "g2g3",
+        "c7c6",
+        "f1g2",
+        "d5c4"
+      ]
+    },
+    {
+      "id": "eco_e05",
+      "name": "Catalan Opening: Open Defense, Classical Line",
+      "eco": "E05",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "d5c4",
+        "g1f3",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_e06",
+      "name": "Catalan Opening: Closed",
+      "eco": "E06",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "f8e7",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_e07",
+      "name": "Catalan Opening: Closed",
+      "eco": "E07",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_e08",
+      "name": "Catalan Opening: Closed",
+      "eco": "E08",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "d7d5",
+        "f1g2",
+        "f8e7",
+        "g1f3",
+        "e8g8",
+        "e1g1",
+        "b8d7",
+        "d1c2"
+      ]
+    },
+    {
+      "id": "eco_e09",
+      "name": "Catalan Opening: Closed, Main Line",
+      "eco": "E09",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "g2g3",
+        "f8e7",
+        "f1g2",
+        "e8g8",
+        "e1g1",
+        "b8d7",
+        "d1c2",
+        "c7c6",
+        "b1d2"
+      ]
+    },
+    {
+      "id": "eco_e10",
+      "name": "Blumenfeld Countergambit: Duz-Khotimirsky Variation",
+      "eco": "E10",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "b7b5",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_e11",
+      "name": "Bogo-Indian Defense: Retreat Variation",
+      "eco": "E11",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g2g3",
+        "f8b4",
+        "c1d2",
+        "b4e7",
+        "f1g2",
+        "d7d5",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_e12",
+      "name": "Queen's Indian Defense: Kasparov-Petrosian Variation, Andersson Variation",
+      "eco": "E12",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "a2a3",
+        "c8b7",
+        "b1c3",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_e13",
+      "name": "Queen's Indian Defense: Kasparov Variation",
+      "eco": "E13",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "b1c3",
+        "f8b4",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "c8b7"
+      ]
+    },
+    {
+      "id": "eco_e14",
+      "name": "Queen's Indian Defense, with e3",
+      "eco": "E14",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "d7d5",
+        "e2e3",
+        "b7b6",
+        "b1c3",
+        "c8b7"
+      ]
+    },
+    {
+      "id": "eco_e15",
+      "name": "Queen's Indian Defense: Fianchetto Variation, Check Variation",
+      "eco": "E15",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "g2g3",
+        "c8a6",
+        "b2b3",
+        "f8b4"
+      ]
+    },
+    {
+      "id": "eco_e16",
+      "name": "Queen's Indian Defense: Capablanca Variation",
+      "eco": "E16",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "g2g3",
+        "c8b7",
+        "f1g2",
+        "f8b4"
+      ]
+    },
+    {
+      "id": "eco_e17",
+      "name": "Queen's Indian Defense: Traditional Variation",
+      "eco": "E17",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "g2g3",
+        "c8b7",
+        "f1g2",
+        "f8e7"
+      ]
+    },
+    {
+      "id": "eco_e18",
+      "name": "Queen's Indian Defense: Classical Variation, Traditional Variation",
+      "eco": "E18",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "g2g3",
+        "c8b7",
+        "f1g2",
+        "f8e7",
+        "e1g1",
+        "e8g8",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_e19",
+      "name": "Queen's Indian Defense: Classical Variation, Traditional Variation, Main Line",
+      "eco": "E19",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "g1f3",
+        "b7b6",
+        "g2g3",
+        "c8b7",
+        "f1g2",
+        "f8e7",
+        "e1g1",
+        "e8g8",
+        "b1c3",
+        "f6e4",
+        "d1c2",
+        "e4c3",
+        "c2c3"
+      ]
+    },
+    {
+      "id": "eco_e20",
+      "name": "Nimzo-Indian Defense: Romanishin Variation",
+      "eco": "E20",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "g1f3",
+        "c7c5",
+        "g2g3",
+        "e8g8",
+        "f1g2"
+      ]
+    },
+    {
+      "id": "eco_e21",
+      "name": "Nimzo-Indian Defense: Three Knights Variation, Euwe Variation",
+      "eco": "E21",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "g1f3",
+        "c7c5",
+        "d4d5",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_e22",
+      "name": "Nimzo-Indian Defense: Spielmann Variation",
+      "eco": "E22",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1b3"
+      ]
+    },
+    {
+      "id": "eco_e23",
+      "name": "Nimzo-Indian Defense: Spielmann Variation, Romanovsky Gambit",
+      "eco": "E23",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1b3",
+        "c7c5",
+        "d4c5",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_e24",
+      "name": "Nimzo-Indian Defense: Sämisch Variation",
+      "eco": "E24",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "a2a3"
+      ]
+    },
+    {
+      "id": "eco_e25",
+      "name": "Nimzo-Indian Defense: Sämisch Variation",
+      "eco": "E25",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "f2f3",
+        "d7d5",
+        "a2a3",
+        "b4c3",
+        "b2c3",
+        "c7c5",
+        "c4d5"
+      ]
+    },
+    {
+      "id": "eco_e26",
+      "name": "Nimzo-Indian Defense: Sämisch Variation",
+      "eco": "E26",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "a2a3",
+        "b4c3",
+        "b2c3",
+        "c7c5",
+        "e2e3"
+      ]
+    },
+    {
+      "id": "eco_e27",
+      "name": "Nimzo-Indian Defense: Sämisch Variation",
+      "eco": "E27",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "a2a3",
+        "b4c3",
+        "b2c3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_e28",
+      "name": "Nimzo-Indian Defense: Sämisch Variation",
+      "eco": "E28",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "a2a3",
+        "b4c3",
+        "b2c3"
+      ]
+    },
+    {
+      "id": "eco_e29",
+      "name": "Nimzo-Indian Defense: Sämisch Variation",
+      "eco": "E29",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "c7c5",
+        "f1d3",
+        "b8c6",
+        "a2a3",
+        "b4c3",
+        "b2c3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_e30",
+      "name": "Nimzo-Indian Defense: Leningrad Variation, Averbakh Gambit",
+      "eco": "E30",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "c7c5",
+        "d4d5",
+        "b7b5"
+      ]
+    },
+    {
+      "id": "eco_e31",
+      "name": "Nimzo-Indian Defense: Leningrad Variation, Benoni Defense",
+      "eco": "E31",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "c1g5",
+        "h7h6",
+        "g5h4",
+        "c7c5",
+        "d4d5",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_e32",
+      "name": "Nimzo-Indian Defense: Classical Variation, Keres Defense",
+      "eco": "E32",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "e8g8",
+        "a2a3",
+        "b4c3",
+        "c2c3",
+        "b7b6"
+      ]
+    },
+    {
+      "id": "eco_e33",
+      "name": "Nimzo-Indian Defense: Classical Variation, Milner-Barry Variation",
+      "eco": "E33",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "b8c6",
+        "g1f3",
+        "d7d6"
+      ]
+    },
+    {
+      "id": "eco_e34",
+      "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation",
+      "eco": "E34",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_e35",
+      "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation",
+      "eco": "E35",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "d7d5",
+        "c4d5",
+        "e6d5"
+      ]
+    },
+    {
+      "id": "eco_e36",
+      "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation",
+      "eco": "E36",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "d7d5",
+        "a2a3"
+      ]
+    },
+    {
+      "id": "eco_e37",
+      "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation",
+      "eco": "E37",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "d7d5",
+        "a2a3",
+        "b4c3",
+        "c2c3",
+        "f6e4",
+        "c3c2"
+      ]
+    },
+    {
+      "id": "eco_e38",
+      "name": "Nimzo-Indian Defense: Classical Variation, Berlin Variation, Steiner Variation",
+      "eco": "E38",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "c7c5",
+        "d4c5",
+        "b4c3"
+      ]
+    },
+    {
+      "id": "eco_e39",
+      "name": "Nimzo-Indian Defense: Classical Variation, Berlin Variation, Pirc Variation",
+      "eco": "E39",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "d1c2",
+        "c7c5",
+        "d4c5",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_e40",
+      "name": "Nimzo-Indian Defense: Rubinstein System, Taimanov Variation",
+      "eco": "E40",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_e41",
+      "name": "Nimzo-Indian Defense: Rubinstein System",
+      "eco": "E41",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "c7c5"
+      ]
+    },
+    {
+      "id": "eco_e42",
+      "name": "Nimzo-Indian Defense: Rubinstein System, Rubinstein Variation",
+      "eco": "E42",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "c7c5",
+        "g1e2"
+      ]
+    },
+    {
+      "id": "eco_e43",
+      "name": "Nimzo-Indian Defense: St. Petersburg Variation",
+      "eco": "E43",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "b7b6",
+        "f1d3",
+        "c8b7",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_e44",
+      "name": "Nimzo-Indian Defense: St. Petersburg Variation, American Variation",
+      "eco": "E44",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "b7b6",
+        "g1e2",
+        "f6e4"
+      ]
+    },
+    {
+      "id": "eco_e45",
+      "name": "Nimzo-Indian Defense: St. Petersburg Variation, Fischer Variation",
+      "eco": "E45",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "b7b6",
+        "g1e2",
+        "c8a6"
+      ]
+    },
+    {
+      "id": "eco_e46",
+      "name": "Nimzo-Indian Defense: Reshevsky Variation",
+      "eco": "E46",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "g1e2"
+      ]
+    },
+    {
+      "id": "eco_e47",
+      "name": "Nimzo-Indian Defense: Normal Variation",
+      "eco": "E47",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3"
+      ]
+    },
+    {
+      "id": "eco_e48",
+      "name": "Nimzo-Indian Defense: Normal Variation, Classical Defense",
+      "eco": "E48",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_e49",
+      "name": "Nimzo-Indian Defense: Normal Variation, Botvinnik System",
+      "eco": "E49",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "a2a3",
+        "b4c3",
+        "b2c3"
+      ]
+    },
+    {
+      "id": "eco_e50",
+      "name": "Nimzo-Indian Defense",
+      "eco": "E50",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_e51",
+      "name": "Nimzo-Indian Defense: Normal Variation, Ragozin Variation",
+      "eco": "E51",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "g1f3",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_e52",
+      "name": "Nimzo-Indian Defense: Normal Variation, Schlechter Defense",
+      "eco": "E52",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "b7b6"
+      ]
+    },
+    {
+      "id": "eco_e53",
+      "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System",
+      "eco": "E53",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5"
+      ]
+    },
+    {
+      "id": "eco_e54",
+      "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation",
+      "eco": "E54",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5",
+        "e1g1",
+        "d5c4",
+        "d3c4"
+      ]
+    },
+    {
+      "id": "eco_e55",
+      "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Bronstein Variation",
+      "eco": "E55",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5",
+        "e1g1",
+        "d5c4",
+        "d3c4",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_e56",
+      "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Bernstein Defense",
+      "eco": "E56",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5",
+        "e1g1",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_e57",
+      "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Bernstein Defense",
+      "eco": "E57",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5",
+        "e1g1",
+        "b8c6",
+        "a2a3",
+        "d5c4",
+        "d3c4",
+        "c5d4"
+      ]
+    },
+    {
+      "id": "eco_e58",
+      "name": "Nimzo-Indian Defense: Normal Variation, Bernstein Defense, Exchange Line",
+      "eco": "E58",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5",
+        "e1g1",
+        "b8c6",
+        "a2a3",
+        "b4c3",
+        "b2c3"
+      ]
+    },
+    {
+      "id": "eco_e59",
+      "name": "Nimzo-Indian Defense: Normal Variation, Bernstein Defense",
+      "eco": "E59",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "e7e6",
+        "b1c3",
+        "f8b4",
+        "e2e3",
+        "e8g8",
+        "f1d3",
+        "d7d5",
+        "g1f3",
+        "c7c5",
+        "e1g1",
+        "b8c6",
+        "a2a3",
+        "b4c3",
+        "b2c3",
+        "d5c4",
+        "d3c4"
+      ]
+    },
+    {
+      "id": "eco_e60",
+      "name": "Grünfeld Defense: Counterthrust Variation",
+      "eco": "E60",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g2g3",
+        "f8g7",
+        "f1g2",
+        "d7d5"
+      ]
+    },
+    {
+      "id": "eco_e61",
+      "name": "King's Indian Defense: Smyslov Variation",
+      "eco": "E61",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "g1f3",
+        "d7d6",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_e62",
+      "name": "King's Indian Defense: Fianchetto Variation, Delayed Fianchetto",
+      "eco": "E62",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "g1f3",
+        "d7d6",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_e63",
+      "name": "King's Indian Defense: Fianchetto Variation, Panno Variation",
+      "eco": "E63",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d6",
+        "e1g1",
+        "b8c6",
+        "b1c3",
+        "a7a6"
+      ]
+    },
+    {
+      "id": "eco_e64",
+      "name": "King's Indian Defense: Fianchetto Variation, Pterodactyl Variation",
+      "eco": "E64",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "c7c5",
+        "f1g2",
+        "d8a5"
+      ]
+    },
+    {
+      "id": "eco_e65",
+      "name": "King's Indian Defense: Fianchetto Variation, Yugoslav Variation",
+      "eco": "E65",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d6",
+        "e1g1",
+        "c7c5",
+        "b1c3"
+      ]
+    },
+    {
+      "id": "eco_e66",
+      "name": "King's Indian Defense: Fianchetto Variation, Yugoslav Variation, Advance Line",
+      "eco": "E66",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d6",
+        "e1g1",
+        "c7c5",
+        "b1c3",
+        "b8c6",
+        "d4d5"
+      ]
+    },
+    {
+      "id": "eco_e67",
+      "name": "King's Indian Defense: Fianchetto Variation, Debrecen Defense",
+      "eco": "E67",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g2g3",
+        "f8g7",
+        "f1g2",
+        "e8g8",
+        "b1c3",
+        "d7d6",
+        "g1f3",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_e68",
+      "name": "King's Indian Defense: Fianchetto Variation, Classical Variation",
+      "eco": "E68",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d6",
+        "e1g1",
+        "b8d7",
+        "b1c3",
+        "e7e5",
+        "e2e4"
+      ]
+    },
+    {
+      "id": "eco_e69",
+      "name": "King's Indian Defense: Fianchetto Variation, Classical Main Line",
+      "eco": "E69",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "g1f3",
+        "f8g7",
+        "g2g3",
+        "e8g8",
+        "f1g2",
+        "d7d6",
+        "e1g1",
+        "b8d7",
+        "b1c3",
+        "e7e5",
+        "e2e4",
+        "c7c6",
+        "h2h3"
+      ]
+    },
+    {
+      "id": "eco_e70",
+      "name": "King's Indian Defense: Accelerated Averbakh Variation",
+      "eco": "E70",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "c1g5"
+      ]
+    },
+    {
+      "id": "eco_e71",
+      "name": "King's Indian Defense: Makogonov Variation",
+      "eco": "E71",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "h2h3"
+      ]
+    },
+    {
+      "id": "eco_e72",
+      "name": "King's Indian Defense: Normal Variation, Deferred Fianchetto",
+      "eco": "E72",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g2g3"
+      ]
+    },
+    {
+      "id": "eco_e73",
+      "name": "King's Indian Defense: Normal Variation, Standard Development",
+      "eco": "E73",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_e74",
+      "name": "King's Indian Defense: Averbakh Variation, Benoni Defense",
+      "eco": "E74",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f1e2",
+        "e8g8",
+        "c1g5",
+        "c7c5"
+      ]
+    },
+    {
+      "id": "eco_e75",
+      "name": "King's Indian Defense: Averbakh Variation, Main Line",
+      "eco": "E75",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f1e2",
+        "e8g8",
+        "c1g5",
+        "c7c5",
+        "d4d5",
+        "e7e6"
+      ]
+    },
+    {
+      "id": "eco_e76",
+      "name": "King's Indian Defense: Four Pawns Attack, Modern Defense",
+      "eco": "E76",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f4",
+        "b8a6"
+      ]
+    },
+    {
+      "id": "eco_e77",
+      "name": "King's Indian Defense: Four Pawns Attack",
+      "eco": "E77",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f1e2",
+        "e8g8",
+        "f2f4"
+      ]
+    },
+    {
+      "id": "eco_e78",
+      "name": "King's Indian Defense: Four Pawns Attack, Fluid Attack",
+      "eco": "E78",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f4",
+        "e8g8",
+        "g1f3",
+        "c7c5",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_e79",
+      "name": "King's Indian Defense: Four Pawns Attack, Exchange Variation",
+      "eco": "E79",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f4",
+        "e8g8",
+        "g1f3",
+        "c7c5",
+        "f1e2",
+        "c5d4",
+        "f3d4",
+        "b8c6",
+        "c1e3"
+      ]
+    },
+    {
+      "id": "eco_e80",
+      "name": "King's Indian Defense: Sämisch Variation",
+      "eco": "E80",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3"
+      ]
+    },
+    {
+      "id": "eco_e81",
+      "name": "King's Indian Defense: Sämisch Variation, Normal Defense",
+      "eco": "E81",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8"
+      ]
+    },
+    {
+      "id": "eco_e82",
+      "name": "King's Indian Defense: Sämisch Variation, Double Fianchetto",
+      "eco": "E82",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "b7b6"
+      ]
+    },
+    {
+      "id": "eco_e83",
+      "name": "King's Indian Defense: Sämisch Variation, Yates Defense",
+      "eco": "E83",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_e84",
+      "name": "King's Indian Defense: Sämisch Variation, Panno Main Line",
+      "eco": "E84",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "b8c6",
+        "g1e2",
+        "a7a6",
+        "d1d2",
+        "a8b8"
+      ]
+    },
+    {
+      "id": "eco_e85",
+      "name": "King's Indian Defense: Sämisch Variation, Orthodox Variation",
+      "eco": "E85",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_e86",
+      "name": "King's Indian Defense: Sämisch Variation",
+      "eco": "E86",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "e7e5",
+        "g1e2",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_e87",
+      "name": "King's Indian Defense: Sämisch Variation, Closed Variation",
+      "eco": "E87",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "e7e5",
+        "d4d5"
+      ]
+    },
+    {
+      "id": "eco_e88",
+      "name": "King's Indian Defense: Sämisch Variation, Closed Variation",
+      "eco": "E88",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "e7e5",
+        "d4d5",
+        "c7c6"
+      ]
+    },
+    {
+      "id": "eco_e89",
+      "name": "King's Indian Defense: Sämisch Variation, Closed Variation, Main Line",
+      "eco": "E89",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "f2f3",
+        "e8g8",
+        "c1e3",
+        "e7e5",
+        "g1e2",
+        "c7c6",
+        "d4d5",
+        "c6d5"
+      ]
+    },
+    {
+      "id": "eco_e90",
+      "name": "King's Indian Defense: Normal Variation, Rare Defenses",
+      "eco": "E90",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3"
+      ]
+    },
+    {
+      "id": "eco_e91",
+      "name": "King's Indian Defense: Orthodox Variation",
+      "eco": "E91",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2"
+      ]
+    },
+    {
+      "id": "eco_e92",
+      "name": "King's Indian Defense: Orthodox Variation",
+      "eco": "E92",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5"
+      ]
+    },
+    {
+      "id": "eco_e93",
+      "name": "King's Indian Defense: Petrosian Variation, Normal Defense",
+      "eco": "E93",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "d4d5",
+        "b8d7"
+      ]
+    },
+    {
+      "id": "eco_e94",
+      "name": "King's Indian Defense: Orthodox Variation",
+      "eco": "E94",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "e1g1"
+      ]
+    },
+    {
+      "id": "eco_e95",
+      "name": "King's Indian Defense: Orthodox Variation",
+      "eco": "E95",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "e1g1",
+        "b8d7",
+        "f1e1"
+      ]
+    },
+    {
+      "id": "eco_e96",
+      "name": "King's Indian Defense: Orthodox Variation, Positional Defense, Main Line",
+      "eco": "E96",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "e1g1",
+        "b8d7",
+        "f1e1",
+        "c7c6",
+        "e2f1",
+        "a7a5"
+      ]
+    },
+    {
+      "id": "eco_e97",
+      "name": "King's Indian Defense: Orthodox Variation, Aronin-Taimanov Defense",
+      "eco": "E97",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "e1g1",
+        "b8c6"
+      ]
+    },
+    {
+      "id": "eco_e98",
+      "name": "King's Indian Defense: Orthodox Variation, Classical System",
+      "eco": "E98",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "e1g1",
+        "b8c6",
+        "d4d5",
+        "c6e7",
+        "f3e1"
+      ]
+    },
+    {
+      "id": "eco_e99",
+      "name": "King's Indian Defense: Orthodox Variation, Classical System, Traditional Line",
+      "eco": "E99",
+      "start_fen": "startpos",
+      "moves_uci": [
+        "d2d4",
+        "g8f6",
+        "c2c4",
+        "g7g6",
+        "b1c3",
+        "f8g7",
+        "e2e4",
+        "d7d6",
+        "g1f3",
+        "e8g8",
+        "f1e2",
+        "e7e5",
+        "e1g1",
+        "b8c6",
+        "d4d5",
+        "c6e7",
+        "f3e1",
+        "f6d7",
+        "f2f3",
+        "f7f5"
+      ]
+    }
+  ]
+}

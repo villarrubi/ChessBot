@@ -87,6 +87,8 @@ class Cycle:
             raise ValueError("time and storage budgets must be positive")
         if int(self.budgets.get("threads", 1)) < 1:
             raise ValueError("threads must be positive")
+        if int(self.budgets.get("cores", 1)) < 1:
+            raise ValueError("cores must be positive")
 
     def remaining(self) -> float:
         return self.max_seconds - (time.monotonic() - self.started)
@@ -193,6 +195,9 @@ class Cycle:
                        str(selfplay.get("max_plies", 80)), "--color-mode", "paired",
                        "--openings", str(openings), "--seed", str(seed), "--output-dir",
                        str(match)]
+            command.extend(["--cores-a", str(self.budgets.get("cores", 1))])
+            if not opponent_value:
+                command.extend(["--cores-b", str(self.budgets.get("cores", 1))])
             if opponent_value:
                 command.extend(["--cwd-b", str(opponent.parent)])
             opening_ids = selfplay.get("opening_ids", [])
@@ -271,7 +276,8 @@ class Cycle:
                    str(eval_config.get("minimum_independent_samples", 8)),
                    "--max-search-slowdown", str(eval_config.get("max_search_slowdown", 3.0)),
                    "--exploration-plies", str(eval_config.get("exploration_plies", 0)),
-                   "--seed", str(eval_config.get("seed", seed + 1))]
+                   "--seed", str(eval_config.get("seed", seed + 1)),
+                   "--cores", str(self.budgets.get("cores", 1))]
         opening_ids = eval_config.get("opening_ids", [])
         if opening_ids:
             command.extend(["--opening-ids", ",".join(map(str, opening_ids))])

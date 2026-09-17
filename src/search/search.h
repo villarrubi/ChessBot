@@ -14,5 +14,6 @@ using SearchInfoCallback = std::function<void(const SearchResult &, int hashFull
 SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTable &table,
                        std::atomic_bool &stop, int moveOverheadMs, EvaluationMode evaluationMode,
                        const EvaluationParameters &evaluationParameters, const NnueNetwork *network,
-                       SearchMode searchMode, const SearchInfoCallback &callback = {});
+                       SearchMode searchMode, int threadCount,
+                       const SearchInfoCallback &callback = {});
 } // namespace chessbot

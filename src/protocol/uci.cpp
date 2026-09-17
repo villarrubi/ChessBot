@@ -61,7 +61,8 @@ void UciProtocol::identify() {
     writeLine("id name ChessBot 0.10.0");
     writeLine("id author ChessBot contributors");
     writeLine("option name Hash type spin default 64 min 1 max 4096");
-    writeLine("option name Threads type spin default 1 min 1 max 1");
+    writeLine("option name Threads type spin default 1 min 1 max " +
+              std::to_string(MaxSearchThreads));
     writeLine("option name Move Overhead type spin default 10 min 0 max 5000");
     writeLine("option name OwnBook type check default false");
     writeLine("option name BookFile type string default <empty>");
@@ -110,10 +111,9 @@ void UciProtocol::setOption(std::string_view arguments) {
         engine_.setHashSize(static_cast<std::size_t>(parseInt(value, 1, 4096, "Hash")));
     else if (name == "Move Overhead")
         engine_.setMoveOverhead(parseInt(value, 0, 5000, "Move Overhead"));
-    else if (name == "Threads") {
-        if (parseInt(value, 1, 1, "Threads") != 1)
-            throw std::invalid_argument("only one search thread is available");
-    } else if (name == "MultiPV") {
+    else if (name == "Threads")
+        engine_.setThreads(parseInt(value, 1, MaxSearchThreads, "Threads"));
+    else if (name == "MultiPV") {
         multiPv_ = parseInt(value, 1, 10, "MultiPV");
     } else if (name == "OwnBook") {
         if (value != "true" && value != "false")

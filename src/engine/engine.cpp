@@ -26,7 +26,7 @@ SearchResult Engine::searchPrepared(const SearchLimits &limits,
     }
     return runSearch(board_, limits, table_, stop_, moveOverheadMs_, evaluationMode_,
                      evaluationParameters_, nnueEnabled_ ? &network_ : nullptr, searchMode_,
-                     callback);
+                     threads_, callback);
 }
 void Engine::clear() {
     stop();
@@ -40,5 +40,12 @@ void Engine::setMoveOverhead(int milliseconds) {
     if (milliseconds < 0 || milliseconds > 5000)
         throw std::invalid_argument("Move Overhead must be between 0 and 5000 ms");
     moveOverheadMs_ = milliseconds;
+}
+void Engine::setThreads(int count) {
+    if (count < 1 || count > MaxSearchThreads)
+        throw std::invalid_argument("Threads must be between 1 and " +
+                                    std::to_string(MaxSearchThreads));
+    stop();
+    threads_ = count;
 }
 } // namespace chessbot

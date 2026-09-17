@@ -108,7 +108,7 @@ Después de iniciar el ejecutable, enviar las órdenes de forma interactiva. Esp
 ```text
 uci
 setoption name Hash value 64
-setoption name Threads value 1
+setoption name Threads value 4
 setoption name OwnBook value false
 isready
 ucinewgame
@@ -138,7 +138,7 @@ go wtime 120000 btime 120000 winc 1000 binc 1000
 | Opción | Función |
 | --- | --- |
 | `Hash` | Memoria de la tabla de transposición, en MB |
-| `Threads` | Número de hilos de búsqueda |
+| `Threads` | Número de hilos de búsqueda, entre 1 y 256 |
 | `Move Overhead` | Margen de tiempo para comunicación y ejecución |
 | `SearchProfile` | `Baseline` conserva la referencia de fase 4; `Optimized` activa PVS, aspiración y podas verificadas |
 | `Evaluation` | `Basic` reproduce material/PST de fase 2; `Positional` activa el desglose de fase 4 |
@@ -152,7 +152,9 @@ go wtime 120000 btime 120000 winc 1000 binc 1000
 | `NNUEFile` | Carga una red cuantizada `CHESSBOT_NNUE 1` desde disco |
 | `NNUE` | Activa la red cargada o vuelve al evaluador manual |
 
-La configuración inicial utiliza un hilo, 64 MB de hash y evaluación manual posicional, con NNUE y libro desactivados. Para usar una red, se establece primero `NNUEFile` y después `NNUE=true`; los errores se devuelven mediante `info string error`.
+La configuración inicial utiliza un hilo para conservar resultados reproducibles. Se puede seleccionar más de uno con `setoption name Threads value N` o desde el lanzador de Windows; 64 MB de hash y la evaluación manual posicional siguen siendo los demás valores iniciales, con NNUE y libro desactivados. Para usar una red, se establece primero `NNUEFile` y después `NNUE=true`; los errores se devuelven mediante `info string error`.
+
+En el lanzador, **Hilos de CPU** controla el paralelismo del motor y **Núcleos de CPU** limita la afinidad del proceso a los primeros núcleos lógicos seleccionados. La misma configuración aparece en **Entrenar** y se aplica a las partidas, evaluaciones y benchmarks del ciclo.
 
 ```text
 setoption name NNUEFile value data/networks/nnue-phase9-candidate-v1.nnue
@@ -190,7 +192,7 @@ Ejemplo de la interfaz actual para organizar partidas a profundidad fija contra 
 python tools/match_runner.py --engine-a .\build\Release\chessbot.exe --engine-b C:\motores\stockfish.exe --games 16 --depth 3 --openings data/openings/core.json --color-mode paired --output-dir data/engine_matches/prueba
 ```
 
-La ruta del rival debe sustituirse por la instalación local. En comparaciones de fuerza, el runner utiliza parejas con colores invertidos y la misma posición de salida. Cada experimento registra configuración, relojes, opciones de libro, evaluadores y procedencia. La guía completa está en [docs/openings-and-matches.md](docs/openings-and-matches.md).
+La ruta del rival debe sustituirse por la instalación local. En comparaciones de fuerza, el runner utiliza parejas con colores invertidos y la misma posición de salida. Cada experimento registra configuración, relojes, opciones de libro, evaluadores y procedencia. La escalera contra Stockfish usa por defecto `data/openings/eco-500.json`: 500 aperturas ECO A00–E99, 1000 partidas por nivel para cubrir ambos colores, y aplica los mismos hilos y núcleos a ambos motores. La guía completa está en [docs/openings-and-matches.md](docs/openings-and-matches.md).
 
 Se admiten estos puntos de partida:
 
@@ -282,8 +284,8 @@ FEN se usa para posiciones; PGN con metadatos JSON, para partidas; y CSV/Parquet
 
 La validación incluye PERFT, invariantes, restauración de posiciones, coherencia Zobrist, tácticas, protocolo UCI y regresiones. El CI ejecuta compilación, pruebas, sanitizadores compatibles, formato y un benchmark pequeño; las campañas largas de fuerza se ejecutan por separado.
 
-El modo determinista permite reproducir resultados bajo una configuración controlada, inicialmente monohilo y con límite de nodos. Los cambios se aceptan por mejoras verificables en corrección, fuerza, análisis, velocidad, memoria o explicabilidad.
+El modo determinista permite reproducir resultados bajo una configuración controlada con `Threads=1` y límite de nodos. Los cambios se aceptan por mejoras verificables en corrección, fuerza, análisis, velocidad, memoria o explicabilidad.
 
-El objetivo es un motor correcto, observable y ampliable. No se promete una cifra Elo ni fuerza equivalente a Stockfish. La búsqueda distribuida, búsqueda en GPU, multihilo real y Syzygy integrado quedan fuera del alcance actual.
+El objetivo es un motor correcto, observable y ampliable. No se promete una cifra Elo ni fuerza equivalente a Stockfish. La búsqueda distribuida, búsqueda en GPU y Syzygy integrado quedan fuera del alcance actual.
 
 La definición técnica completa está en [specs.md](specs.md), y las tareas y criterios de aceptación están en [roadmap.md](roadmap.md).

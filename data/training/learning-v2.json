@@ -6,7 +6,7 @@
   "reference": "data/evaluation/hce-active.params",
   "reference_kind": "hce",
   "feature_eval_file": "data/evaluation/hce-active.params",
-  "openings": "data/openings/core.json",
+  "openings": "data/openings/eco-500.json",
   "source_pgns": [],
   "candidate_version": "SegundoModelo-v2",
   "seed": 20260917,

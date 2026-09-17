@@ -25,7 +25,9 @@ una posición concreta; `--moves` añade un prefijo SAN o UCI exacto antes de li
 Las suites aceptadas son JSON nativo, PGN, EPD, listas FEN/UCI y libros Polyglot. Cada entrada se
 normaliza a una FEN inicial y una lista UCI, con identificador, nombre, ECO, fuente y ply de
 liberación. `data/openings/core.json` sirve para pruebas funcionales; `strength-v1.json` contiene
-50 puntos de partida para comparaciones con mayor diversidad.
+50 puntos de partida para comparaciones con mayor diversidad. `data/openings/eco-500.json` contiene
+una línea legal representativa para cada código ECO de A00 a E99 (500 en total), procedente de
+`lichess-org/chess-openings`, publicado bajo CC0.
 
 El libro nativo del motor es independiente del prefijo del runner. Se activa con estas opciones
 UCI:
@@ -52,17 +54,24 @@ SPRT opcional se configura con `--sprt-elo0`, `--sprt-elo1`, `--sprt-alpha` y `-
 El lanzador incluye **Medir Elo aproximado** en la pestaña Herramientas. Selecciona un ejecutable
 UCI nativo de Stockfish, indica las partidas por nivel y la profundidad, y ejecuta la prueba. La
 escalera usa los límites `UCI_LimitStrength` y `UCI_Elo` de Stockfish (1320–3190), juega cada nivel
-con colores emparejados y guarda `summary.json`, `summary.csv` y una carpeta por nivel. La cifra
+contra las 500 líneas de `data/openings/eco-500.json` (A00–E99), una vez con cada color, y guarda
+`summary.json`, `summary.csv` y una carpeta por nivel. La cifra
 estimada suma el Elo configurado de Stockfish y la diferencia medida en la partida; el intervalo
-de confianza se muestra junto al valor y suele ser amplio con pocas partidas.
+de confianza se muestra junto al valor y suele ser amplio con pocas partidas. Los parámetros
+`--threads` y `--cores` se aplican por igual a ChessBot y Stockfish para que la comparación use
+los mismos recursos de CPU.
 
 También se puede ejecutar sin el lanzador:
 
 ```powershell
 python tools/elo_ladder.py --engine build/Release/chessbot.exe `
   --stockfish C:\motores\stockfish\stockfish-windows-x86-64.exe `
-  --games-per-level 16 --depth 3 --output-dir build/elo-ladder
+  --games-per-level 1000 --depth 3 --output-dir build/elo-ladder
 ```
+
+La herramienta exige al menos dos partidas por apertura en modo emparejado: con la suite completa
+son 1000 partidas por nivel. Se puede usar otra suite mediante `--openings`, pero también debe
+proporcionar al menos dos partidas por entrada.
 
 La versión `.js/.wasm` de Stockfish que usa ChessPrep funciona dentro del navegador y no es un
 ejecutable UCI nativo; para esta prueba hay que seleccionar el binario de Windows.

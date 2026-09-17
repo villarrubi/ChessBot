@@ -86,7 +86,7 @@ Evidencia de las fases 2–4: [búsqueda](docs/search.md), [evaluación](docs/ev
 - [x] Reducir asignaciones mediante listas fijas en búsqueda; el perfil no justificó separar todavía una caché de peones dependiente de reyes y torres.
 - [x] Registrar NPS, profundidad, profundidad selectiva, aciertos de TT, cortes beta, cortes con el primer movimiento, quietud, ramificación y memoria de hash.
 - [x] Validar corrección, benchmark, suite táctica y partidas automatizadas; conservar decisiones y resultados, incluidas campañas desfavorables.
-- [x] Evaluar el salto a multihilo y mantener esta versión monohilo como referencia determinista hasta disponer de una campaña estadística mayor.
+- [x] Incorporar Lazy SMP configurable y mantener `Threads=1` como referencia determinista para las campañas comparables.
 - [x] Evaluar Syzygy como ampliación opcional; documentar WDL/DTZ y conservar funcionamiento completo sin tablas externas.
 - [ ] **Cierre:** el perfil optimizado conserva jugada/puntuación a profundidad fija y reduce un 41,7 % los nodos, pero obtuvo 30,5–33,5 en 64 partidas a 50 ms: −16 Elo estimados, IC 95 % [−64, +31]. No se promociona como predeterminado hasta demostrar fuerza.
 

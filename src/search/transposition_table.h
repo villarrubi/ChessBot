@@ -1,7 +1,11 @@
 #pragma once
 #include "board/move.h"
+#include <array>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <mutex>
+#include <optional>
 #include <vector>
 
 namespace chessbot {
@@ -24,9 +28,9 @@ class TranspositionTable {
     void resize(std::size_t megabytes);
     void clear();
     void newSearch() {
-        ++age_;
+        age_.fetch_add(1, std::memory_order_relaxed);
     }
-    const TTEntry *probe(std::uint64_t key) const;
+    std::optional<TTEntry> probe(std::uint64_t key) const;
     void store(std::uint64_t key, Move move, Score score, int depth, Bound bound, int rule50);
     int hashFullPermille() const;
     std::size_t megabytes() const {
@@ -34,9 +38,11 @@ class TranspositionTable {
     }
 
   private:
+    static constexpr std::size_t LockCount = 4096;
     std::vector<TTEntry> entries_;
     std::size_t mask_ = 0;
     std::size_t megabytes_ = 0;
-    std::uint8_t age_ = 0;
+    std::atomic<std::uint8_t> age_{0};
+    mutable std::array<std::mutex, LockCount> locks_;
 };
 } // namespace chessbot

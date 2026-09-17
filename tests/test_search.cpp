@@ -119,6 +119,21 @@ TEST_CASE("external stop interrupts infinite analysis") {
     CHECK(result.depth >= 1);
 }
 
+TEST_CASE("parallel search uses configurable threads and a global node limit") {
+    Engine engine;
+    CHECK(engine.threads() == 1);
+    engine.setThreads(4);
+    CHECK(engine.threads() == 4);
+    SearchLimits limits;
+    limits.nodes = 2000;
+    const auto result = engine.search(limits);
+    CHECK(result.nodes == limits.nodes);
+    CHECK(result.bestMove);
+    CHECK(result.completed);
+    CHECK_THROWS_AS(engine.setThreads(0), std::invalid_argument);
+    CHECK_THROWS_AS(engine.setThreads(MaxSearchThreads + 1), std::invalid_argument);
+}
+
 TEST_CASE("MultiPV returns distinct ordered root variations") {
     Engine engine;
     SearchLimits limits;
@@ -202,9 +217,9 @@ TEST_CASE("transposition table sizing, bounds and replacement") {
     CHECK(table.probe(42)->depth == 4);
     CHECK(table.probe(42)->bound == Bound::Exact);
     CHECK(table.probe(42)->rule50 == 17);
-    CHECK(table.probe(43) == nullptr);
+    CHECK_FALSE(table.probe(43));
     table.clear();
-    CHECK(table.probe(42) == nullptr);
+    CHECK_FALSE(table.probe(42));
     CHECK_THROWS_AS(table.resize(0), std::invalid_argument);
     CHECK_THROWS_AS(table.resize(4097), std::invalid_argument);
 }

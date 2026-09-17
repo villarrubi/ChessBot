@@ -10,6 +10,8 @@
 #include <stdexcept>
 
 namespace chessbot {
+constexpr int MaxSearchThreads = 256;
+
 class Engine {
   public:
     Engine();
@@ -47,6 +49,10 @@ class Engine {
         return table_.megabytes();
     }
     void setMoveOverhead(int milliseconds);
+    void setThreads(int count);
+    int threads() const {
+        return threads_;
+    }
     void setEvaluationMode(EvaluationMode mode) {
         stop();
         evaluationMode_ = mode;
@@ -108,6 +114,7 @@ class Engine {
     TranspositionTable table_;
     std::atomic_bool stop_{false};
     int moveOverheadMs_ = 10;
+    int threads_ = 1;
     EvaluationMode evaluationMode_ = EvaluationMode::Positional;
     EvaluationParameters evaluationParameters_;
     NnueNetwork network_;

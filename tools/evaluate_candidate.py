@@ -14,6 +14,8 @@ from typing import Any
 import chess
 import chess.engine
 
+from process_affinity import set_process_affinity
+
 
 POSITIONS = (chess.STARTING_FEN,
              "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
@@ -30,7 +32,14 @@ def engine_options(kind: str, artifact: Path) -> dict[str, Any]:
     return {"EvalFile": str(artifact), "NNUE": False, "OwnBook": False}
 
 
-def correctness(engine: Path, options: dict[str, Any]) -> dict[str, Any]:
+def start_engine(engine: Path, options: dict[str, Any], cores: int) -> chess.engine.SimpleEngine:
+    process = chess.engine.SimpleEngine.popen_uci(str(engine), timeout=15)
+    set_process_affinity(process.transport.get_pid(), cores)
+    process.configure(options)
+    return process
+
+
+def correctness(engine: Path, options: dict[str, Any], cores: int) -> dict[str, Any]:
     perft = []
     for depth, expected in ((3, 8902), (4, 197281)):
         run = subprocess.run([str(engine), "perft", str(depth)], check=True,
@@ -38,10 +47,9 @@ def correctness(engine: Path, options: dict[str, Any]) -> dict[str, Any]:
         actual = int(run.stdout.strip())
         perft.append({"depth": depth, "expected": expected, "actual": actual,
                       "pass": actual == expected})
-    process = chess.engine.SimpleEngine.popen_uci(str(engine), timeout=10)
+    process = start_engine(engine, options, cores)
     tactics = []
     try:
-        process.configure(options)
         for fen, expected, depth in TACTICS:
             played = process.play(chess.Board(fen), chess.engine.Limit(depth=depth))
             actual = played.move.uci() if played.move else "0000"
@@ -53,12 +61,11 @@ def correctness(engine: Path, options: dict[str, Any]) -> dict[str, Any]:
             "pass": all(row["pass"] for row in perft + tactics)}
 
 
-def benchmark(engine: Path, options: dict[str, Any], depth: int) -> dict[str, Any]:
-    process = chess.engine.SimpleEngine.popen_uci(str(engine), timeout=15)
+def benchmark(engine: Path, options: dict[str, Any], depth: int, cores: int) -> dict[str, Any]:
+    process = start_engine(engine, options, cores)
     elapsed = nodes = 0
     rows = []
     try:
-        process.configure(options)
         for fen in POSITIONS:
             started = time.perf_counter()
             result = process.play(chess.Board(fen), chess.engine.Limit(depth=depth, nodes=2_000_000),
@@ -118,10 +125,13 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--minimum-lower-score", type=float, default=0.5)
     parser.add_argument("--minimum-independent-samples", type=int, default=8)
+    parser.add_argument("--cores", type=int, default=1)
     parser.add_argument("--promote-to", type=Path)
     args = parser.parse_args()
     if args.games < 2 or args.games % 2 or args.depth < 1 or args.benchmark_depth < 1:
         parser.error("games must be a positive even number and depths must be positive")
+    if args.cores < 1 or args.cores > 64:
+        parser.error("cores must be between 1 and 64")
     engine = args.engine.resolve(strict=True)
     candidate = args.candidate.resolve(strict=True)
     reference = args.reference.resolve(strict=True)
@@ -133,9 +143,9 @@ def main() -> None:
     candidate_options = engine_options(args.candidate_kind, candidate_copy)
     reference_options = engine_options(args.reference_kind, reference_copy)
 
-    rules = correctness(engine, candidate_options)
-    reference_benchmark = benchmark(engine, reference_options, args.benchmark_depth)
-    candidate_benchmark = benchmark(engine, candidate_options, args.benchmark_depth)
+    rules = correctness(engine, candidate_options, args.cores)
+    reference_benchmark = benchmark(engine, reference_options, args.benchmark_depth, args.cores)
+    candidate_benchmark = benchmark(engine, candidate_options, args.benchmark_depth, args.cores)
     nps_ratio = candidate_benchmark["nps"] / max(reference_benchmark["nps"], 1)
     performance_ratio = 1 / max(nps_ratio, 1e-9)
     latency_ratio = candidate_benchmark["elapsed_ms"] / max(reference_benchmark["elapsed_ms"], 1)
@@ -150,7 +160,8 @@ def main() -> None:
                "--depth", str(args.depth), "--max-plies", str(args.max_plies),
                "--color-mode", "paired", "--openings", str(args.openings.resolve(strict=True)),
                "--output-dir", str(match_dir), "--exploration-plies", str(args.exploration_plies),
-               "--exploration-engine", "b", "--seed", str(args.seed)]
+               "--exploration-engine", "b", "--seed", str(args.seed),
+               "--cores-a", str(args.cores), "--cores-b", str(args.cores)]
     if args.opening_ids:
         command.extend(["--opening-ids", args.opening_ids])
     subprocess.run(command, check=True)

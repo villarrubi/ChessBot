@@ -21,6 +21,8 @@ import chess.engine
 import chess.pgn
 import chess.polyglot
 
+from process_affinity import set_process_affinity
+
 
 def configure_utf8_stdio() -> None:
     """Keep progress output safe when a Windows parent uses a legacy code page."""
@@ -53,6 +55,7 @@ class EngineConfig:
     options: dict[str, Any]
     cwd: Path | None
     environment: dict[str, str]
+    cores: int | None
 
 
 @dataclass
@@ -195,12 +198,12 @@ def parse_json_object(text: str, label: str) -> dict[str, Any]:
 
 
 def engine_config(path: Path, name: str | None, options: str, cwd: Path | None,
-                  environment: str) -> EngineConfig:
+                  environment: str, cores: int) -> EngineConfig:
     resolved = path.resolve(strict=True)
     resolved_cwd = cwd.resolve(strict=True) if cwd else None
     env = {str(key): str(value) for key, value in parse_json_object(environment, "environment").items()}
     return EngineConfig(resolved, name or resolved.stem, parse_json_object(options, "options"),
-                        resolved_cwd, env)
+                        resolved_cwd, env, cores or None)
 
 
 def start_engine(config: EngineConfig, timeout: float) -> RunningEngine:
@@ -210,6 +213,7 @@ def start_engine(config: EngineConfig, timeout: float) -> RunningEngine:
                                                   cwd=str(config.cwd) if config.cwd else None,
                                                   env=environment)
     try:
+        set_process_affinity(process.transport.get_pid(), config.cores)
         if config.options:
             process.configure(config.options)
     except Exception:
@@ -346,8 +350,11 @@ def play_game(first: RunningEngine, second: RunningEngine, opening: Opening, ind
     game.headers["Result"] = result_for_winner(winner)
     game.headers["Termination"] = termination
     game.headers["FinalFEN"] = board.fen()
+    game.headers["PlyCount"] = str(board.ply())
+    game.headers["FullMoveCount"] = str((board.ply() + 1) // 2)
     metadata = {"round": index + 1, "result": game.headers["Result"],
                 "termination": termination, "final_fen": board.fen(), "engine_a_color": a_color_name,
+                "played_plies": board.ply(), "full_moves": (board.ply() + 1) // 2,
                 "opening": {"id": opening.identifier, "name": opening.name, "eco": opening.eco,
                             "source": opening.source, "version": opening.version,
                             "start_fen": opening.start_fen,
@@ -439,6 +446,8 @@ def main() -> None:
     parser.add_argument("--cwd-b", type=Path)
     parser.add_argument("--env-a", default="{}")
     parser.add_argument("--env-b", default="{}")
+    parser.add_argument("--cores-a", type=int, default=0)
+    parser.add_argument("--cores-b", type=int, default=0)
     parser.add_argument("--games", type=int, default=2)
     limits = parser.add_mutually_exclusive_group()
     limits.add_argument("--depth", type=int)
@@ -492,8 +501,10 @@ def main() -> None:
     if (args.sprt_elo0 is None) != (args.sprt_elo1 is None):
         parser.error("SPRT requires both elo0 and elo1")
     root = Path(__file__).resolve().parents[1]
-    config_a = engine_config(args.engine_a, args.name_a, args.options_a, args.cwd_a, args.env_a)
-    config_b = engine_config(args.engine_b, args.name_b, args.options_b, args.cwd_b, args.env_b)
+    config_a = engine_config(args.engine_a, args.name_a, args.options_a, args.cwd_a,
+                             args.env_a, args.cores_a)
+    config_b = engine_config(args.engine_b, args.name_b, args.options_b, args.cwd_b,
+                             args.env_b, args.cores_b)
     if args.openings:
         openings = load_openings(args.openings.resolve(strict=True))
     elif args.fen:
@@ -559,8 +570,11 @@ def main() -> None:
             draws = sum(1 for item in records if item["result"] == "1/2-1/2")
             losses = len(records) - wins - draws
             score = wins + 0.5 * draws
+            color = "blancas" if record["engine_a_color"] == "white" else "negras"
             progress_line = (f"[partida {index + 1}/{args.games}] {record['result']} | "
-                             f"{opening.name} | W {wins} D {draws} L {losses} | "
+                             f"{opening.name} | ChessBot: {color} | "
+                             f"movimientos {record['full_moves']} ({record['played_plies']} plies) | "
+                             f"W {wins} D {draws} L {losses} | "
                              f"score {score / len(records):.3f} | "
                              f"{time.monotonic() - started:.0f}s")
             print(progress_line, flush=True)
@@ -586,10 +600,12 @@ def main() -> None:
                 "git_commit": git_commit(root), "platform": platform.platform(), "seed": args.seed,
                 "engines": {"a": {"path": str(config_a.path), "name": config_a.name,
                                       "id": first.identifier, "options": config_a.options,
+                                      "cores": config_a.cores,
                                       "cwd": str(config_a.cwd) if config_a.cwd else None,
                                       "environment_keys": sorted(config_a.environment)},
                             "b": {"path": str(config_b.path), "name": config_b.name,
                                       "id": second.identifier, "options": config_b.options,
+                                      "cores": config_b.cores,
                                       "cwd": str(config_b.cwd) if config_b.cwd else None,
                                       "environment_keys": sorted(config_b.environment)}},
                 "conditions": {"games": args.games, "color_mode": args.color_mode,

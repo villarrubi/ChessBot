@@ -1,6 +1,6 @@
 # Arquitectura actual
 
-Las fases 0–10 implementan una biblioteca `chessbot_core`, un motor UCI monohilo, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas, evaluación HCE/NNUE y un ciclo de aprendizaje por lotes.
+Las fases 0–10 implementan una biblioteca `chessbot_core`, un motor UCI con búsqueda multihilo configurable, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas, evaluación HCE/NNUE y un ciclo de aprendizaje por lotes.
 
 ## Dependencias y módulos
 
@@ -70,7 +70,7 @@ Un mate favorable usa `ScoreMate - ply`; uno desfavorable, `-ScoreMate + ply`. A
 - Tablas de subconjuntos de ocupación para deslizantes, con selección PEXT en tiempo de ejecución y alternativa por software.
 - `MoveList` fijo dentro de búsqueda y vectores en las fronteras públicas donde simplifican la interoperabilidad.
 - Consola de diagnóstico y protocolo UCI comparten el ejecutable, pero tienen entradas separadas: sin argumentos se inicia UCI.
-- Búsqueda monohilo determinista con perfiles `Baseline`/`Optimized`; el hilo asíncrono pertenece al adaptador UCI.
+- Búsqueda Lazy SMP configurable con `Threads`; `Threads=1` conserva la referencia determinista y el adaptador UCI mantiene además un hilo asíncrono para responder a `stop`.
 - UCI transporta búsqueda, MultiPV, libro y archivos de evaluación; `eval` y `features-stream` exponen el desglose JSON que consumen las herramientas de análisis y entrenamiento.
 
 ## Evaluación neuronal

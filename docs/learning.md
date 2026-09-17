@@ -146,8 +146,9 @@ La profundidad se aplica a cada jugada tanto en la generación como en la evalua
 Subirla produce partidas de mayor calidad, pero el coste crece con rapidez. Profundidad `3` es una
 base práctica; `4–5` requiere bastante más tiempo. `selfplay_games` genera datos y
 `evaluation_games` mide el candidato después, sin mezclar esas partidas con el entrenamiento.
-La interfaz permite marcar un subconjunto de aperturas del libro `data/openings/core.json`; la
-selección se aplica tanto a las partidas de aprendizaje como a la evaluación. Para probar una línea
+La interfaz carga por defecto `data/openings/eco-500.json`, con los 500 códigos ECO A00–E99, y
+permite buscar por código o nombre, marcar/quitar todas o actuar solo sobre las líneas visibles.
+La selección se aplica tanto a las partidas de aprendizaje como a la evaluación. Para probar una línea
 que no esté en el libro, escribe en **Apertura propia** `Nombre | movimientos`, por ejemplo
 `Gambito de Rey | e4 e5 f4`. Se admiten movimientos SAN (`e4`) y UCI (`e2e4`) separados por espacios;
 el lanzador genera un catálogo temporal para ese ciclo y valida que la línea sea legal.

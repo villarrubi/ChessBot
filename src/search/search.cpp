@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <exception>
+#include <thread>
+#include <vector>
 
 namespace chessbot {
 namespace {
@@ -30,14 +33,20 @@ bool quiet(Move move) {
     return !move.has(Capture) && move.promotion() == None;
 }
 
+struct SharedSearchState {
+    explicit SharedSearchState(std::uint64_t nodeLimit) : nodeLimit(nodeLimit) {}
+    std::atomic<std::uint64_t> nodes{0};
+    const std::uint64_t nodeLimit;
+};
+
 class Searcher {
   public:
     Searcher(Board board, const SearchLimits &limits, TranspositionTable &table,
-             std::atomic_bool &stop, int overhead, EvaluationMode evaluationMode,
-             const EvaluationParameters &evaluationParameters, const NnueNetwork *network,
-             SearchMode searchMode, const SearchInfoCallback &callback)
-        : board_(std::move(board)), limits_(limits), table_(table), stop_(stop),
-          callback_(callback), evaluationMode_(evaluationMode),
+             std::atomic_bool &stop, SharedSearchState &shared, int workerIndex, int overhead,
+             EvaluationMode evaluationMode, const EvaluationParameters &evaluationParameters,
+             const NnueNetwork *network, SearchMode searchMode, const SearchInfoCallback &callback)
+        : board_(std::move(board)), limits_(limits), table_(table), stop_(stop), shared_(shared),
+          workerIndex_(workerIndex), callback_(callback), evaluationMode_(evaluationMode),
           evaluationParameters_(evaluationParameters), network_(network), searchMode_(searchMode) {
         timer_.start(limits, board_.sideToMove(), overhead);
         if (network_)
@@ -45,7 +54,6 @@ class Searcher {
     }
 
     SearchResult run() {
-        table_.newSearch();
         rootMoves_ = legalMoveList(board_);
         if (!limits_.rootMoves.empty()) {
             std::size_t kept = 0;
@@ -96,6 +104,8 @@ class Searcher {
     const SearchLimits &limits_;
     TranspositionTable &table_;
     std::atomic_bool &stop_;
+    SharedSearchState &shared_;
+    int workerIndex_;
     const SearchInfoCallback &callback_;
     EvaluationMode evaluationMode_;
     const EvaluationParameters &evaluationParameters_;
@@ -138,7 +148,7 @@ class Searcher {
         pvLength_.fill(0);
     }
     void updateResultCounters() {
-        result_.nodes = nodes_;
+        result_.nodes = shared_.nodes.load(std::memory_order_relaxed);
         result_.qnodes = qnodes_;
         result_.ttHits = ttHits_;
         result_.betaCutoffs = betaCutoffs_;
@@ -156,7 +166,8 @@ class Searcher {
     bool stopped() {
         if (stop_.load(std::memory_order_relaxed))
             return true;
-        if (limits_.nodes && nodes_ >= limits_.nodes) {
+        if (shared_.nodeLimit &&
+            shared_.nodes.load(std::memory_order_relaxed) >= shared_.nodeLimit) {
             stop_.store(true, std::memory_order_relaxed);
             return true;
         }
@@ -169,6 +180,19 @@ class Searcher {
     bool enterNode(int ply, bool quiescence) {
         if (stopped())
             return false;
+        if (shared_.nodeLimit) {
+            auto current = shared_.nodes.load(std::memory_order_relaxed);
+            while (true) {
+                if (current >= shared_.nodeLimit) {
+                    stop_.store(true, std::memory_order_relaxed);
+                    return false;
+                }
+                if (shared_.nodes.compare_exchange_weak(current, current + 1,
+                                                        std::memory_order_relaxed))
+                    break;
+            }
+        } else
+            shared_.nodes.fetch_add(1, std::memory_order_relaxed);
         ++nodes_;
         if (quiescence)
             ++qnodes_;
@@ -210,9 +234,13 @@ class Searcher {
         clearPv();
         auto moves = rootMoves_;
         Move ttMove;
-        if (const auto *entry = table_.probe(board_.key()))
+        if (const auto entry = table_.probe(board_.key()))
             ttMove = entry->bestMove;
         orderMoves(moves, ttMove, {}, {}, optimized() ? &history_ : nullptr, board_.sideToMove());
+        if (workerIndex_ > 0 && moves.size() > 1) {
+            const auto offset = static_cast<std::size_t>(workerIndex_) % moves.size();
+            std::rotate(moves.begin(), moves.begin() + offset, moves.end());
+        }
         const Score originalAlpha = alpha;
         Score best = -ScoreInfinity;
         Move bestMove;
@@ -305,7 +333,7 @@ class Searcher {
         const bool inCheck = board_.inCheck(board_.sideToMove());
         const Score originalAlpha = alpha;
         Move ttMove;
-        if (const auto *entry = table_.probe(board_.key())) {
+        if (const auto entry = table_.probe(board_.key())) {
             ++ttHits_;
             ttMove = entry->bestMove;
             const Score ttScore = fromTable(entry->score, ply);
@@ -467,9 +495,73 @@ class Searcher {
 SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTable &table,
                        std::atomic_bool &stop, int moveOverheadMs, EvaluationMode evaluationMode,
                        const EvaluationParameters &evaluationParameters, const NnueNetwork *network,
-                       SearchMode searchMode, const SearchInfoCallback &callback) {
-    return Searcher(std::move(board), limits, table, stop, moveOverheadMs, evaluationMode,
-                    evaluationParameters, network, searchMode, callback)
-        .run();
+                       SearchMode searchMode, int threadCount, const SearchInfoCallback &callback) {
+    table.newSearch();
+    SharedSearchState shared(limits.nodes);
+    std::vector<SearchResult> results(static_cast<std::size_t>(threadCount));
+    std::vector<std::exception_ptr> errors(static_cast<std::size_t>(threadCount));
+    std::vector<std::thread> workers;
+    workers.reserve(static_cast<std::size_t>(threadCount - 1));
+    try {
+        for (int index = 1; index < threadCount; ++index) {
+            workers.emplace_back([&, index, workerBoard = board]() mutable {
+                try {
+                    results[static_cast<std::size_t>(index)] =
+                        Searcher(std::move(workerBoard), limits, table, stop, shared, index,
+                                 moveOverheadMs, evaluationMode, evaluationParameters, network,
+                                 searchMode, {})
+                            .run();
+                } catch (...) {
+                    errors[static_cast<std::size_t>(index)] = std::current_exception();
+                    stop.store(true, std::memory_order_relaxed);
+                }
+            });
+        }
+    } catch (...) {
+        stop.store(true, std::memory_order_relaxed);
+        for (auto &worker : workers)
+            worker.join();
+        throw;
+    }
+    try {
+        results[0] = Searcher(std::move(board), limits, table, stop, shared, 0, moveOverheadMs,
+                              evaluationMode, evaluationParameters, network, searchMode, callback)
+                         .run();
+    } catch (...) {
+        errors[0] = std::current_exception();
+    }
+    stop.store(true, std::memory_order_relaxed);
+    for (auto &worker : workers)
+        worker.join();
+    for (const auto &error : errors)
+        if (error)
+            std::rethrow_exception(error);
+
+    std::size_t selected = 0;
+    for (std::size_t index = 1; index < results.size(); ++index)
+        if (results[index].depth > results[selected].depth)
+            selected = index;
+    SearchResult result = results[selected];
+    result.nodes = shared.nodes.load(std::memory_order_relaxed);
+    result.qnodes = result.ttHits = result.betaCutoffs = result.firstMoveCutoffs = 0;
+    result.generatedMoves = result.aspirationResearches = result.nullMoveAttempts = 0;
+    result.nullMoveCutoffs = result.lmrReductions = result.lmrResearches = 0;
+    result.maximumBranching = result.selectiveDepth = 0;
+    for (const auto &workerResult : results) {
+        result.qnodes += workerResult.qnodes;
+        result.ttHits += workerResult.ttHits;
+        result.betaCutoffs += workerResult.betaCutoffs;
+        result.firstMoveCutoffs += workerResult.firstMoveCutoffs;
+        result.generatedMoves += workerResult.generatedMoves;
+        result.aspirationResearches += workerResult.aspirationResearches;
+        result.nullMoveAttempts += workerResult.nullMoveAttempts;
+        result.nullMoveCutoffs += workerResult.nullMoveCutoffs;
+        result.lmrReductions += workerResult.lmrReductions;
+        result.lmrResearches += workerResult.lmrResearches;
+        result.maximumBranching = std::max(result.maximumBranching, workerResult.maximumBranching);
+        result.selectiveDepth = std::max(result.selectiveDepth, workerResult.selectiveDepth);
+        result.timeMs = std::max(result.timeMs, workerResult.timeMs);
+    }
+    return result;
 }
 } // namespace chessbot

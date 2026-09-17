@@ -58,10 +58,13 @@ try:
                    "BookSeed", "MultiPV", "SearchProfile", "Evaluation", "EvalFile", "NNUE",
                    "NNUEFile"):
         assert any(line.startswith(f"option name {option} ") for line in greeting), option
+    assert any(line == "option name Threads type spin default 1 min 1 max 256"
+               for line in greeting), greeting
 
     send("isready")
     assert wait_for(lambda line: line == "readyok")[-1] == "readyok"
     send("setoption name Hash value 16")
+    send("setoption name Threads value 2")
     send("setoption name Move Overhead value 1")
     send("setoption name Evaluation value Basic")
     send("setoption name Evaluation value Positional")

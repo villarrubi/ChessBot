@@ -49,7 +49,13 @@ No se añadió caché de peones: el perfil seguía dominado por generación y qu
 
 `SearchLimits` admite profundidad, nodos, tiempo por movimiento, relojes, incrementos, movimientos restantes e infinito. Los relojes usan `-1` para «no suministrado» y aceptan `0` como tiempo agotado. El gestor resta `Move Overhead`, calcula límites blando y duro y usa un reloj monotónico. La parada externa es atómica.
 
-El límite blando decide si se inicia otra iteración y el duro interrumpe la actual. Los análisis con reloj conservan la última profundidad completa. El motor sigue siendo monohilo: esta versión constituye la referencia determinista antes de medir búsqueda paralela.
+El límite blando decide si se inicia otra iteración y el duro interrumpe la actual. Los análisis con reloj conservan la última profundidad completa. El límite de nodos es global: con varios hilos no se multiplica por el número de trabajadores.
+
+## Búsqueda paralela
+
+La opción UCI `Threads`, entre 1 y 256, activa Lazy SMP. Cada trabajador mantiene su tablero, acumulador NNUE, PV, killers e historial, diversifica el orden de movimientos de raíz y comparte una tabla de transposición protegida por bloqueos segmentados. La señal de parada, el reloj y el contador global de nodos coordinan todos los trabajadores. Las métricas finales agregan el trabajo de todos ellos.
+
+`Threads=1` conserva la ruta monohilo y es la configuración predeterminada para pruebas reproducibles. Valores mayores aprovechan varios núcleos; la mejora depende de la posición, la duración y la CPU.
 
 ## Métricas y referencia
 
@@ -62,4 +68,4 @@ En la máquina de validación, `bench 5 Baseline` produjo 567.651 nodos en 1.430
 .\build\Release\chessbot.exe bench 5 Optimized
 ```
 
-Syzygy se evaluó como ampliación opcional. No se integra en esta fase porque requiere archivos externos, configuración WDL/DTZ y una política de cincuenta movimientos; el motor funciona completamente sin tablas. La búsqueda paralela y Syzygy quedan como candidatos independientes después de ampliar las campañas estadísticas.
+Syzygy se evaluó como ampliación opcional. No se integra en esta fase porque requiere archivos externos, configuración WDL/DTZ y una política de cincuenta movimientos; el motor funciona completamente sin tablas.
