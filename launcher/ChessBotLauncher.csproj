@@ -10,4 +10,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>chessbot.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="ChessBotLauncher.Tests" />
+  </ItemGroup>
 </Project>

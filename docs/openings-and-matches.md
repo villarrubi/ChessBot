@@ -73,5 +73,4 @@ La herramienta exige al menos dos partidas por apertura en modo emparejado: con 
 son 1000 partidas por nivel. Se puede usar otra suite mediante `--openings`, pero también debe
 proporcionar al menos dos partidas por entrada.
 
-La versión `.js/.wasm` de Stockfish que usa ChessPrep funciona dentro del navegador y no es un
-ejecutable UCI nativo; para esta prueba hay que seleccionar el binario de Windows.
+Las versiones `.js/.wasm` de motores para navegador no son ejecutables UCI nativos; selecciona un binario compatible con tu sistema operativo. El rango de Elo aceptado depende de la versión de Stockfish; la interfaz utiliza 1320–3190.

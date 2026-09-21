@@ -7,6 +7,7 @@ import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from collections.abc import Callable
 
 import chess
 import chess.engine
@@ -29,13 +30,17 @@ def classify(best: dict[str, int | None], played: dict[str, int | None], thresho
                                                                                          int]) -> tuple[str, int | None, str | None]:
     best_mate, played_mate = best["mate"], played["mate"]
     if best_mate is not None or played_mate is not None:
+        if best_mate is not None and best_mate <= 0 and played_mate is not None and played_mate <= 0:
+            return "best", None, "el mate en contra ya era inevitable según esta búsqueda"
         if (best_mate is not None and best_mate > 0 and
                 (played_mate is None or played_mate <= 0)) or (played_mate is not None and
-                                                               played_mate < 0):
-            return "blunder", None, "se pierde una secuencia de mate o se permite mate"
+                                                               played_mate <= 0):
+            note = ("se permite un mate en contra que la mejor alternativa evita"
+                    if played_mate is not None and played_mate <= 0 else "se pierde un mate a favor")
+            return "blunder", None, note
         if best_mate is not None and played_mate is not None and best_mate > 0 and played_mate > 0:
             delta = max(0, played_mate - best_mate)
-            return ("best" if delta == 0 else "inaccuracy"), None, f"mate retrasado {delta} plies"
+            return ("best" if delta == 0 else "inaccuracy"), None, f"mate retrasado {delta} movimientos"
         return "best", None, "resultado de mate conservado"
     loss = max(0, numeric_score(best) - numeric_score(played))
     if loss >= thresholds[2]:
@@ -118,7 +123,8 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
                  limit: chess.engine.Limit, multipv: int, thresholds: tuple[int, int, int],
                  max_plies: int | None, include_static: bool,
                  static_cache: dict[str, dict[str, Any] | None],
-                 nnue_file: Path | None) -> tuple[dict[str, Any], chess.pgn.Game]:
+                 nnue_file: Path | None,
+                 progress: Callable[[int], None] | None = None) -> tuple[dict[str, Any], chess.pgn.Game]:
     board = game.board()
     annotated = chess.pgn.Game()
     annotated.setup(game.board())
@@ -131,7 +137,10 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
     for ply, move in enumerate(game.mainline_moves(), start=1):
         if max_plies is not None and ply > max_plies:
             break
+        if progress:
+            progress(ply)
         color = board.turn
+        move_number = board.fullmove_number
         fen_before = board.fen()
         san = board.san(move)
         candidates_raw = engine.analyse(board, limit, multipv=multipv,
@@ -145,13 +154,18 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
         classification, loss, mate_note = classify(best["score"], played["score"], thresholds)
         static_before = static_evaluation(engine_path, board, include_static, nnue_file,
                                           static_cache)
+        best_board = board.copy(stack=False)
+        best_board.push_uci(best["move"])
+        static_best_after = from_player_perspective(
+            static_evaluation(engine_path, best_board, include_static, nnue_file, static_cache), flip=True)
         board.push(move)
         static_after_raw = static_evaluation(engine_path, board, include_static, nnue_file,
                                              static_cache)
         static_after = from_player_perspective(static_after_raw, flip=True)
         record = {
             "ply": ply,
-            "move_number": (ply + 1) // 2,
+            "move_number": move_number,
+            "initial_fen": game.board().fen(),
             "color": "white" if color == chess.WHITE else "black",
             "move_uci": move.uci(),
             "move_san": san,
@@ -167,6 +181,7 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
             "candidates": candidates,
             "static_before": from_player_perspective(static_before, flip=False),
             "static_after": static_after,
+            "static_best_after": static_best_after,
         }
         records.append(record)
         history_uci.append(move.uci())

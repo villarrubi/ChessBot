@@ -12,7 +12,7 @@ python -m venv .venv
 .\.venv\Scripts\ctest.exe --test-dir build -C Release --output-on-failure
 ```
 
-CMake detecta la instalación de Visual Studio. La entrega se ha compilado con Visual Studio 2026 y CMake 4.4.3. Un CMake antiguo puede no reconocer generadores de Visual Studio posteriores.
+CMake detecta la instalación de Visual Studio. La validación histórica utilizó Visual Studio 2026 y CMake 4.4.3. Un CMake antiguo puede no reconocer generadores de Visual Studio posteriores.
 
 ```powershell
 .\.venv\Scripts\cmake.exe --build build --config Debug --parallel
@@ -70,7 +70,7 @@ En MSVC la opción activa AddressSanitizer. Requiere instalar el componente de s
 .\.venv\Scripts\ctest.exe --test-dir build-asan -C RelWithDebInfo --output-on-failure
 ```
 
-La máquina de esta entrega no dispone de `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`, por lo que no se ha podido validar localmente la ejecución instrumentada. El workflow configura una comprobación ASan/UBSan en Linux.
+Si falta `clang_rt.asan_dynamic_runtime_thunk-x86_64.lib`, instala el componente ASan de MSVC antes de compilar esta configuración. El workflow incluye una comprobación ASan/UBSan en Linux.
 
 ## Consola disponible
 
@@ -135,3 +135,18 @@ CTest ejecuta tipos, ataques, FEN, legalidad, terminales, hash, restauración al
 El workflow de GitHub Actions compila Debug/Release en Windows/Linux, comprueba formato, reglas, CLI, UCI, análisis, partidas, ajuste y equivalencia NNUE, y añade un job Linux de sanitizadores. `learning.yml` ejecuta por separado campañas manuales que instalan PyTorch y conserva sus artefactos.
 
 Las dependencias de análisis y entrenamiento están declaradas como extras `analysis` y `training`, separadas del entorno básico. El análisis PGN usa la dependencia básica `python-chess`; PyTorch solo se instala para entrenar o probar el ciclo largo.
+
+## Interfaz de Windows y análisis local
+
+La interfaz requiere el SDK de .NET 9 para compilar y el runtime de escritorio de .NET 9 para ejecutar. `tools/build_launcher.ps1` publica en `build/launcher/` y crea el acceso directo del escritorio. Cierra esa instancia antes de republicar para evitar archivos bloqueados; el parámetro `-Destination` permite otra carpeta de salida.
+
+```powershell
+dotnet build launcher/ChessBotLauncher.csproj -c Release
+dotnet run --project tests/launcher/ChessBotLauncher.Tests.csproj -c Release -- .
+.\.venv\Scripts\python.exe tools/test_explainer.py
+.\.venv\Scripts\python.exe tools/test_analysis_session.py --engine build/Release/chessbot.exe
+```
+
+La prueba WinForms requiere Windows, `build/Release/chessbot.exe` y `.venv/Scripts/python.exe`. Genera capturas en `build/launcher-qa/`. Las pruebas del adaptador usan respuestas simuladas; Ollama no es necesario para CI. Para comprobar la generación real, sigue [analysis.md](analysis.md).
+
+Opciones UCI principales: `Hash`, `Threads`, `Move Overhead`, `SearchProfile`, `Evaluation`, `EvalFile`, `MultiPV`, `AnalysisDetail`, `OwnBook`, `BookFile`, `BookPolicy`, `BookSeed`, `NNUEFile` y `NNUE`. El comando `uci` devuelve los rangos y valores por defecto del binario compilado. Configura `NNUEFile` antes de activar `NNUE`; una red incluida puede ser un candidato rechazado, no la referencia de juego.

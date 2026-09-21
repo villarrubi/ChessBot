@@ -1,6 +1,6 @@
 # Arquitectura actual
 
-Las fases 0–10 implementan una biblioteca `chessbot_core`, un motor UCI con búsqueda multihilo configurable, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas, evaluación HCE/NNUE y un ciclo de aprendizaje por lotes.
+ChessBot implementa una biblioteca `chessbot_core`, un motor UCI con búsqueda multihilo configurable, una consola de diagnóstico, análisis PGN, explicaciones basadas en evidencias, libro de aperturas, evaluación HCE/NNUE y un ciclo de aprendizaje por lotes.
 
 ## Dependencias y módulos
 
@@ -15,6 +15,8 @@ Las fases 0–10 implementan una biblioteca `chessbot_core`, un motor UCI con b�
 - `engine/`: API estable, límites, resultados, configuración y parada.
 - `protocol/uci.*`: protocolo asíncrono y salida sincronizada.
 - `main.cpp`: entrada UCI, diagnóstico JSON y benchmark.
+- `launcher/`: aplicación Windows WinForms; Análisis ejecuta tareas Python cancelables y presenta artefactos JSON.
+- `tools/local_explainer.py`: adaptador de Ollama local, separado de los cálculos y con explicación determinista de respaldo.
 - `tools/`: validación, partidas, análisis PGN, explicaciones, datasets, ajuste y promoción mediante python-chess/NumPy. El núcleo no enlaza Python ni motores externos.
 
 `Board` mantiene doce bitboards, ocupación por color y un array de piezas por casilla. El array permite consultar capturas y serializar FEN sin recorrer todos los bitboards. Las mutaciones actualizan las tres representaciones; las aserciones Debug comprueban su coherencia.
@@ -56,7 +58,7 @@ La detección cuenta tres apariciones de la posición actual dentro del tramo re
 
 La implementación detecta una reclamación ya disponible en la posición actual. No predice la posibilidad de reclamar anunciando la próxima jugada. El historial se debe conservar durante una partida. Mate tiene prioridad sobre la regla de cincuenta movimientos.
 
-Material insuficiente cubre rey contra rey, rey y alfil/caballo contra rey y posiciones con solo reyes y alfiles que circulan por casillas del mismo color. No declara automáticamente tablas con dos caballos contra rey ni con alfiles de colores opuestos. No se implementa una prueba general de todas las posiciones muertas ni arbitraje adicional de cinco repeticiones/75 movimientos en esta fase.
+Material insuficiente cubre rey contra rey, rey y alfil/caballo contra rey y posiciones con solo reyes y alfiles que circulan por casillas del mismo color. No declara automáticamente tablas con dos caballos contra rey ni con alfiles de colores opuestos. No se implementa una prueba general de todas las posiciones muertas ni arbitraje adicional de cinco repeticiones/75 movimientos actualmente.
 
 ## Puntuaciones de búsqueda
 
@@ -64,7 +66,7 @@ Material insuficiente cubre rey contra rey, rey y alfil/caballo contra rey y pos
 
 Un mate favorable usa `ScoreMate - ply`; uno desfavorable, `-ScoreMate + ply`. Así se prefiere dar mate antes y retrasar el mate propio. UCI convierte estas puntuaciones a `score mate N`; las demás se publican como centipeones.
 
-## Decisiones de esta entrega
+## Decisiones de diseño
 
 - CMake y CTest para construcción y ejecución; doctest 2.4.12 incluido con su licencia para que las pruebas C++ no necesiten descargas.
 - Tablas de subconjuntos de ocupación para deslizantes, con selección PEXT en tiempo de ejecución y alternativa por software.

@@ -1,6 +1,6 @@
-# Validación de las fases 0–10
+# Resultados de validación
 
-Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con AMD Ryzen 7 7800X3D, MSVC 19.51.36252, CMake 4.4.3 y Python 3.12.7. Son resultados de esta entrega; las cifras de rendimiento dependen del equipo.
+Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con AMD Ryzen 7 7800X3D, MSVC 19.51.36252, CMake 4.4.3 y Python 3.12.7. Son resultados históricos, no una certificación del estado de cada clon; las cifras de rendimiento dependen del equipo. Para repetir las comprobaciones, consulta [desarrollo](development.md).
 
 | Comprobación | Resultado |
 | --- | --- |
@@ -133,3 +133,19 @@ Los escenarios A–F continúan cubiertos por `test_match_runner.py`; G y H, inc
 restringida adicional para una jugada ausente de MultiPV, por `test_analysis.py`. `test_nnue.py`
 añade procedencia neuronal al análisis, y `test_learning_cycle.py` verifica manifiesto, hashes,
 presupuestos y que un rechazo no reemplaza el archivo activo.
+
+## Análisis de escritorio y asistente local
+
+La ampliación de análisis añade pruebas reproducibles de PGN, FEN, historial, alternativas SAN, mates y adaptadores de IA en `test_analysis_session.py` y `test_explainer.py`. La interfaz tiene una prueba Windows en `tests/launcher/` que genera capturas y comprueba navegación, explicaciones y cancelación. Estas comprobaciones complementan la suite C++ y el análisis PGN existente; no miden fuerza Elo ni demuestran que cualquier respuesta de un LLM sea correcta.
+
+Comprobaciones locales del 21 de septiembre de 2026:
+
+- Compilación Release del lanzador sin errores ni advertencias.
+- CTest Release: 3/3, incluida PERFT completa.
+- Análisis PGN y sesión de escritorio: pruebas completas correctas.
+- Adaptador y explicaciones: ocho regresiones correctas sin depender de un modelo.
+- WinForms: navegación, tablero posterior, explicación básica y cancelación de una búsqueda en curso correctas; capturas revisadas a 1040×760 y 900×690.
+- Ollama con `qwen3.5:9b`: respuesta real sobre un mate y una alternativa SAN con búsqueda adicional; fallback comprobado solicitando un modelo inexistente.
+- Ruff, formato C++ y enlaces relativos de la documentación comprobados.
+
+La automatización remota de ventanas no estaba disponible; la comprobación visual utilizó las capturas de la prueba WinForms. Estas comprobaciones locales no sustituyen una nueva ejecución de CI en Linux y Windows.

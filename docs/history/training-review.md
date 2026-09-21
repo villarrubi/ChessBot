@@ -1,4 +1,6 @@
-# Revisión del primer entrenamiento
+# Revisión histórica del entrenamiento (septiembre de 2026)
+
+Este registro documenta experimentos locales; sus rutas `build/` no forman parte de la distribución. Para configurar un entrenamiento actual, consulta [la guía de aprendizaje](../learning.md).
 
 ## Diagnóstico comprobado
 
@@ -55,4 +57,4 @@ Las campañas usan posiciones distintas: estos resultados no cuantifican una gan
 
 Ninguna de estas pruebas promocionó una red. La referencia HCE sigue activa. La campaña nueva de
 1008 partidas queda preparada para ejecutarse desde el lanzador; no se ha ejecutado en esta revisión.
-El acceso directo del escritorio apunta al lanzador actualizado en `build/launcher-v2`.
+La ubicación del lanzador se configura actualmente con `tools/build_launcher.ps1`; no depende de las carpetas de estos experimentos.

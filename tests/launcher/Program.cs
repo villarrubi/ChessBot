@@ -1,0 +1,93 @@
+using ChessBotLauncher;
+
+namespace ChessBotLauncher.Tests;
+
+internal static class Program
+{
+    [STAThread]
+    private static int Main(string[] args)
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        string root = Path.GetFullPath(args.Length > 0 ? args[0] : ".");
+        string output = Path.Combine(root, "build", "launcher-qa");
+        Directory.CreateDirectory(output);
+        using MainForm form = new(root);
+        form.StartPosition = FormStartPosition.Manual;
+        form.Location = new Point(-20000, -20000);
+        form.ShowInTaskbar = false;
+        int exitCode = 0;
+        form.Shown += async (_, _) =>
+        {
+            try { await VerifyAsync(form, output); }
+            catch (Exception error) { Console.Error.WriteLine(error); exitCode = 1; }
+            finally { form.Close(); }
+        };
+        Application.Run(form);
+        return exitCode;
+    }
+
+    private static async Task VerifyAsync(MainForm form, string output)
+    {
+        TabControl tabs = form.Controls.OfType<TabControl>().Single();
+        AnalysisTab analysis = tabs.TabPages.OfType<AnalysisTab>().Single();
+        tabs.SelectedTab = analysis;
+        foreach (Size size in new[] { new Size(1040, 760), new Size(900, 690) })
+        {
+            form.Size = size;
+            form.PerformLayout();
+            using Bitmap image = new(form.Width, form.Height);
+            form.DrawToBitmap(image, new Rectangle(Point.Empty, form.Size));
+            image.Save(Path.Combine(output, $"analysis-{size.Width}.png"));
+        }
+        Control[] controls = Descendants(analysis).ToArray();
+        Button analyze = controls.OfType<Button>().Single(b => b.Text == "Analizar");
+        TextBox input = controls.OfType<TextBox>().Single(t => t.Multiline);
+        DataGridView grid = controls.OfType<DataGridView>().Single();
+        input.Text = "1. e4 e5 2. Nf3 *";
+        analyze.PerformClick();
+        await WaitUntilAsync(() => analyze.Enabled, 60);
+        if (grid.Rows.Count != 3) throw new Exception("PGN did not populate the analysis grid.");
+        grid.CurrentCell = grid.Rows[1].Cells[0];
+        CheckBox after = controls.OfType<CheckBox>().Single();
+        after.Checked = true;
+        string boardFen = controls.OfType<ChessBoard>().Single().Position;
+        if (!boardFen.Contains("4p3") || !boardFen.Contains(" w ")) throw new Exception("Wrong board after e5.");
+        ComboBox provider = controls.OfType<ComboBox>().Single(c => c.Items.Contains("Solo motor"));
+        provider.SelectedIndex = 1;
+        Button explain = controls.OfType<Button>().Single(b => b.Text == "Explicar / preguntar");
+        explain.PerformClick();
+        await WaitUntilAsync(() => explain.Enabled, 60);
+        if (!controls.OfType<RichTextBox>().Any(t => t.Text.Contains("motor\n\n") && t.Text.Contains("negras")))
+            throw new Exception("Deterministic explanation missing or wrong perspective.");
+        form.Size = new Size(1040, 760);
+        form.PerformLayout();
+        using (Bitmap image = new(form.Width, form.Height))
+        {
+            form.DrawToBitmap(image, new Rectangle(Point.Empty, form.Size));
+            image.Save(Path.Combine(output, "analysis-populated.png"));
+        }
+        NumericUpDown depth = controls.OfType<NumericUpDown>().Single(n => n.Maximum == 12);
+        depth.Value = 12;
+        analyze.PerformClick();
+        Button cancel = controls.OfType<Button>().Single(b => b.Text == "Cancelar");
+        await WaitUntilAsync(() => controls.OfType<Label>().Any(l => l.Text.Contains("jugada 1")), 10);
+        cancel.PerformClick();
+        await WaitUntilAsync(() => analyze.Enabled, 10);
+        if (!controls.OfType<Label>().Any(l => l.Text.Contains("cancelada"))) throw new Exception("Cancellation failed.");
+        Console.WriteLine("PASS: analysis layout, PGN navigation, board, explanation and cancellation");
+    }
+
+    private static IEnumerable<Control> Descendants(Control parent) => parent.Controls.Cast<Control>()
+        .SelectMany(child => new[] { child }.Concat(Descendants(child)));
+
+    private static async Task WaitUntilAsync(Func<bool> condition, int seconds)
+    {
+        DateTime deadline = DateTime.UtcNow.AddSeconds(seconds);
+        do
+        {
+            await Task.Delay(10);
+            if (DateTime.UtcNow > deadline) throw new TimeoutException("Launcher operation timed out.");
+        } while (!condition());
+    }
+}

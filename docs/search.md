@@ -24,7 +24,7 @@ go depth 8
 
 Null-move queda desactivado en finales de solo rey y peones, donde el zugzwang es frecuente. Las posiciones artificiales creadas por esa poda no se usan para declarar triple repetición o cincuenta movimientos. Hacer y deshacer el pase restaura hash, turno, en passant, relojes e historial.
 
-Las podas de futilidad y razoring, las extensiones generales de jaque, SEE como criterio de poda, extensiones singulares y reducciones iterativas internas se probaron durante esta fase y no forman parte del perfil final: las campañas cortas mostraron cambios de fuerza desfavorables o no aportaron evidencia suficiente. Se conserva la quietud completa para capturas y evasiones.
+Las podas de futilidad y razoring, las extensiones generales de jaque, SEE como criterio de poda, extensiones singulares y reducciones iterativas internas se probaron durante los experimentos iniciales y no forman parte del perfil final: las campañas cortas mostraron cambios de fuerza desfavorables o no aportaron evidencia suficiente. Se conserva la quietud completa para capturas y evasiones.
 
 ## MultiPV y movimientos de raíz
 
@@ -68,4 +68,4 @@ En la máquina de validación, `bench 5 Baseline` produjo 567.651 nodos en 1.430
 .\build\Release\chessbot.exe bench 5 Optimized
 ```
 
-Syzygy se evaluó como ampliación opcional. No se integra en esta fase porque requiere archivos externos, configuración WDL/DTZ y una política de cincuenta movimientos; el motor funciona completamente sin tablas.
+Syzygy se evaluó como ampliación opcional. No está integrado porque requiere archivos externos, configuración WDL/DTZ y una política de cincuenta movimientos; el motor funciona completamente sin tablas.

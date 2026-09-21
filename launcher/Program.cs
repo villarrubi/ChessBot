@@ -209,6 +209,7 @@ internal sealed class MainForm : Form
 
         TabControl tabs = new() { Dock = DockStyle.Fill };
         tabs.TabPages.Add(BuildPlayTab());
+        tabs.TabPages.Add(new AnalysisTab(root, engine, python, () => moves.ToArray()));
         tabs.TabPages.Add(BuildTrainingTab());
         tabs.TabPages.Add(BuildToolsTab());
         Controls.Add(tabs);
@@ -323,7 +324,7 @@ internal sealed class MainForm : Form
         side.Controls.Add(resignButton);
         side.Controls.Add(Spacer());
         side.Controls.Add(gameStatus);
-        side.Controls.Add(new Label { Text = "Selecciona una pieza y después su casilla de destino. Las promociones se realizan a dama.", MaximumSize = new Size(270, 0), AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(3, 14, 3, 3) });
+        side.Controls.Add(new Label { Text = "Selecciona una pieza y después su casilla de destino. Al coronar podrás elegir dama, torre, alfil o caballo.", MaximumSize = new Size(270, 0), AutoSize = true, ForeColor = Color.DimGray, Margin = new Padding(3, 14, 3, 3) });
         layout.Controls.Add(side, 1, 0);
         page.Controls.Add(layout);
         return page;
@@ -664,26 +665,58 @@ internal sealed class MainForm : Form
             MinimizeBox = false,
             MaximizeBox = false,
             ShowInTaskbar = false,
-            ClientSize = new Size(360, 92),
+            ClientSize = new Size(430, 150),
             BackColor = Paper,
-            ForeColor = Ink
+            ForeColor = Ink,
+            KeyPreview = true
+        };
+        Label prompt = new()
+        {
+            Text = "Elige la pieza para coronar el peón:",
+            Dock = DockStyle.Top,
+            Height = 38,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Font = new Font(Font, FontStyle.Bold)
         };
         FlowLayoutPanel buttons = new()
         {
-            Dock = DockStyle.Fill,
+            Dock = DockStyle.Top,
+            Height = 70,
             FlowDirection = FlowDirection.LeftToRight,
             WrapContents = false,
-            Padding = new Padding(12)
+            Padding = new Padding(12, 4, 12, 4)
         };
-        foreach ((char code, string name) in new[] { ('q', "Dama"), ('r', "Torre"), ('b', "Alfil"), ('n', "Caballo") })
+        foreach ((char code, string name, string symbol) in new[]
+                 { ('q', "Dama", "♛"), ('r', "Torre", "♜"), ('b', "Alfil", "♝"), ('n', "Caballo", "♞") })
         {
             if (!candidates.Any(move => move.EndsWith(code)))
                 continue;
-            Button button = new() { Text = name, Tag = code, AutoSize = true, DialogResult = DialogResult.OK };
-            button.Click += (_, _) => dialog.Tag = code;
+            Button button = new()
+            {
+                Text = $"{symbol}  {name}",
+                Tag = code,
+                AutoSize = true,
+                Height = 52,
+                Width = 92,
+                DialogResult = DialogResult.None,
+                AccessibleName = $"Coronar a {name.ToLowerInvariant()}",
+                AccessibleRole = AccessibleRole.PushButton
+            };
+            button.Click += (_, _) =>
+            {
+                dialog.Tag = code;
+                dialog.DialogResult = DialogResult.OK;
+            };
             buttons.Controls.Add(button);
         }
+        Button cancel = new() { Text = "Cancelar", AutoSize = true, DialogResult = DialogResult.Cancel };
+        FlowLayoutPanel footer = new() { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(12, 0, 12, 8) };
+        footer.Controls.Add(cancel);
+        dialog.Controls.Add(footer);
         dialog.Controls.Add(buttons);
+        dialog.Controls.Add(prompt);
+        dialog.CancelButton = cancel;
+        dialog.AcceptButton = buttons.Controls.OfType<Button>().FirstOrDefault();
         return dialog.ShowDialog(this) == DialogResult.OK && dialog.Tag is char choice ? choice : null;
     }
 

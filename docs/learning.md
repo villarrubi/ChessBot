@@ -1,4 +1,4 @@
-# Ajuste de la evaluación manual
+# Aprendizaje: evaluación manual y neuronal
 
 La fase 8 implementa un ciclo por lotes: PGN y metadatos de búsqueda → dataset → ajuste tipo
 Texel → candidato → pruebas → promoción o rechazo. Ninguna partida modifica los parámetros que
@@ -201,12 +201,12 @@ directo, `build/<entrenamiento>/training.json` confirma que se exportaron `candi
 `checkpoint.pt`. La ausencia de esos archivos no basta por sí sola para diagnosticar un crash:
 el historial central es la fuente de estado y permite localizar la última fase conocida.
 
-## Configuración corregida de septiembre de 2026
+## Configuración del ciclo
 
 El lanzador utiliza `data/training/learning-v2.json`: 32 neuronas, hasta 60 épocas, objetivo mixto,
 tasa de aprendizaje 0,0003, peso del profesor 1,0 y hasta 64 posiciones distribuidas por partida.
 El límite de 500 muestras por bucket se desactiva para evitar descartar miles de posiciones.
-Las cifras visibles de 1000/100 partidas se redondean a 1008/108 para cubrir las 18 aperturas.
+Las partidas se redondean para cubrir las aperturas seleccionadas en parejas de colores. Con 18 aperturas, 1000/100 partidas se convierten en 1008/108; al seleccionar otro catálogo cambia el redondeo.
 
 La generación añade seis medias jugadas elegidas entre las tres mejores alternativas a profundidad
 2, a un máximo de 80 cp de la mejor. La semilla hace reproducibles las variantes y ambos colores
@@ -221,7 +221,7 @@ el Elo extremo mostrado sigue recortado numéricamente y se marca `elo_is_clippe
 La puerta de rendimiento comprueba NPS, finalización de profundidad y un coste total no superior
 a tres veces la referencia; el benchmark tiene un límite de dos millones de nodos por posición.
 La prueba de captura de dama acepta tanto `Qxe2` como `Kxe2`, ambas correctas en esa posición.
-El popup distingue ahora una red aceptada de una rechazada.
+El diálogo final distingue una red aceptada de una rechazada.
 
 La configuración es un punto de partida comprobable, no una garantía de ganar Elo. La validación
 sigue separándose por partidas, no por familias enteras de aperturas. La evaluación a profundidad

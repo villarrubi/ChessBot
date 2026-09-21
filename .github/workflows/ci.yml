@@ -53,6 +53,10 @@ jobs:
       - if: runner.os == 'Windows' && matrix.config == 'Release'
         run: python tools/test_analysis.py --engine build/Release/chessbot.exe
       - if: runner.os == 'Linux' && matrix.config == 'Release'
+        run: python tools/test_analysis_session.py --engine build/chessbot
+      - if: runner.os == 'Windows' && matrix.config == 'Release'
+        run: python tools/test_analysis_session.py --engine build/Release/chessbot.exe
+      - if: runner.os == 'Linux' && matrix.config == 'Release'
         run: python tools/test_match_runner.py --engine build/chessbot
       - if: runner.os == 'Windows' && matrix.config == 'Release'
         run: python tools/test_match_runner.py --engine build/Release/chessbot.exe
@@ -62,6 +66,7 @@ jobs:
         run: python tools/test_tuning.py --engine build/Release/chessbot.exe
       - run: python tools/check_format.py
       - run: ruff check tools
+      - run: python tools/test_explainer.py
 
   sanitizers:
     runs-on: ubuntu-latest
