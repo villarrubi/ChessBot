@@ -140,7 +140,9 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
                  max_plies: int | None, include_static: bool,
                  static_cache: dict[str, dict[str, Any] | None],
                  nnue_file: Path | None,
-                 progress: Callable[[int, str], None] | None = None) -> tuple[dict[str, Any], chess.pgn.Game]:
+                 progress: Callable[[int, str], None] | None = None,
+                 initial_candidates: list[dict[str, Any]] | None = None
+                 ) -> tuple[dict[str, Any], chess.pgn.Game]:
     board = game.board()
     annotated = chess.pgn.Game()
     annotated.setup(game.board())
@@ -159,10 +161,13 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
         move_number = board.fullmove_number
         fen_before = board.fen()
         san = board.san(move)
-        candidates_raw = streamed_analysis(
-            engine, board, limit, multipv=multipv,
-            on_depth=(lambda current: progress(ply, f"variantes · profundidad {current}"))
-            if progress else None)
+        if ply == 1 and initial_candidates is not None:
+            candidates_raw = initial_candidates
+        else:
+            candidates_raw = streamed_analysis(
+                engine, board, limit, multipv=multipv,
+                on_depth=(lambda current, ply=ply: progress(ply, f"variantes · profundidad {current}"))
+                if progress else None)
         if isinstance(candidates_raw, dict):
             candidates_raw = [candidates_raw]
         candidates = [pv_data(board, info, color) for info in candidates_raw]
@@ -172,7 +177,7 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
                 progress(ply, "jugada realizada")
             played_raw = streamed_analysis(
                 engine, board, limit, root_moves=[move],
-                on_depth=(lambda current: progress(
+                on_depth=(lambda current, ply=ply: progress(
                     ply, f"jugada realizada · profundidad {current}")) if progress else None)
             played = pv_data(board, played_raw, color)
         best = candidates[0]

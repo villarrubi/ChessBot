@@ -12,7 +12,7 @@ import chess
 import chess.engine
 import chess.pgn
 
-from analyze_pgn import analyze_game, write_report
+from analyze_pgn import analyze_game, streamed_analysis, write_report
 from explain_analysis import deterministic_explanation
 
 
@@ -60,19 +60,24 @@ def run_session(request: dict[str, Any], engine_path: Path, output: Path) -> dic
         for index, game in enumerate(games, 1):
             print(f"Analizando partida {index}/{len(games)}…", flush=True)
             board = game.board()
+            initial_candidates = None
             if position_only:
                 if board.is_game_over(claim_draw=True):
                     results.append({"headers": dict(game.headers), "moves": [],
                                     "fen": board.fen(), "terminal": str(board.outcome(claim_draw=True))})
                     continue
-                info = engine.analyse(board, chess.engine.Limit(depth=depth))
-                game.add_variation(info["pv"][0])
+                initial_candidates = streamed_analysis(
+                    engine, board, chess.engine.Limit(depth=depth), multipv=multipv,
+                    on_depth=lambda current: print(
+                        f"Analizando posición · profundidad {current}…", flush=True))
+                game.add_variation(initial_candidates[0]["pv"][0])
             result, annotated = analyze_game(game, engine, engine_path,
                                              chess.engine.Limit(depth=depth), multipv,
                                              (50, 100, 200), None, True, cache, None,
                                              progress=lambda ply, stage, index=index: print(
                                                  f"Analizando partida {index}/{len(games)} · jugada {ply} · {stage}…",
-                                                 flush=True))
+                                                 flush=True),
+                                             initial_candidates=initial_candidates)
             result["fen"] = game.board().fen()
             for record in result["moves"]:
                 record["mode"] = "position" if position_only else "game"

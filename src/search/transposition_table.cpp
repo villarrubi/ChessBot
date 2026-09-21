@@ -34,11 +34,15 @@ std::optional<TTEntry> TranspositionTable::probe(std::uint64_t key) const {
                                                           : std::nullopt;
 }
 void TranspositionTable::store(std::uint64_t key, Move move, Score score, int depth, Bound bound,
-                               int rule50) {
+                               int rule50, bool preserveDeeper) {
     const auto index = key & mask_;
     std::lock_guard lock(locks_[index & (LockCount - 1)]);
     auto &entry = entries_[index];
     const auto age = age_.load(std::memory_order_relaxed);
+    if (preserveDeeper && entry.bound != Bound::None && entry.key == key && entry.age == age &&
+        entry.rule50 == std::clamp(rule50, 0, 100) && bound != Bound::Exact &&
+        depth + 3 < entry.depth)
+        return;
     if (entry.bound == Bound::None || entry.key == key || depth >= entry.depth || entry.age != age)
         entry = {key,
                  move,

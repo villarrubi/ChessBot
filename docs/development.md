@@ -14,6 +14,18 @@ python -m venv .venv
 
 CMake detecta la instalación de Visual Studio. La validación histórica utilizó Visual Studio 2026 y CMake 4.4.3. Un CMake antiguo puede no reconocer generadores de Visual Studio posteriores.
 
+Las compilaciones Release activan optimización entre unidades de compilación (IPO/LTO) cuando el compilador la admite. Puede desactivarse con `-DCHESSBOT_IPO=OFF`; no se activa en compilaciones con sanitizadores.
+
+Con MSVC se solicita explícitamente el [enlace LTCG completo](https://learn.microsoft.com/en-us/cpp/build/reference/ltcg-link-time-code-generation) (`/LTCG`, `/INCREMENTAL:NO`) para evitar reutilizar artefactos de generación incremental. Si se cambia la configuración de optimización en un directorio existente, conviene realizar una compilación limpia.
+
+Para medir el coste real del análisis con un motor recién iniciado en cada muestra:
+
+```powershell
+.\.venv\Scripts\python.exe tools/benchmark_analysis.py --engine build/Release/chessbot.exe --depth 20 --multipv 3 --threads 8 --runs 3
+```
+
+Cada línea JSON incluye tiempo, nodos y profundidad alcanzada por variante. El límite de seguridad es 120 segundos (`--seconds`); una muestra que no alcanza la profundidad solicitada no cuenta como profundidad 20 completada. `--fen` permite medir otras posiciones. Ejecuta las comparaciones secuencialmente sin otro análisis en marcha.
+
 ```powershell
 .\.venv\Scripts\cmake.exe --build build --config Debug --parallel
 .\.venv\Scripts\ctest.exe --test-dir build -C Debug -LE slow --output-on-failure

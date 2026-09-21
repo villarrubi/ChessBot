@@ -32,6 +32,17 @@ bool contains(const std::vector<Move> &moves, Move candidate) {
 bool quiet(Move move) {
     return !move.has(Capture) && move.promotion() == None;
 }
+int lateMoveReduction(int depth, int searched) {
+    static const auto reductions = [] {
+        std::array<std::array<int, 256>, MaxPly> table{};
+        for (int d = 1; d < MaxPly; ++d)
+            for (int n = 0; n < 256; ++n)
+                table[d][n] = 1 + static_cast<int>(std::log(static_cast<double>(d)) *
+                                                   std::log(static_cast<double>(n + 1)) / 2.25);
+        return table;
+    }();
+    return reductions[depth][searched];
+}
 int materialValue(PieceType piece) {
     switch (piece) {
     case Pawn:
@@ -93,7 +104,8 @@ class Searcher {
         const int maximumDepth =
             std::clamp(limits_.depth > 0 ? limits_.depth : MaxPly - 2, 1, MaxPly - 2);
         for (int depth = 1; depth <= maximumDepth && !stopped(); ++depth) {
-            if (workerIndex_ > 0 && depth >= 6 && (depth + workerIndex_) % 4 == 0)
+            if (workerIndex_ > 0 && depth >= 6 && depth < maximumDepth &&
+                (depth + workerIndex_) % 4 == 0)
                 continue;
             const auto variations = searchVariations(depth);
             if (stopped() || variations.empty())
@@ -263,6 +275,18 @@ class Searcher {
         if (const auto entry = table_.probe(board_.key()))
             ttMove = entry->bestMove;
         orderMoves(moves, ttMove, {}, {}, optimized() ? &history_ : nullptr, board_.sideToMove());
+        if (optimized() && limits_.multiPv > 1 && !result_.variations.empty()) {
+            // Preserve the previous iteration's MultiPV order. The root TT entry
+            // alone cannot represent the best move for every excluded-move set.
+            const auto rank = [&](Move move) {
+                for (std::size_t i = 0; i < result_.variations.size(); ++i)
+                    if (result_.variations[i].move == move)
+                        return i;
+                return result_.variations.size();
+            };
+            std::stable_sort(moves.begin(), moves.end(),
+                             [&](Move a, Move b) { return rank(a) < rank(b); });
+        }
         const Score originalAlpha = alpha;
         Score best = -ScoreInfinity;
         Move bestMove;
@@ -299,12 +323,14 @@ class Searcher {
                 break;
             }
         }
-        if (bestMove)
+        // A search with excluded/restricted root moves is not an exact result
+        // for the unrestricted position and must not overwrite its TT entry.
+        if (bestMove && excluded.empty() && limits_.rootMoves.empty())
             table_.store(board_.key(), bestMove, toTable(best, 0), depth,
                          best <= originalAlpha ? Bound::Upper
                          : best >= beta        ? Bound::Lower
                                                : Bound::Exact,
-                         static_cast<int>(board_.halfmoveClock()));
+                         static_cast<int>(board_.halfmoveClock()), optimized());
         return {bestMove, best, std::move(bestLine)};
     }
     std::vector<RootVariation> searchVariations(int depth) {
@@ -313,12 +339,18 @@ class Searcher {
             std::min(std::max(limits_.multiPv, 1), static_cast<int>(rootMoves_.size()));
         for (int index = 0; index < requested && !stopped(); ++index) {
             RootVariation variation;
-            if (index == 0 && requested == 1 && optimized() && depth >= 4 && result_.completed) {
+            std::vector<Move> excluded;
+            excluded.reserve(variations.size());
+            for (const auto &previous : variations)
+                excluded.push_back(previous.move);
+            if (optimized() && depth >= 4 &&
+                static_cast<std::size_t>(index) < result_.variations.size()) {
+                const Score previousScore = result_.variations[index].score;
                 int window = 35;
                 while (!stopped()) {
-                    const Score alpha = std::max(-ScoreInfinity, result_.score - window);
-                    const Score beta = std::min(ScoreInfinity, result_.score + window);
-                    variation = searchRoot(depth, alpha, beta, {});
+                    const Score alpha = std::max(-ScoreInfinity, previousScore - window);
+                    const Score beta = std::min(ScoreInfinity, previousScore + window);
+                    variation = searchRoot(depth, alpha, beta, excluded);
                     if (!variation.move || (variation.score > alpha && variation.score < beta) ||
                         (alpha == -ScoreInfinity && beta == ScoreInfinity))
                         break;
@@ -326,16 +358,15 @@ class Searcher {
                     window = std::min(ScoreInfinity, window * 2);
                 }
             } else {
-                std::vector<Move> excluded;
-                excluded.reserve(variations.size());
-                for (const auto &previous : variations)
-                    excluded.push_back(previous.move);
                 variation = searchRoot(depth, -ScoreInfinity, ScoreInfinity, excluded);
             }
             if (!variation.move)
                 break;
             variations.push_back(std::move(variation));
         }
+        std::stable_sort(
+            variations.begin(), variations.end(),
+            [](const RootVariation &a, const RootVariation &b) { return a.score > b.score; });
         return variations;
     }
 
@@ -447,9 +478,7 @@ class Searcher {
             if (optimized() && searched > 0) {
                 int reduction = 0;
                 if (depth >= 3 && searched >= 3 && isQuiet && !inCheck && !givesCheck) {
-                    reduction =
-                        1 + static_cast<int>(std::log(static_cast<double>(depth)) *
-                                             std::log(static_cast<double>(searched + 1)) / 2.25);
+                    reduction = lateMoveReduction(depth, searched);
                     if (narrowWindow && depth >= 5)
                         ++reduction;
                     reduction = std::min(reduction, childDepth - 1);
@@ -496,7 +525,7 @@ class Searcher {
                             : best >= beta        ? Bound::Lower
                                                   : Bound::Exact;
         table_.store(board_.key(), bestMove, toTable(best, ply), depth, bound,
-                     static_cast<int>(board_.halfmoveClock()));
+                     static_cast<int>(board_.halfmoveClock()), optimized());
         return best;
     }
     Score quiescence(Score alpha, Score beta, int ply) {
@@ -590,6 +619,11 @@ SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTab
                                  moveOverheadMs, evaluationMode, evaluationParameters, network,
                                  searchMode, {})
                             .run();
+                    // Any worker that completed the requested depth and all
+                    // variations has a usable result; don't wait for worker 0.
+                    if (limits.depth > 0 &&
+                        results[static_cast<std::size_t>(index)].depth >= limits.depth)
+                        stop.store(true, std::memory_order_relaxed);
                 } catch (...) {
                     errors[static_cast<std::size_t>(index)] = std::current_exception();
                     stop.store(true, std::memory_order_relaxed);
@@ -641,6 +675,8 @@ SearchResult runSearch(Board board, const SearchLimits &limits, TranspositionTab
         result.selectiveDepth = std::max(result.selectiveDepth, workerResult.selectiveDepth);
         result.timeMs = std::max(result.timeMs, workerResult.timeMs);
     }
+    if (selected != 0 && callback)
+        callback(result, table.hashFullPermille());
     return result;
 }
 } // namespace chessbot

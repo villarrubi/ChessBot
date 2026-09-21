@@ -31,7 +31,8 @@ class TranspositionTable {
         age_.fetch_add(1, std::memory_order_relaxed);
     }
     std::optional<TTEntry> probe(std::uint64_t key) const;
-    void store(std::uint64_t key, Move move, Score score, int depth, Bound bound, int rule50);
+    void store(std::uint64_t key, Move move, Score score, int depth, Bound bound, int rule50,
+               bool preserveDeeper = false);
     int hashFullPermille() const;
     std::size_t megabytes() const {
         return megabytes_;

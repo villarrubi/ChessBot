@@ -1,6 +1,7 @@
 #include "board/movegen.h"
 #include "engine/engine.h"
 #include "openings/opening_book.h"
+#include <algorithm>
 #include <atomic>
 #include <doctest.h>
 #include <stdexcept>
@@ -183,6 +184,46 @@ TEST_CASE("root move restriction and null-move zugzwang guard") {
     CHECK(result.nullMoveAttempts == 0);
 }
 
+TEST_CASE("optimized MultiPV preserves complete ordered legal lines across iterations") {
+    for (const int threads : {1, 4}) {
+        Engine engine;
+        engine.setThreads(threads);
+        engine.setSearchMode(SearchMode::Optimized);
+        SearchLimits limits;
+        limits.depth = 6;
+        limits.multiPv = 3;
+        int reportedDepth = 0;
+        Move reportedMove;
+        const auto validate = [](const SearchResult &result) {
+            REQUIRE(result.variations.size() == 3);
+            for (std::size_t i = 0; i < result.variations.size(); ++i) {
+                const auto &variation = result.variations[i];
+                REQUIRE_FALSE(variation.principalVariation.empty());
+                CHECK(variation.principalVariation.front() == variation.move);
+                if (i > 0)
+                    CHECK(result.variations[i - 1].score >= variation.score);
+                for (std::size_t j = 0; j < i; ++j)
+                    CHECK(result.variations[j].move != variation.move);
+                auto board = Board::startPosition();
+                for (const auto move : variation.principalVariation) {
+                    StateInfo state;
+                    CHECK_NOTHROW(board.playUci(move.uci(), state));
+                }
+            }
+        };
+        const auto result = engine.search(limits, [&](const SearchResult &iteration, int) {
+            validate(iteration);
+            CHECK(iteration.depth > reportedDepth);
+            reportedDepth = iteration.depth;
+            reportedMove = iteration.bestMove;
+        });
+        CHECK(result.depth == limits.depth);
+        CHECK(reportedDepth == result.depth);
+        CHECK(reportedMove == result.bestMove);
+        validate(result);
+    }
+}
+
 TEST_CASE("safe optimized search preserves the fixed-depth reference") {
     Engine engine;
     SearchLimits limits;
@@ -195,6 +236,31 @@ TEST_CASE("safe optimized search preserves the fixed-depth reference") {
     CHECK(optimized.score == baseline.score);
     CHECK(optimized.generatedMoves > 0);
     CHECK(optimized.maximumBranching >= 20);
+}
+
+TEST_CASE("optimized MultiPV finds mate and the forced queen capture") {
+    for (const auto fen : {"7k/8/6K1/8/8/8/5Q2/8 w - - 0 1", "4k3/8/8/8/8/8/4q3/4KQ2 w - - 0 1"}) {
+        Engine engine;
+        auto board = Board::fromFen(fen);
+        const auto expectedVariations = std::min<std::size_t>(3, legalMoveList(board).size());
+        engine.setPosition(board);
+        engine.setSearchMode(SearchMode::Optimized);
+        engine.setThreads(4);
+        SearchLimits limits;
+        limits.depth = 4;
+        limits.multiPv = 3;
+        const auto result = engine.search(limits);
+        REQUIRE(result.variations.size() == expectedVariations);
+        const bool mate = std::string_view(fen).starts_with("7k");
+        if (mate) {
+            CHECK(result.bestMove.uci() == "f2f8");
+            CHECK(result.score == ScoreMate - 1);
+        } else {
+            CHECK(result.bestMove.captured() == Queen);
+            CHECK(result.bestMove.to() == parseSquare("e2"));
+            CHECK(result.score > 500);
+        }
+    }
 }
 
 TEST_CASE("native opening book validates moves and applies deterministic policies") {
@@ -232,4 +298,22 @@ TEST_CASE("transposition table sizing, bounds and replacement") {
     CHECK_FALSE(table.probe(42));
     CHECK_THROWS_AS(table.resize(0), std::invalid_argument);
     CHECK_THROWS_AS(table.resize(4097), std::invalid_argument);
+}
+
+TEST_CASE("optimized TT keeps deeper results when another worker stores a shallow bound") {
+    TranspositionTable table(1);
+    table.newSearch();
+    table.store(42, {}, 100, 12, Bound::Exact, 0, true);
+    table.store(42, {}, 80, 2, Bound::Upper, 0, true);
+    REQUIRE(table.probe(42));
+    CHECK(table.probe(42)->depth == 12);
+    CHECK(table.probe(42)->score == 100);
+    table.store(42, {}, 90, 13, Bound::Lower, 0, true);
+    CHECK(table.probe(42)->depth == 13);
+    // A different rule-50 state or a new search can replace the old entry.
+    table.store(42, {}, 0, 2, Bound::Upper, 99, true);
+    CHECK(table.probe(42)->rule50 == 99);
+    table.newSearch();
+    table.store(42, {}, 50, 1, Bound::Upper, 99, true);
+    CHECK(table.probe(42)->depth == 1);
 }

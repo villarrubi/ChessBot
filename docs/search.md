@@ -26,11 +26,15 @@ go depth 8
 
 Null-move queda desactivado en finales de solo rey y peones, donde el zugzwang es frecuente. Las posiciones artificiales creadas por esa poda no se usan para declarar triple repetición o cincuenta movimientos. Hacer y deshacer el pase restaura hash, turno, en passant, relojes e historial.
 
-Las extensiones generales de jaque, SEE como criterio de poda, extensiones singulares y reducciones iterativas internas no forman parte del perfil. Las podas nuevas solo se activan en `Optimized`; `Baseline` conserva la referencia completa para comparaciones y regresiones.
+Las extensiones generales de jaque, SEE como criterio de poda y extensiones singulares no forman parte del perfil. Las podas nuevas solo se activan en `Optimized`; `Baseline` conserva la referencia completa para comparaciones y regresiones.
 
 ## MultiPV y movimientos de raíz
 
 `SearchLimits.multiPv` solicita alternativas ordenadas hasta cubrir todas las jugadas legales de la posición (el protocolo UCI admite 1–256). Cada `RootVariation` contiene jugada, puntuación y PV. `SearchLimits.rootMoves` limita las candidatas; UCI lo expone mediante `go ... searchmoves`. Esto permite valorar la jugada de una partida con el mismo límite usado para buscar la mejor alternativa.
+
+El perfil optimizado conserva el orden de las variantes de la iteración anterior y utiliza una ventana de aspiración para cada alternativa, ampliándola hasta obtener una puntuación dentro de la ventana. Las búsquedas de raíz restringidas o con jugadas excluidas no sobrescriben la entrada TT de la posición completa. Las variantes terminadas se ordenan por puntuación.
+
+En `Optimized`, una cota nueva no exacta que está más de tres plies por debajo de la entrada existente no reemplaza esa entrada si pertenece a la misma búsqueda, posición y reloj de 50 jugadas. Esto evita que trabajadores menos avanzados borren resultados profundos reutilizables. Una búsqueda nueva, un resultado exacto o un reloj distinto siguen pudiendo reemplazarla.
 
 ```text
 setoption name MultiPV value 3
@@ -42,6 +46,8 @@ go depth 6 searchmoves g1f3 f1c4
 ## Ataques y asignaciones
 
 Las listas internas de búsqueda usan `MoveList`, un array fijo para el máximo de movimientos de una posición, por lo que no reservan un vector en cada nodo. La API pública conserva vectores donde facilitan diagnóstico y pruebas.
+
+La ordenación interna calcula una sola prioridad por movimiento y usa inserción estable con memoria local, evitando las reservas de `stable_sort` en cada nodo. Las reducciones LMR se precalculan con la misma fórmula en una tabla compartida de solo lectura.
 
 Los ataques de alfil y torre se precalculan para todos los subconjuntos relevantes de ocupación. En x64 se usa PEXT cuando la CPU anuncia BMI2; las demás arquitecturas comprimen la ocupación por software sobre las mismas tablas. `chessbot bench` informa `sliders pext` o `sliders lookup-software`.
 
@@ -59,11 +65,13 @@ La opción UCI `Threads`, entre 1 y 256, activa Lazy SMP. Cada trabajador mantie
 
 `Threads=1` conserva la ruta monohilo y es la configuración predeterminada para pruebas reproducibles. Valores mayores aprovechan varios núcleos; la mejora depende de la posición, la duración y la CPU.
 
+En búsquedas por profundidad, todos los ayudantes incluyen la iteración final. Cuando cualquiera termina la profundidad y las variantes solicitadas, se detienen los demás y se publica el resultado completo elegido; no es necesario esperar a que termine el trabajador principal.
+
 ## Métricas y referencia
 
 `SearchResult` registra profundidad, profundidad selectiva, nodos, quietud, tiempo, TT, cortes beta, cortes con el primer movimiento, movimientos generados, ramificación máxima, reintentos de aspiración, intentos/cortes null-move, reducciones/rebúsquedas LMR y podas de futilidad. `AnalysisDetail=Full` publica estos contadores en líneas `info string search_metrics`.
 
-En la máquina de validación, `bench 5 Baseline` produjo 567.651 nodos en 1.415 ms. La revisión actual de `Optimized` produjo 33.351 nodos en 42 ms: 94,1 % menos nodos. Tres de las cuatro posiciones conservaron jugada y puntuación; la posición inicial cambió de `e3` a `d4` con una diferencia de 6 cp. Una comprobación corta de 16 partidas a 20 ms dio 5 victorias, 10 tablas y 1 derrota para `Optimized`; es una señal favorable, no una estimación definitiva de fuerza.
+En la medición previa a la revisión MultiPV, `bench 5 Baseline` produjo 567.651 nodos en 1.415 ms y `Optimized` produjo 33.351 nodos en 42 ms: 94,1 % menos nodos. Tres de las cuatro posiciones conservaron jugada y puntuación; la posición inicial cambió de `e3` a `d4` con una diferencia de 6 cp. Una comprobación corta de 16 partidas a 20 ms dio 5 victorias, 10 tablas y 1 derrota para `Optimized`; es una señal favorable, no una estimación definitiva de fuerza. La comparación de rendimiento de la revisión MultiPV está en [validación](validation.md#revisión-del-coste-multipv-21-de-septiembre-de-2026).
 
 ```powershell
 .\build\Release\chessbot.exe bench 5 Baseline

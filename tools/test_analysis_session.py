@@ -5,8 +5,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import chess
+import chess.engine
 
 from analysis_session import run_session
 
@@ -32,7 +34,16 @@ with tempfile.TemporaryDirectory() as directory:
     explanation = json.loads(result_path.read_text(encoding="utf-8"))
     assert "búsqueda adicional de h5" in explanation["text"]
     assert "negras" in explanation["text"]
-    position = run_session({"kind": "fen", "text": chess.STARTING_FEN, "depth": 1}, engine, output)
+    searches = []
+    original_analysis = chess.engine.SimpleEngine.analysis
+    def count_analysis(self, *args, **kwargs):
+        searches.append(kwargs)
+        return original_analysis(self, *args, **kwargs)
+    with patch.object(chess.engine.SimpleEngine, "analysis", count_analysis):
+        position = run_session({"kind": "fen", "text": chess.STARTING_FEN,
+                                "depth": 1, "multipv": 3}, engine, output)
+    assert len(searches) == 1, "FEN analysis must not search the position twice"
+    assert len(position["games"][0]["moves"][0]["candidates"]) == 3
     assert position["games"][0]["moves"][0]["mode"] == "position"
     assert "recomienda" in position["games"][0]["moves"][0]["explanation"]
     terminal = run_session({"kind": "fen", "text": "7k/6Q1/5K2/8/8/8/8/8 b - - 0 1", "depth": 1}, engine, output)

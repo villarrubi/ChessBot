@@ -25,9 +25,20 @@ int priority(Move move, Move ttMove, Move firstKiller, Move secondKiller,
 } // namespace
 void orderMoves(MoveList &moves, Move ttMove, Move firstKiller, Move secondKiller,
                 const HistoryTable *history, Color side) {
-    std::stable_sort(moves.begin(), moves.end(), [&](Move a, Move b) {
-        return priority(a, ttMove, firstKiller, secondKiller, history, side) >
-               priority(b, ttMove, firstKiller, secondKiller, history, side);
-    });
+    // Score each move once. Stable insertion sort is efficient for these short,
+    // mostly tied lists and avoids an allocation at every search node.
+    std::array<int, 256> scores;
+    for (std::size_t i = 0; i < moves.size(); ++i) {
+        const Move move = moves[i];
+        const int score = priority(move, ttMove, firstKiller, secondKiller, history, side);
+        std::size_t j = i;
+        while (j > 0 && scores[j - 1] < score) {
+            moves[j] = moves[j - 1];
+            scores[j] = scores[j - 1];
+            --j;
+        }
+        moves[j] = move;
+        scores[j] = score;
+    }
 }
 } // namespace chessbot

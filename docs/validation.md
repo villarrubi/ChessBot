@@ -7,7 +7,7 @@ Comprobaciones ejecutadas del 14 al 21 de septiembre de 2026 en Windows x64, con
 | Compilación Release y Debug | Correcta, sin avisos del código propio |
 | CTest Release | 3/3 pruebas, incluida PERFT completa |
 | CTest Debug sin etiqueta `slow` | 2/2 pruebas |
-| Suite doctest rápida | 41 casos y más de 29.500 aserciones: reglas, evaluación parametrizada, NNUE incremental, libro, mates, táctica, límites, null-move, MultiPV y transposiciones |
+| Suite doctest rápida | 44 casos y más de 29.800 aserciones; incluye reglas, evaluación parametrizada, NNUE incremental, libro, mates, táctica, límites, null-move, MultiPV y transposiciones |
 | Restauración aleatoria | Hasta 40 partidas de 150 plies, comprobando todos los estados al retroceder |
 | Comparación Release con python-chess | 15.675 posiciones y 24 fixtures PERFT hasta profundidad 3 |
 | Comparación Debug con python-chess | 1.874 posiciones y 24 fixtures PERFT hasta profundidad 3 |
@@ -17,8 +17,8 @@ Comprobaciones ejecutadas del 14 al 21 de septiembre de 2026 en Windows x64, con
 | Partidas completas | 2 partidas UCI de autojuego, ambas válidas y terminadas por triple repetición |
 | Evaluación posicional frente a básica | 13–3 en 16 partidas, profundidad 3, ocho aperturas con colores invertidos |
 | Benchmark Baseline | 567.651 nodos, 1.415 ms y ~401.166 NPS a profundidad 5 |
-| Benchmark Optimized actual | 33.351 nodos y 42 ms; 94,1 % menos nodos que Baseline |
-| Partidas de búsqueda actuales | Comprobación corta: Optimized 10–6 Baseline en 16 partidas a 20 ms; 5 victorias, 10 tablas y 1 derrota |
+| Benchmark Optimized (revisión previa) | 33.351 nodos y 42 ms; 94,1 % menos nodos que Baseline |
+| Partidas de búsqueda (revisión previa) | Comprobación corta: Optimized 10–6 Baseline en 16 partidas a 20 ms; 5 victorias, 10 tablas y 1 derrota |
 | Análisis de PGN | JSON, PGN anotado, informe Markdown, MultiPV, `searchmoves` y explicación con búsqueda adicional correctos |
 | Runner de fase 7 | Escenarios A–F, importadores JSON/PGN/EPD/FEN/UCI/Polyglot, libro y metadatos correctos |
 | Pipeline de fase 8 | Dataset de 2.528 posiciones/126 partidas, particiones sin solapamiento, ajuste, carga y puertas de promoción correctos |
@@ -151,3 +151,24 @@ Comprobaciones locales del 21 de septiembre de 2026:
 - Ruff, formato C++ y enlaces relativos de la documentación comprobados.
 
 La automatización remota de ventanas no estaba disponible; la comprobación visual utilizó las capturas de la prueba WinForms. Estas comprobaciones locales no sustituyen una nueva ejecución de CI en Linux y Windows.
+
+## Revisión del coste MultiPV (21 de septiembre de 2026)
+
+Comparación con `0d356a7`, posición inicial, perfil `Optimized`, NNUE y libro desactivados, Hash 256 MB, 8 hilos, profundidad 20 y **3 variantes**. Cada muestra arranca un motor nuevo. Ambas versiones completaron profundidad 20 en las tres variantes:
+
+| Versión | Muestra 1 | Muestra 2 | Media |
+| --- | ---: | ---: | ---: |
+| Publicada anteriormente (`0d356a7`) | 81,800 s | 99,956 s | 90,878 s |
+| Revisión MultiPV y caché profunda | 37,855 s | 34,174 s | 36,015 s |
+
+La media se redujo aproximadamente un 60 % (2,5× más rápido). La sesión completa de escritorio para `1. e4 *`, con los mismos ajustes y generación del informe, tardó 33,475 s; la jugada realizada estaba entre las candidatas y se reutilizó. Estas muestras pequeñas no garantizan tiempos para otras posiciones, para jugadas que necesitan búsqueda adicional ni para una partida completa. La cifra histórica de 33,1 s correspondía a **una** variante y no era comparable con la configuración de tres variantes del usuario.
+
+Los cambios conservan los límites solicitados: ventanas de aspiración y orden previo en MultiPV, protección de resultados profundos en la TT, finalización al completar cualquier trabajador todas las variantes pedidas, ordenación sin reservas por nodo, precálculo de LMR, compilación Release con IPO y eliminación de la búsqueda duplicada de FEN. El benchmark reproducible está en `tools/benchmark_analysis.py`.
+
+La suite C++ pasa 44 casos y más de 29.800 aserciones, incluyendo variantes completas, ordenadas y legales con uno y cuatro hilos, publicación del resultado final, mate, captura de dama y conservación de entradas profundas en la TT. La prueba de FEN verifica que solo se ejecuta una búsqueda.
+
+La compilación final con LTCG completo pasó también UCI (incluidos límites y parada), sesión de análisis PGN/FEN, exportación de informes, Ruff y la integración WinForms (hilos, navegación, tablero, explicación y cancelación). El lanzador Release compiló sin errores ni advertencias.
+
+Una versión intermedia obtuvo 7–9 en 16 partidas a 20 ms contra `0d356a7`. Después de limitar la nueva ordenación de raíz a MultiPV, la comprobación final de 16 partidas a 50 ms y máximo 120 plies obtuvo 4 victorias, 9 tablas y 3 derrotas (8,5–7,5). Son comprobaciones cortas con límites distintos; no demuestran una mejora estadística de fuerza ni permiten atribuir el cambio de resultado a una sola modificación.
+
+Tras un enlace incremental con MSVC se observó un `SIGILL` reproducible en la prueba del libro de aperturas. La compilación limpia del mismo código pasó la suite. La configuración final solicita LTCG completo y desactiva el enlace incremental; esto evita reutilizar los artefactos observados, sin atribuir el fallo a un defecto concreto del compilador no diagnosticado.

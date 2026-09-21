@@ -4,6 +4,16 @@ project(ChessBot VERSION 0.10.0 LANGUAGES CXX)
 include(CTest)
 option(CHESSBOT_SANITIZERS "Enable supported address/undefined behavior sanitizers" OFF)
 option(CHESSBOT_SLOW_TESTS "Register full depth-6 PERFT tests" OFF)
+option(CHESSBOT_IPO "Enable interprocedural optimization in Release builds when supported" ON)
+if(CHESSBOT_IPO AND NOT CHESSBOT_SANITIZERS)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT CHESSBOT_IPO_SUPPORTED OUTPUT CHESSBOT_IPO_ERROR)
+    if(CHESSBOT_IPO_SUPPORTED)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+    else()
+        message(STATUS "IPO unavailable: ${CHESSBOT_IPO_ERROR}")
+    endif()
+endif()
 
 find_package(Threads REQUIRED)
 add_library(chessbot_core
@@ -20,6 +30,11 @@ set_target_properties(chessbot_core PROPERTIES CXX_EXTENSIONS OFF)
 add_library(chessbot_options INTERFACE)
 if(MSVC)
     target_compile_options(chessbot_options INTERFACE /W4 /permissive- /utf-8)
+    if(CHESSBOT_IPO AND CHESSBOT_IPO_SUPPORTED AND NOT CHESSBOT_SANITIZERS)
+        # Full LTCG avoids reusing stale incremental code-generation artifacts.
+        target_link_options(chessbot_options INTERFACE
+            "$<$<CONFIG:Release>:/LTCG>" "$<$<CONFIG:Release>:/INCREMENTAL:NO>")
+    endif()
     if(CHESSBOT_SANITIZERS)
         # MSVC address sanitizer is incompatible with Debug's /RTC1 checks.
         string(REGEX REPLACE "/RTC[1su]+" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
