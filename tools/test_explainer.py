@@ -52,6 +52,7 @@ class ExplanationTests(unittest.TestCase):
         self.assertEqual((answer, model), ("Explicación local", "qwen3.5:4b"))
         payload = request.call_args.args[1]
         self.assertFalse(payload["stream"])
+        self.assertFalse(payload["think"])
         self.assertEqual(payload["messages"][0]["role"], "system")
         self.assertIn("No inventes", payload["messages"][0]["content"])
 

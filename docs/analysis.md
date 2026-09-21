@@ -30,6 +30,8 @@ En Windows, deja Ollama abierto; si solo usas la CLI, inicia `ollama serve`. Pul
 
 El adaptador usa [la API local de chat](https://docs.ollama.com/api/chat) en `http://127.0.0.1:11434`, sin proxy ni proveedor de nube. Filtra modelos remotos; no descarga ni instala nada al explicar. Si el servicio, modelo o respuesta fallan, vuelve a la explicación del motor e indica el motivo. El tiempo de espera de una respuesta es de 120 segundos.
 
+Con Qwen 3/3.5 se solicita directamente la respuesta final (`think: false`). Así el presupuesto de salida no se consume en el campo interno `thinking` dejando vacío `message.content`; los cálculos verificables siguen procediendo exclusivamente del motor.
+
 Las instrucciones del modelo exigen no inventar puntuaciones, piezas, variantes o mates y distinguir cálculo de interpretación. Esto reduce errores, pero no verifica todas las afirmaciones del texto generado. Contrasta las respuestas con Cálculos del motor; una PV es una continuación calculada, no una prueba de que cada jugada sea forzada.
 
 ## Preguntar por alternativas

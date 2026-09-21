@@ -75,7 +75,10 @@ def explain(context: dict[str, Any], model: str = "") -> tuple[str, str]:
                      {"role": "user", "content": json.dumps(context, ensure_ascii=False)}],
     }
     if selected.startswith("qwen3"):
-        payload["think"] = True
+        # The explanation needs the final answer, not the model's private
+        # reasoning. With a finite prediction budget, thinking can consume the
+        # whole response and leave message.content empty in Ollama.
+        payload["think"] = False
     response = request_json("/api/chat", payload, timeout=120)
     message = response.get("message")
     if not isinstance(message, dict) or not isinstance(message.get("content"), str):
