@@ -27,13 +27,23 @@ with tempfile.TemporaryDirectory() as directory:
     assert len(records) == 2 and records[1]["color"] == "black"
     assert records[1]["history_uci"] == ["e2e4"]
     result_path = output / "explanation.json"
+    context_path = output / "explanation-context.json"
     subprocess.run([sys.executable, "-X", "utf8", str(Path(__file__).with_name("explain_analysis.py")),
-                    "--analysis", str(output / "analysis.json"), "--ply", "2", "--move", "h5",
-                    "--engine", str(engine), "--json-output", str(result_path)],
+                    "--analysis", str(output / "analysis.json"), "--ply", "2", "--moves", "h5,a5",
+                    "--engine", str(engine), "--json-output", str(result_path),
+                    "--context-output", str(context_path)],
                    capture_output=True, check=True, text=True, encoding="utf-8")
     explanation = json.loads(result_path.read_text(encoding="utf-8"))
     assert "búsqueda adicional de h5" in explanation["text"]
+    assert "búsqueda adicional de a5" in explanation["text"]
     assert "negras" in explanation["text"]
+    context = json.loads(context_path.read_text(encoding="utf-8"))
+    assert [move["move"] for move in context["proposed_moves"]] == ["h7h5", "a7a5"]
+    assert len({move["comparison_to_best"]["reference_move"]
+                for move in context["proposed_moves"]}) == 1
+    for move in context["proposed_moves"]:
+        assert move["plan_evidence"]["detailed_sequence"][0]["bando"] == "negras"
+        assert move["move_facts"]["moving_piece"]
     searches = []
     original_analysis = chess.engine.SimpleEngine.analysis
     def count_analysis(self, *args, **kwargs):

@@ -31,9 +31,10 @@ internal sealed class AnalysisTab : TabPage
         BorderStyle = BorderStyle.None };
     private readonly RichTextBox evidence = new() { Dock = DockStyle.Fill, ReadOnly = true, BorderStyle = BorderStyle.None };
     private readonly RichTextBox answer = new() { Dock = DockStyle.Fill, ReadOnly = true, BorderStyle = BorderStyle.None,
-        Text = "Selecciona una jugada y pulsa Explicar con IA. El motor calcula las variantes; la IA las comenta." };
-    private readonly TextBox question = new() { Dock = DockStyle.Fill, PlaceholderText = "¿Por qué prefiere esta jugada?" };
-    private readonly TextBox alternative = new() { Width = 95, PlaceholderText = "Nf3 / g1f3" };
+        Text = "Selecciona una jugada y pulsa Evaluar / explicar. El motor calcula las propuestas; la IA comenta ideas y planes." };
+    private readonly TextBox question = new() { Dock = DockStyle.Fill,
+        PlaceholderText = "Pregunta por la jugada, sus ideas, planes o riesgos." };
+    private readonly TextBox alternative = new() { Width = 170, PlaceholderText = "Qxc3, Qxf1" };
     private readonly TextBox fen = new() { Dock = DockStyle.Fill, ReadOnly = true };
     private readonly Label lastMove = new() { Name = "analysisLastMove", Text = "Última jugada: —", AutoSize = true };
     private readonly ComboBox lines = new() { Name = "analysisLines", DropDownStyle = ComboBoxStyle.DropDownList, Width = 180 };
@@ -152,9 +153,9 @@ internal sealed class AnalysisTab : TabPage
         right.Controls.Add(aiSettings, 0, 5);
         right.Controls.Add(question, 0, 6);
         FlowLayoutPanel askRow = Flow();
-        askRow.Controls.Add(Caption("Alternativa"));
+        askRow.Controls.Add(Caption("Alternativas"));
         askRow.Controls.Add(alternative);
-        askRow.Controls.Add(ActionButton("Explicar / preguntar", ExplainAsync));
+        askRow.Controls.Add(ActionButton("Evaluar / explicar", ExplainAsync));
         right.Controls.Add(askRow, 0, 7);
         content.Controls.Add(right, 1, 0);
         rightLayout = right;
@@ -310,7 +311,7 @@ internal sealed class AnalysisTab : TabPage
         evidence.Text = text.ToString();
         if (prioritize)
         {
-            answer.Text = "Pulsa Explicar / preguntar para comentar esta posición con la IA local.";
+            answer.Text = "Pulsa Evaluar / explicar para comentar esta posición o calcular hasta cuatro alternativas.";
             alternative.Clear();
         }
         int previousLine = lines.SelectedIndex;
@@ -463,11 +464,11 @@ internal sealed class AnalysisTab : TabPage
         string result = Path.Combine(outputDirectory, "explanation.json");
         List<string> arguments = ["tools/explain_analysis.py", "--analysis", Path.Combine(outputDirectory, "analysis.json"),
             "--game", (games.SelectedIndex + 1).ToString(), "--ply", records[SelectedIndex].GetProperty("ply").ToString(),
-            "--engine", engine, "--question", question.Text, "--move", alternative.Text.Trim(),
+            "--engine", engine, "--question", question.Text, "--moves", alternative.Text.Trim(),
             "--provider", provider.SelectedIndex == 0 ? "auto" : "none", "--json-output", result,
             "--context-output", Path.Combine(outputDirectory, "explanation-context.json")];
         if (model.SelectedIndex > 0) arguments.AddRange(["--model", model.Text]);
-        await RunTaskAsync("Preparando explicación local…", async token =>
+        await RunTaskAsync("Evaluando las jugadas propuestas y preparando los planes…", async token =>
         {
             await RunPythonAsync(arguments, token);
             using JsonDocument document = JsonDocument.Parse(await File.ReadAllTextAsync(result, token));

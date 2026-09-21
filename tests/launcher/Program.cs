@@ -71,11 +71,15 @@ internal static class Program
         if (!chart.Visible) throw new Exception("Evaluation chart did not expand.");
         ComboBox provider = controls.OfType<ComboBox>().Single(c => c.Items.Contains("Solo motor"));
         provider.SelectedIndex = 1;
-        Button explain = controls.OfType<Button>().Single(b => b.Text == "Explicar / preguntar");
+        TextBox alternatives = controls.OfType<TextBox>().Single(t => t.PlaceholderText == "Qxc3, Qxf1");
+        alternatives.Text = "h5,a5";
+        Button explain = controls.OfType<Button>().Single(b => b.Text == "Evaluar / explicar");
         explain.PerformClick();
         await WaitUntilAsync(() => explain.Enabled, 60);
         if (!controls.OfType<RichTextBox>().Any(t => t.Text.Contains("motor\n\n") && t.Text.Contains("negras")))
             throw new Exception("Deterministic explanation missing or wrong perspective.");
+        if (!controls.OfType<RichTextBox>().Any(t => t.Text.Contains("h5") && t.Text.Contains("a5")))
+            throw new Exception("Multiple proposed moves were not evaluated by the desktop UI.");
         form.Size = new Size(1040, 760);
         form.PerformLayout();
         using (Bitmap image = new(form.Width, form.Height))
