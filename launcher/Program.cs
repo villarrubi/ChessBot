@@ -819,6 +819,11 @@ internal sealed class MainForm : Form
             await process.StandardInput.WriteLineAsync("setoption name UCI_LimitStrength value true");
             await process.StandardInput.WriteLineAsync($"setoption name UCI_Elo value {(int)playStockfishElo.Value}");
         }
+        else
+        {
+            await process.StandardInput.WriteLineAsync("setoption name SearchProfile value Optimized");
+            await process.StandardInput.WriteLineAsync("setoption name Hash value 256");
+        }
         await process.StandardInput.WriteLineAsync("isready");
         await ReadUntilAsync(process, line => line == "readyok");
         string position = moves.Count == 0 ? "position startpos" : "position startpos moves " + string.Join(' ', moves);

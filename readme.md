@@ -27,7 +27,7 @@ python -m venv .venv
 
 El último paso genera `build/launcher/ChessBot Launcher.exe` y un acceso directo **ChessBot** en el escritorio. Necesitas el runtime de escritorio .NET 9 para ejecutarlo; el SDK ya lo incluye. La aplicación usa el motor de `build/Release` y el Python de `.venv` de este repositorio.
 
-La pestaña **Análisis** permite importar un PGN o pegar una FEN. Selecciona una fila para ver el tablero y los cálculos; pulsa **Explicar / preguntar** para obtener un comentario. En **Alternativa** puedes escribir `Nf3` o `g1f3` para que el motor evalúe esa jugada antes de responder. Los resultados se guardan en `data/analysis/` y se abren con **Resultados**.
+La pestaña **Análisis** permite importar un PGN o pegar una FEN. La partida aparece desde el inicio, abierta en la última jugada y con el movimiento resaltado. Evaluaciones y variantes llegan en directo; seleccionar una fila pendiente le da prioridad. Puedes recorrer una variante, volver a la partida y desplegar su gráfico de evaluación. **Cancelar** conserva los resultados parciales. Cuando una fila está completa, pulsa **Explicar / preguntar** para obtener un comentario. En **Alternativa** puedes escribir `Nf3` o `g1f3` para que el motor evalúe esa jugada antes de responder. Los resultados se guardan en `data/analysis/` y se abren con **Resultados**.
 
 Para entrenar redes, instala además las dependencias opcionales:
 

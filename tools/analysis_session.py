@@ -105,9 +105,17 @@ def main() -> None:
     parser.add_argument("--request", required=True, type=Path)
     parser.add_argument("--engine", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
+    parser.add_argument("--live", action="store_true", help="Stream results and accept focus commands on stdin")
     args = parser.parse_args()
     try:
-        run_session(json.loads(args.request.read_text(encoding="utf-8-sig")), args.engine, args.output_dir)
+        request = json.loads(args.request.read_text(encoding="utf-8-sig"))
+        if args.live:
+            from live_analysis import run_live
+            games, position_only = read_games(request)
+            run_live(request, args.engine, args.output_dir, games, position_only)
+            return
+        else:
+            run_session(request, args.engine, args.output_dir)
     except (ValueError, OSError, chess.engine.EngineError) as error:
         parser.exit(1, f"No se pudo analizar: {error}\n")
     print("Análisis completo.", flush=True)

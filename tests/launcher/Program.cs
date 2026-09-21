@@ -51,11 +51,20 @@ internal static class Program
         analyze.PerformClick();
         await WaitUntilAsync(() => analyze.Enabled, 60);
         if (grid.Rows.Count != 3) throw new Exception("PGN did not populate the analysis grid.");
+        ChessBoard analysisBoard = controls.OfType<ChessBoard>().Single();
+        if (grid.CurrentRow?.Index != 2 || analysisBoard.LastMove != "g1f3")
+            throw new Exception("Analysis should open on and highlight the last move.");
         grid.CurrentCell = grid.Rows[1].Cells[0];
         CheckBox after = controls.OfType<CheckBox>().Single();
         if (!after.Checked) throw new Exception("Analysis should show the position after the selected move by default.");
         string boardFen = controls.OfType<ChessBoard>().Single().Position;
         if (!boardFen.Contains("4p3") || !boardFen.Contains(" w ")) throw new Exception("Wrong board after e5.");
+        if (analysisBoard.LastMove != "e7e5") throw new Exception("Missing last move highlight.");
+        if (!controls.OfType<Label>().Single(l => l.Name == "analysisLastMove").Text.Contains("1… e5"))
+            throw new Exception("Wrong last-move caption.");
+        after.Checked = false;
+        if (analysisBoard.LastMove != "e2e4") throw new Exception("Before-move view should highlight the previous move.");
+        after.Checked = true;
         Button chartToggle = controls.OfType<Button>().Single(b => b.Text.StartsWith("Gráfico de evaluación"));
         EvaluationChart chart = controls.OfType<EvaluationChart>().Single();
         chartToggle.PerformClick();
@@ -75,14 +84,27 @@ internal static class Program
             image.Save(Path.Combine(output, "analysis-populated.png"));
         }
         NumericUpDown depth = controls.OfType<NumericUpDown>().Single(n => n.Maximum == 126);
-        depth.Value = 12;
+        depth.Value = 20;
         analyze.PerformClick();
         Button cancel = controls.OfType<Button>().Single(b => b.Text == "Cancelar");
+        await WaitUntilAsync(() => cancel.Enabled && grid.Enabled && grid.Rows.Count == 3 && grid.CurrentRow?.Index == 2, 10);
+        grid.CurrentCell = grid.Rows[0].Cells[0];
         await WaitUntilAsync(() => controls.OfType<Label>().Any(l => l.Text.Contains("jugada 1")), 10);
+        ComboBox lines = controls.OfType<ComboBox>().Single(c => c.Name == "analysisLines");
+        await WaitUntilAsync(() => lines.Items.Count > 0, 10);
+        if (analyze.Enabled) throw new Exception("Expected partial results while analysis is still active.");
+        controls.OfType<Button>().Single(b => b.Text == "Ver línea").PerformClick();
+        if (analysisBoard.LastMove is null) throw new Exception("Variation navigation should highlight its move.");
+        controls.OfType<Button>().Single(b => b.Text == "Volver a partida").PerformClick();
+        if (analysisBoard.LastMove != "e2e4") throw new Exception("Returning from the line lost the game position.");
         cancel.PerformClick();
         await WaitUntilAsync(() => analyze.Enabled, 10);
         if (!controls.OfType<Label>().Any(l => l.Text.Contains("cancelada"))) throw new Exception("Cancellation failed.");
-        Console.WriteLine("PASS: analysis layout, threads, PGN navigation, board, explanation and cancellation");
+        if (grid.Rows.Count != 3) throw new Exception("Cancellation lost the partial game.");
+        explain.PerformClick();
+        if (!controls.OfType<Label>().Any(l => l.Text.Contains("todavía no tiene un análisis completo")))
+            throw new Exception("Incomplete results must not be sent to the explainer.");
+        Console.WriteLine("PASS: live analysis, priority, partial results, last move, variation navigation and cancellation");
     }
 
     private static IEnumerable<Control> Descendants(Control parent) => parent.Controls.Cast<Control>()

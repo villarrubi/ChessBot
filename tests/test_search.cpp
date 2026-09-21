@@ -82,6 +82,45 @@ TEST_CASE("pseudo-legal tactical move generation excludes quiet moves") {
         CHECK((move.has(Capture) || move.promotion() != None));
 }
 
+TEST_CASE("optimized search recognizes stalemate at the horizon and in full search") {
+    for (const int depth : {1, 2, 4}) {
+        auto board = Board::fromFen("7k/5K2/8/6Q1/8/8/8/8 w - - 0 1");
+        Engine engine;
+        engine.setSearchMode(SearchMode::Optimized);
+        engine.setPosition(board);
+        SearchLimits limits;
+        limits.depth = depth;
+        for (const auto move : legalMoveList(board))
+            if (move.uci() == "g5g6")
+                limits.rootMoves.push_back(move);
+        REQUIRE(limits.rootMoves.size() == 1);
+        const auto result = engine.search(limits);
+        CHECK(result.score == ScoreDraw);
+        CHECK(result.bestMove.uci() == "g5g6");
+    }
+}
+
+TEST_CASE("early legal-move detection agrees with full generation and restores the board") {
+    for (const auto fen : {"7k/5KQ1/8/8/8/8/8/8 b - - 0 1", "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1",
+                           "4r1k1/8/8/3pP3/8/8/8/4K3 w - d6 0 1",
+                           "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}) {
+        auto board = Board::fromFen(fen);
+        for (int ply = 0; ply < 80; ++ply) {
+            const auto before = board.fen();
+            const auto key = board.key();
+            const auto moves = legalMoveList(board);
+            CHECK(hasLegalMove(board, pseudoLegalMoveList(board)) == !moves.empty());
+            CHECK(hasLegalMove(board) == !moves.empty());
+            CHECK(board.fen() == before);
+            CHECK(board.key() == key);
+            if (moves.empty())
+                break;
+            StateInfo state;
+            board.makeMove(moves[(ply * 17 + 3) % moves.size()], state);
+        }
+    }
+}
+
 TEST_CASE("iterative deepening callback and persistent transposition table") {
     Engine engine;
     SearchLimits limits;

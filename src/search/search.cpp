@@ -420,11 +420,11 @@ class Searcher {
             if (razor <= alpha)
                 return razor;
         }
-        if (optimized() && narrowWindow && !inCheck && depth <= 7 && beta < ScoreMate - MaxPly &&
-            staticEval - 80 * depth >= beta)
-            return staticEval;
+        if (optimized() && narrowWindow && !inCheck && depth <= 7 &&
+            std::abs(beta) < ScoreMate - MaxPly && staticEval - 80 * depth >= beta)
+            return hasLegalMove(board_) ? staticEval : ScoreDraw;
         if (optimized() && allowNull && !inCheck && depth >= 3 && staticEval >= beta &&
-            beta < ScoreMate - MaxPly && hasNullMaterial()) {
+            std::abs(beta) < ScoreMate - MaxPly && hasNullMaterial()) {
             ++nullMoveAttempts_;
             StateInfo state;
             board_.makeNullMove(state);
@@ -438,7 +438,7 @@ class Searcher {
                 return 0;
             if (score >= beta) {
                 ++nullMoveCutoffs_;
-                return score;
+                return hasLegalMove(board_) ? score : ScoreDraw;
             }
         }
 
@@ -465,12 +465,12 @@ class Searcher {
             const bool givesCheck = board_.inCheck(board_.sideToMove());
             const int childDepth = depth - 1;
             if (optimized() && depth <= 3 && searched > 0 && isQuiet && !inCheck && !givesCheck &&
-                alpha < ScoreMate - MaxPly && staticEval + 100 * depth <= alpha) {
+                std::abs(alpha) < ScoreMate - MaxPly && staticEval + 100 * depth <= alpha) {
                 unmakeMove(move, state);
                 continue;
             }
             if (optimized() && narrowWindow && depth <= 6 && isQuiet && !inCheck && !givesCheck &&
-                searched >= 4 + 2 * depth) {
+                std::abs(alpha) < ScoreMate - MaxPly && searched >= 4 + 2 * depth) {
                 unmakeMove(move, state);
                 continue;
             }
@@ -540,13 +540,13 @@ class Searcher {
         if (ply >= MaxPly - 1)
             return staticEvaluation();
         const bool check = board_.inCheck(board_.sideToMove());
-        auto moves = optimized() ? (check ? pseudoLegalMoveList(board_)
-                                          : pseudoLegalTacticalMoveList(board_))
-                                 : legalMoveList(board_);
+        auto moves = optimized() ? pseudoLegalMoveList(board_) : legalMoveList(board_);
         countMoves(moves.size());
         if (check && !optimized() && moves.empty())
             return -ScoreMate + ply;
         if (!check && !optimized() && moves.empty())
+            return ScoreDraw;
+        if (!check && optimized() && !hasLegalMove(board_, moves))
             return ScoreDraw;
         Score standPat = -ScoreInfinity;
         if (!check) {
@@ -554,13 +554,11 @@ class Searcher {
             if (standPat >= beta)
                 return standPat;
             alpha = std::max(alpha, standPat);
-            if (!optimized()) {
-                std::size_t kept = 0;
-                for (const Move move : moves)
-                    if (move.has(Capture) || move.promotion() != None)
-                        moves[kept++] = move;
-                moves.resize(kept);
-            }
+            std::size_t kept = 0;
+            for (const Move move : moves)
+                if (move.has(Capture) || move.promotion() != None)
+                    moves[kept++] = move;
+            moves.resize(kept);
         }
         orderMoves(moves, {});
         int searched = 0;
@@ -568,6 +566,7 @@ class Searcher {
         const Color side = board_.sideToMove();
         for (const Move move : moves) {
             if (optimized() && !check && move.promotion() == None &&
+                std::abs(alpha) < ScoreMate - MaxPly &&
                 standPat + materialValue(move.captured()) + 150 < alpha)
                 continue;
             StateInfo state;

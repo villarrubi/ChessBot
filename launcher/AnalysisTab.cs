@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace ChessBotLauncher;
 
@@ -34,6 +35,15 @@ internal sealed class AnalysisTab : TabPage
     private readonly TextBox question = new() { Dock = DockStyle.Fill, PlaceholderText = "¿Por qué prefiere esta jugada?" };
     private readonly TextBox alternative = new() { Width = 95, PlaceholderText = "Nf3 / g1f3" };
     private readonly TextBox fen = new() { Dock = DockStyle.Fill, ReadOnly = true };
+    private readonly Label lastMove = new() { Name = "analysisLastMove", Text = "Última jugada: —", AutoSize = true };
+    private readonly ComboBox lines = new() { Name = "analysisLines", DropDownStyle = ComboBoxStyle.DropDownList, Width = 180 };
+    private readonly List<Control> navigationControls = [];
+    private JsonObject? livePayload;
+    private Process? liveProcess;
+    private bool analysisRunning;
+    private JsonElement[] lineRecords = [];
+    private JsonElement? exploredLine;
+    private int exploredPly;
     private readonly CheckBox after = new() { Text = "Después de la jugada", AutoSize = true, Checked = true };
     private readonly Button chartToggle = new() { Text = "Gráfico de evaluación ▾", AutoSize = true };
     private readonly EvaluationChart evaluationChart = new() { Dock = DockStyle.Fill, Visible = false };
@@ -95,15 +105,22 @@ internal sealed class AnalysisTab : TabPage
         left.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         left.Controls.Add(board, 0, 0);
         FlowLayoutPanel navigation = Flow();
-        navigation.Controls.Add(ActionButton("◀", () => NavigateAsync(-1)));
-        navigation.Controls.Add(ActionButton("▶", () => NavigateAsync(1)));
+        navigation.Controls.Add(ActionButton("◀", () => NavigateAsync(-1), true));
+        navigation.Controls.Add(ActionButton("▶", () => NavigateAsync(1), true));
         navigation.Controls.Add(after);
-        navigation.Controls.Add(ActionButton("Girar", () => { board.Flipped = !board.Flipped; board.Invalidate(); return Task.CompletedTask; }));
+        navigation.Controls.Add(ActionButton("Girar", () => { board.Flipped = !board.Flipped; board.Invalidate(); return Task.CompletedTask; }, true));
+        navigation.Controls.Add(lastMove);
+        navigation.Controls.Add(lines);
+        navigation.Controls.Add(ActionButton("Ver línea", () => PreviewLineAsync(0), true));
+        navigation.Controls.Add(ActionButton("◀ línea", () => PreviewLineAsync(-1), true));
+        navigation.Controls.Add(ActionButton("Línea ▶", () => PreviewLineAsync(1), true));
+        navigation.Controls.Add(ActionButton("Volver a partida", () => { exploredLine = null; UpdateBoard(); return Task.CompletedTask; }, true));
         left.Controls.Add(navigation, 0, 1);
         left.Controls.Add(fen, 0, 2);
         content.Controls.Add(left, 0, 0);
 
-        TableLayoutPanel right = new() { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 8, Padding = new Padding(8, 0, 0, 0) };
+        TableLayoutPanel right = new() { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 8, Padding = new Padding(8, 0, 0, 0),
+            AutoScroll = true, AutoScrollMinSize = new Size(0, 440) };
         right.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         right.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         right.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
@@ -148,6 +165,8 @@ internal sealed class AnalysisTab : TabPage
         Controls.Add(layout);
         lockedControls.AddRange([input, source, depth, multipv, games, grid, provider, model, question, alternative, after]);
         lockedControls.Add(threads);
+        lockedControls.Add(lines);
+        navigationControls.AddRange([games, grid, after, chartToggle, lines]);
         cancel.Click += (_, _) => cancellation?.Cancel();
         games.SelectedIndexChanged += (_, _) => LoadGame();
         grid.CurrentCellChanged += (_, _) => SelectMove();
@@ -158,10 +177,11 @@ internal sealed class AnalysisTab : TabPage
     private static FlowLayoutPanel Flow() => new() { Dock = DockStyle.Fill, AutoSize = true, WrapContents = true, Margin = new Padding(0) };
     private static Label Caption(string text) => new() { Text = text, AutoSize = true, Margin = new Padding(3, 8, 3, 0) };
 
-    private Button ActionButton(string text, Func<Task> action)
+    private Button ActionButton(string text, Func<Task> action, bool navigation = false)
     {
         Button button = new() { Text = text, AutoSize = true };
         lockedControls.Add(button);
+        if (navigation) navigationControls.Add(button);
         button.Click += async (_, _) =>
         {
             try { await action(); }
@@ -187,53 +207,64 @@ internal sealed class AnalysisTab : TabPage
         string request = Path.Combine(directory, "request.json");
         string requestJson = JsonSerializer.Serialize(new { kind, text = input.Text, moves,
             depth = (int)depth.Value, multipv = (int)multipv.Value, threads = (int)threads.Value });
-        await RunTaskAsync("Calculando variantes…", async token =>
+        analysisRunning = true;
+        livePayload = null;
+        exploredLine = null;
+        outputDirectory = directory;
+        loading = true;
+        records = [];
+        lineRecords = [];
+        grid.Rows.Clear();
+        games.Items.Clear();
+        lines.Items.Clear();
+        evidence.Clear();
+        answer.Clear();
+        evaluationChart.SetRecords([]);
+        board.LastMove = null;
+        lastMove.Text = "Cargando partida…";
+        loading = false;
+        try { await RunTaskAsync("Calculando variantes…", async token =>
         {
             Directory.CreateDirectory(directory);
             await File.WriteAllTextAsync(request, requestJson, token);
-            await RunPythonAsync(["tools/analysis_session.py", "--request", request, "--engine", engine, "--output-dir", directory], token);
+            await RunPythonAsync(["tools/analysis_session.py", "--live", "--request", request, "--engine", engine, "--output-dir", directory], token);
             using JsonDocument document = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(directory, "analysis.json"), token));
             payload = document.RootElement.Clone();
+            livePayload = JsonNode.Parse(payload.GetRawText())!.AsObject();
             outputDirectory = directory;
-            games.Items.Clear();
-            int index = 0;
-            foreach (JsonElement game in payload.GetProperty("games").EnumerateArray())
-            {
-                JsonElement headers = game.GetProperty("headers");
-                games.Items.Add($"{++index}. {headers.GetProperty("White").GetString()} — {headers.GetProperty("Black").GetString()}");
-            }
-            games.SelectedIndex = 0;
             status.Text = "Análisis listo · puntuaciones relativas al jugador de cada fila · resultados guardados.";
-        });
+        }); }
+        finally { analysisRunning = false; liveProcess = null; }
     }
 
     private void LoadGame()
     {
         if (games.SelectedIndex < 0) return;
-        JsonElement game = payload.GetProperty("games")[games.SelectedIndex];
+        JsonElement game = livePayload is null ? payload.GetProperty("games")[games.SelectedIndex]
+            : JsonSerializer.SerializeToElement(livePayload["games"]![games.SelectedIndex]);
         records = game.GetProperty("moves").EnumerateArray().ToArray();
         evaluationChart.SetRecords(records);
         loading = true;
         grid.Rows.Clear();
         foreach (JsonElement record in records)
         {
-            string prefix = record.GetProperty("move_number").GetInt32() + (record.GetProperty("color").GetString() == "white" ? ". " : "… ");
-            JsonElement loss = record.GetProperty("centipawn_loss");
-            grid.Rows.Add(prefix + record.GetProperty("move_san").GetString(), Label(record.GetProperty("classification").GetString()),
-                Score(record.GetProperty("played").GetProperty("score")),
-                loss.ValueKind == JsonValueKind.Null ? "Mate" : (loss.GetInt32() / 100.0).ToString("0.00"),
-                record.GetProperty("best").GetProperty("san").GetString() ?? "—");
+            int row = grid.Rows.Add();
+            RenderRow(row, record);
         }
         loading = false;
         if (grid.Rows.Count > 0)
         {
-            grid.CurrentCell = grid.Rows[0].Cells[0];
+            grid.CurrentCell = grid.Rows[grid.Rows.Count - 1].Cells[0];
             SelectMove();
         }
         else
         {
+            exploredLine = null;
+            lineRecords = [];
+            lines.Items.Clear();
             board.Position = game.GetProperty("fen").GetString()!;
             board.LastMove = null;
+            lastMove.Text = "Última jugada: —";
             fen.Text = board.Position;
             evidence.Text = "No hay jugadas que analizar. La posición es terminal o el PGN no contiene movimientos.";
             answer.Clear();
@@ -242,10 +273,18 @@ internal sealed class AnalysisTab : TabPage
     }
 
     private int SelectedIndex => grid.CurrentRow?.Index ?? -1;
-    private void SelectMove()
+    private void SelectMove() => ShowSelectedMove(true);
+
+    private void ShowSelectedMove(bool prioritize)
     {
         if (loading || SelectedIndex < 0 || SelectedIndex >= records.Length) return;
         JsonElement record = records[SelectedIndex];
+        if (prioritize)
+        {
+            exploredLine = null;
+            if (analysisRunning && (!record.TryGetProperty("complete", out JsonElement complete) || !complete.GetBoolean()))
+                SendFocus(games.SelectedIndex, record.GetProperty("ply").GetInt32());
+        }
         StringBuilder text = new(record.GetProperty("explanation").GetString());
         text.AppendLine("\n\nAlternativas calculadas:");
         foreach (JsonElement candidate in record.GetProperty("candidates").EnumerateArray())
@@ -269,10 +308,19 @@ internal sealed class AnalysisTab : TabPage
             }
         }
         evidence.Text = text.ToString();
-        answer.Text = "Pulsa Explicar / preguntar para comentar esta posición con la IA local.";
-        alternative.Clear();
+        if (prioritize)
+        {
+            answer.Text = "Pulsa Explicar / preguntar para comentar esta posición con la IA local.";
+            alternative.Clear();
+        }
+        int previousLine = lines.SelectedIndex;
+        lineRecords = record.GetProperty("candidates").EnumerateArray().ToArray();
+        lines.Items.Clear();
+        foreach (JsonElement line in lineRecords)
+            lines.Items.Add($"{line.GetProperty("san").GetString()} · {Score(line.GetProperty("score"))}");
+        if (lines.Items.Count > 0) lines.SelectedIndex = Math.Clamp(previousLine, 0, lines.Items.Count - 1);
         evaluationChart.SelectedIndex = SelectedIndex;
-        UpdateBoard();
+        if (exploredLine is null) UpdateBoard();
     }
 
     private void SetChartExpanded(bool expanded)
@@ -282,6 +330,7 @@ internal sealed class AnalysisTab : TabPage
         chartToggle.Text = expanded ? "Gráfico de evaluación ▴" : "Gráfico de evaluación ▾";
         if (rightLayout is not null)
         {
+            rightLayout.AutoScrollMinSize = new Size(0, expanded ? 620 : 440);
             rightLayout.RowStyles[3] = new RowStyle(SizeType.Absolute, expanded ? 180 : 0);
             rightLayout.PerformLayout();
         }
@@ -291,10 +340,112 @@ internal sealed class AnalysisTab : TabPage
     {
         if (SelectedIndex < 0 || SelectedIndex >= records.Length) return;
         JsonElement record = records[SelectedIndex];
+        exploredLine = null;
         board.Position = record.GetProperty(after.Checked ? "fen_after" : "fen_before").GetString()!;
-        board.LastMove = after.Checked ? record.GetProperty("move_uci").GetString() : null;
+        JsonElement[] history = record.GetProperty("history_uci").EnumerateArray().ToArray();
+        board.LastMove = after.Checked ? record.GetProperty("move_uci").GetString()
+            : history.LastOrDefault().ValueKind == JsonValueKind.String ? history[^1].GetString() : null;
+        JsonElement previousSan = record.GetProperty("history_san").EnumerateArray().LastOrDefault();
+        string san = after.Checked ? record.GetProperty("move_san").GetString()!
+            : previousSan.ValueKind == JsonValueKind.String ? previousSan.GetString()! : "";
+        lastMove.Text = board.LastMove is null ? "Última jugada: —" : "Última jugada: " + MoveCaption(board.Position, san);
         board.Invalidate();
         fen.Text = board.Position;
+    }
+
+    private static string MoveCaption(string afterFen, string san)
+    {
+        string[] parts = afterFen.Split(' ');
+        int number = int.Parse(parts[5]);
+        return parts[1] == "w" ? $"{number - 1}… {san}" : $"{number}. {san}";
+    }
+
+    private Task PreviewLineAsync(int direction)
+    {
+        if (direction == 0 || exploredLine is null)
+        {
+            if (lines.SelectedIndex < 0 || lines.SelectedIndex >= lineRecords.Length) return Task.CompletedTask;
+            exploredLine = lineRecords[lines.SelectedIndex];
+            exploredPly = 1;
+        }
+        else exploredPly += direction;
+        JsonElement line = exploredLine.Value;
+        if (!line.TryGetProperty("positions", out JsonElement positions)) return Task.CompletedTask;
+        exploredPly = Math.Clamp(exploredPly, 0, positions.GetArrayLength() - 1);
+        board.Position = positions[exploredPly].GetString()!;
+        board.LastMove = exploredPly == 0 ? null : line.GetProperty("pv_uci")[exploredPly - 1].GetString();
+        lastMove.Text = exploredPly == 0 ? "Variante · posición inicial" : "Variante · " +
+            MoveCaption(board.Position, line.GetProperty("pv_san")[exploredPly - 1].GetString()!);
+        board.Invalidate();
+        fen.Text = board.Position;
+        return Task.CompletedTask;
+    }
+
+    private void RenderRow(int index, JsonElement record)
+    {
+        string prefix = record.GetProperty("move_number").GetInt32() + (record.GetProperty("color").GetString() == "white" ? ". " : "… ");
+        JsonElement loss = record.GetProperty("centipawn_loss");
+        bool complete = !record.TryGetProperty("complete", out JsonElement done) || done.GetBoolean();
+        string? san = record.GetProperty("move_san").GetString();
+        grid.Rows[index].SetValues(san is null ? "Posición" : prefix + san,
+            Label(record.GetProperty("classification").GetString()), Score(record.GetProperty("played").GetProperty("score")),
+            !complete ? "—" : loss.ValueKind == JsonValueKind.Null ? "Mate" : (loss.GetInt32() / 100.0).ToString("0.00"),
+            record.GetProperty("best").GetProperty("san").GetString() ?? "—");
+    }
+
+    private void SendFocus(int game, int ply)
+    {
+        try
+        {
+            if (liveProcess is { HasExited: false })
+            {
+                liveProcess.StandardInput.WriteLine(JsonSerializer.Serialize(new { command = "focus", game, ply }));
+                liveProcess.StandardInput.Flush();
+            }
+        }
+        catch (Exception error) when (error is IOException or InvalidOperationException) { }
+    }
+
+    private void HandleLiveEvent(string line)
+    {
+        using JsonDocument document = JsonDocument.Parse(line);
+        JsonElement message = document.RootElement;
+        switch (message.GetProperty("event").GetString())
+        {
+            case "init":
+                payload = message.GetProperty("payload").Clone();
+                livePayload = JsonNode.Parse(payload.GetRawText())!.AsObject();
+                games.Items.Clear();
+                int index = 0;
+                foreach (JsonElement game in payload.GetProperty("games").EnumerateArray())
+                {
+                    JsonElement headers = game.GetProperty("headers");
+                    games.Items.Add($"{++index}. {headers.GetProperty("White").GetString()} — {headers.GetProperty("Black").GetString()}");
+                }
+                games.SelectedIndex = 0;
+                break;
+            case "record":
+                int gameIndex = message.GetProperty("game").GetInt32();
+                int rowIndex = message.GetProperty("ply").GetInt32() - 1;
+                JsonElement record = message.GetProperty("record").Clone();
+                livePayload!["games"]![gameIndex]!["moves"]![rowIndex] = JsonNode.Parse(record.GetRawText());
+                if (games.SelectedIndex == gameIndex)
+                {
+                    records[rowIndex] = record;
+                    RenderRow(rowIndex, record);
+                    evaluationChart.SetRecords(records);
+                    evaluationChart.SelectedIndex = SelectedIndex;
+                    if (SelectedIndex == rowIndex) ShowSelectedMove(false);
+                }
+                string stage = record.GetProperty("stage").GetString()!;
+                string stageLabel = stage switch { "complete" => "completada", "paused" => "parcial guardado", _ => stage };
+                JsonElement progress = record.GetProperty(stage == "jugada realizada" ? "played" : "best");
+                status.Text = $"Analizando partida {gameIndex + 1} · jugada {rowIndex + 1} · {stageLabel} · profundidad {progress.GetProperty("depth")}";
+                break;
+            case "status":
+                status.Text = $"Analizando partida {message.GetProperty("game").GetInt32() + 1} · jugada {message.GetProperty("ply")} · {message.GetProperty("stage").GetString()}…";
+                break;
+        }
     }
 
     private Task NavigateAsync(int direction)
@@ -307,6 +458,8 @@ internal sealed class AnalysisTab : TabPage
     private async Task ExplainAsync()
     {
         if (outputDirectory is null || SelectedIndex < 0) throw new InvalidOperationException("Analiza y selecciona una jugada primero.");
+        if (records[SelectedIndex].TryGetProperty("complete", out JsonElement complete) && !complete.GetBoolean())
+            throw new InvalidOperationException("Esta jugada todavía no tiene un análisis completo. Sus variantes son provisionales.");
         string result = Path.Combine(outputDirectory, "explanation.json");
         List<string> arguments = ["tools/explain_analysis.py", "--analysis", Path.Combine(outputDirectory, "analysis.json"),
             "--game", (games.SelectedIndex + 1).ToString(), "--ply", records[SelectedIndex].GetProperty("ply").ToString(),
@@ -358,10 +511,11 @@ internal sealed class AnalysisTab : TabPage
         using CancellationTokenSource operation = new();
         cancellation = operation;
         foreach (Control control in lockedControls) control.Enabled = false;
+        if (analysisRunning) foreach (Control control in navigationControls) control.Enabled = true;
         cancel.Enabled = true;
         status.Text = message;
         try { await action(operation.Token); }
-        catch (OperationCanceledException) { if (!IsDisposed) status.Text = "Tarea cancelada. Puedes volver a analizar."; }
+        catch (OperationCanceledException) { if (!IsDisposed) status.Text = "Tarea cancelada. Se conservan los resultados parciales."; }
         catch (Exception error) { if (!IsDisposed) status.Text = "No se pudo completar: " + error.Message; }
         finally
         {
@@ -379,16 +533,39 @@ internal sealed class AnalysisTab : TabPage
         token.ThrowIfCancellationRequested();
         ProcessStartInfo start = new(python) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardOutput = true, RedirectStandardError = true,
+            RedirectStandardInput = arguments.Contains("--live"),
             StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8 };
         start.Environment["PYTHONUTF8"] = "1";
         start.Environment["PYTHONUNBUFFERED"] = "1";
         foreach (string argument in arguments) start.ArgumentList.Add(argument);
         using Process process = Process.Start(start) ?? throw new InvalidOperationException("No se pudo iniciar Python.");
+        if (arguments.Contains("--live")) liveProcess = process;
         using CancellationTokenRegistration registration = token.Register(() =>
         {
-            try { if (!process.HasExited) process.Kill(entireProcessTree: true); }
+            try
+            {
+                if (!process.HasExited && arguments.Contains("--live"))
+                {
+                    process.StandardInput.WriteLine("{\"command\":\"cancel\"}");
+                    process.StandardInput.Flush();
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(1500);
+                        try { if (!process.HasExited) process.Kill(entireProcessTree: true); }
+                        catch (InvalidOperationException) { }
+                        catch (System.ComponentModel.Win32Exception) { }
+                    });
+                }
+                else if (!process.HasExited) process.Kill(entireProcessTree: true);
+            }
             catch (InvalidOperationException) { }
             catch (System.ComponentModel.Win32Exception) { }
+            catch (IOException)
+            {
+                try { process.Kill(entireProcessTree: true); }
+                catch (InvalidOperationException) { }
+                catch (System.ComponentModel.Win32Exception) { }
+            }
         });
         Task<string> error = process.StandardError.ReadToEndAsync();
         Task output = DrainOutputAsync(process, arguments[0] == "tools/analysis_session.py");
@@ -401,17 +578,35 @@ internal sealed class AnalysisTab : TabPage
 
     private async Task DrainOutputAsync(Process process, bool showProgress)
     {
+        Exception? failure = null;
         while (await process.StandardOutput.ReadLineAsync() is string line)
-            if (showProgress && !IsDisposed && line.StartsWith("Analizando")) status.Text = line;
+            if (showProgress && !IsDisposed && failure is null)
+            {
+                try
+                {
+                    if (line.StartsWith('{')) HandleLiveEvent(line);
+                    else if (line.StartsWith("Analizando")) status.Text = line;
+                }
+                catch (Exception error)
+                {
+                    // Keep draining stdout so a malformed event cannot deadlock the child.
+                    failure = error;
+                    try { if (!process.HasExited) process.Kill(entireProcessTree: true); }
+                    catch (InvalidOperationException) { }
+                    catch (System.ComponentModel.Win32Exception) { }
+                }
+            }
+        if (failure is not null) throw new InvalidOperationException("No se pudo leer el análisis en directo.", failure);
     }
 
     private static string Label(string? value) => value switch
     {
-        "best" => "Buena", "good" => "Aceptable", "inaccuracy" => "Imprecisión", "mistake" => "Error", "blunder" => "Error grave", _ => value ?? ""
+        "pending" => "Pendiente", "provisional" => "Provisional", "best" => "Buena", "good" => "Aceptable", "inaccuracy" => "Imprecisión", "mistake" => "Error", "blunder" => "Error grave", _ => value ?? ""
     };
 
     private static string Score(JsonElement value) => value.GetProperty("mate").ValueKind != JsonValueKind.Null
-        ? $"Mate {value.GetProperty("mate")}" : (value.GetProperty("cp").GetInt32() / 100.0).ToString("+0.00;-0.00;0.00");
+        ? $"Mate {value.GetProperty("mate")}" : value.GetProperty("cp").ValueKind == JsonValueKind.Null ? "—"
+        : (value.GetProperty("cp").GetInt32() / 100.0).ToString("+0.00;-0.00;0.00");
 
     private static string? ComponentLabel(string name) => name switch
     {

@@ -17,14 +17,16 @@ go depth 8
 1. Comprobar parada, límites, tablas y terminales. Jaque mate tiene prioridad sobre una reclamación de tablas.
 2. Consultar la tabla de transposición y ordenar mediante movimiento TT, promociones, MVV-LVA, killers e historial.
 3. Buscar el primer movimiento con ventana completa y los siguientes con PVS. Una mejora dentro de la ventana provoca una búsqueda completa.
-4. En profundidad cero, entrar en quietud. En jaque se exploran todas las evasiones; fuera de jaque se generan directamente capturas y promociones, con poda delta de capturas que no pueden alcanzar alfa. En el perfil optimizado los candidatos pseudo-legales se validan al buscarlos, evitando hacer y deshacer cada movimiento dos veces.
+4. En profundidad cero, entrar en quietud. En jaque se exploran todas las evasiones; fuera de jaque se comprueba primero que existe una jugada legal (ahogado), y después se filtran capturas y promociones. La poda delta se desactiva para promociones y ventanas de mate. En el perfil optimizado los candidatos pseudo-legales se validan al buscarlos.
 5. A partir de profundidad 3, reducir jugadas tranquilas tardías que no dan jaque. La reducción crece con profundidad y orden; toda jugada que supera alfa se repite a profundidad completa.
 6. A partir de profundidad 3, probar null-move únicamente fuera de jaque, con evaluación al menos beta y material no peón. No se permite otro null-move consecutivo.
-7. En nodos de ventana estrecha aplicar razoring, poda por evaluación estática, futilidad y poda de movimientos tranquilos tardíos con márgenes dependientes de profundidad.
+7. En nodos de ventana estrecha aplicar razoring, poda por evaluación estática y poda de movimientos tranquilos tardíos con márgenes dependientes de profundidad. Futilidad se aplica a movimientos tranquilos después de haber buscado al menos uno.
 8. Aplicar una reducción iterativa interna de un ply en nodos profundos sin movimiento de transposición y reutilizar entradas alejadas del límite de 50 jugadas aunque su reloj no sea idéntico.
 9. Guardar mejor movimiento, profundidad, cota y puntuación de mate normalizada.
 
 Null-move queda desactivado en finales de solo rey y peones, donde el zugzwang es frecuente. Las posiciones artificiales creadas por esa poda no se usan para declarar triple repetición o cincuenta movimientos. Hacer y deshacer el pase restaura hash, turno, en passant, relojes e historial.
+
+La revisión del 22 de septiembre comprueba ahogado antes de devolver cortes estáticos/null-move y del stand-pat de quietud. `hasLegalMove` termina en la primera jugada legal, con una ruta rápida para piezas fuera de los rayos del rey que no sean rey ni en passant. Antes de generar candidatos, los cortes pueden descartar ahogado mediante un avance libre de peón fuera de esos rayos. Se prueba su equivalencia con la generación legal y la restauración del tablero. Las podas estáticas, null-move, futilidad y movimientos tardíos se protegen también en ventanas de mate negativo. Estas correcciones se aplican tanto con evaluación manual como con NNUE; no requieren entrenar una red y no garantizan por sí solas una ganancia Elo.
 
 Las extensiones generales de jaque, SEE como criterio de poda y extensiones singulares no forman parte del perfil. Las podas nuevas solo se activan en `Optimized`; `Baseline` conserva la referencia completa para comparaciones y regresiones.
 

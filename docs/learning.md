@@ -5,6 +5,8 @@ Texel → candidato → pruebas → promoción o rechazo. Ninguna partida modifi
 usa el motor. `EvalFile` carga un archivo completo al iniciar el experimento y limpia la tabla de
 transposición.
 
+Las mejoras de búsqueda del 22 de septiembre de 2026 (ahogado antes de devolver podas y protección de ventanas de mate) no entrenan ni sustituyen la evaluación: funcionan con HCE y NNUE en `SearchProfile=Optimized`. Análisis y el rival ChessBot de Jugar seleccionan ese perfil y Hash 256 MB; la opción UCI predeterminada sigue siendo `Baseline` para conservar la referencia. Al comparar una red nueva, usa el mismo perfil, tiempo, hilos y memoria en ambos candidatos. Una base corregida no garantiza que cualquier entrenamiento sea más fuerte: conserva las puertas de táctica, rendimiento y partidas antes de promover la red.
+
 ## Generar un dataset
 
 ```powershell

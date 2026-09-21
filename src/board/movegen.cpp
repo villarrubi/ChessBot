@@ -1,6 +1,7 @@
 #include "movegen.h"
 #include "attack_tables.h"
 #include "bitboard.h"
+#include <cstdlib>
 #include <stdexcept>
 
 namespace chessbot {
@@ -94,6 +95,41 @@ MoveList legalMoveList(Board &board) {
     }
     candidates.resize(count);
     return candidates;
+}
+bool hasLegalMove(Board &board, const MoveList &candidates) {
+    const Color us = board.sideToMove();
+    const Square king = board.kingSquare(us);
+    const bool check = board.inCheck(us);
+    for (const auto move : candidates) {
+        // Outside check, moving a non-king off every ray of our king cannot
+        // expose it. En passant also removes another square, so validate it.
+        if (!check && move.moving() != King && !move.has(EnPassant)) {
+            const int fileDistance = std::abs(fileOf(move.from()) - fileOf(king));
+            const int rankDistance = std::abs(rankOf(move.from()) - rankOf(king));
+            if (fileDistance && rankDistance && fileDistance != rankDistance)
+                return true;
+        }
+        StateInfo state;
+        board.makeMove(move, state);
+        const bool legal = !board.inCheck(us);
+        board.unmakeMove(move, state);
+        if (legal)
+            return true;
+    }
+    return false;
+}
+bool hasLegalMove(Board &board) {
+    const Color us = board.sideToMove();
+    if (!board.inCheck(us)) {
+        const Square king = board.kingSquare(us);
+        const Bitboard rays = rookAttacks(king, 0) | bishopAttacks(king, 0);
+        const Bitboard unpinnedPawns = board.pieces(us, Pawn) & ~rays;
+        const Bitboard pushes = us == White ? unpinnedPawns << 8 : unpinnedPawns >> 8;
+        // One free push by a pawn off every king ray proves this is not stalemate.
+        if (pushes & ~board.occupied())
+            return true;
+    }
+    return hasLegalMove(board, pseudoLegalMoveList(board));
 }
 MoveList pseudoLegalTacticalMoveList(const Board &board) {
     auto candidates = pseudoLegalMoveList(board);

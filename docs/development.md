@@ -157,6 +157,7 @@ dotnet build launcher/ChessBotLauncher.csproj -c Release
 dotnet run --project tests/launcher/ChessBotLauncher.Tests.csproj -c Release -- .
 .\.venv\Scripts\python.exe tools/test_explainer.py
 .\.venv\Scripts\python.exe tools/test_analysis_session.py --engine build/Release/chessbot.exe
+.\.venv\Scripts\python.exe tools/test_live_analysis.py --engine build/Release/chessbot.exe
 ```
 
 La prueba WinForms requiere Windows, `build/Release/chessbot.exe` y `.venv/Scripts/python.exe`. Genera capturas en `build/launcher-qa/`. Las pruebas del adaptador usan respuestas simuladas; Ollama no es necesario para CI. Para comprobar la generación real, sigue [analysis.md](analysis.md).

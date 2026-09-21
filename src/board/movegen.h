@@ -47,6 +47,8 @@ class MoveList {
 
 MoveList pseudoLegalMoveList(const Board &board);
 MoveList legalMoveList(Board &board);
+bool hasLegalMove(Board &board, const MoveList &candidates);
+bool hasLegalMove(Board &board);
 MoveList pseudoLegalTacticalMoveList(const Board &board);
 std::vector<Move> legalMoves(Board &board);
 std::uint64_t perft(Board &board, int depth);
