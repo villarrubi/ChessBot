@@ -44,6 +44,9 @@ internal static class Program
         Button analyze = controls.OfType<Button>().Single(b => b.Text == "Analizar");
         TextBox input = controls.OfType<TextBox>().Single(t => t.Multiline);
         DataGridView grid = controls.OfType<DataGridView>().Single();
+        NumericUpDown analysisThreads = controls.OfType<NumericUpDown>().Single(n => n.Name == "analysisThreads");
+        if (analysisThreads.Maximum != 256) throw new Exception("Wrong analysis thread range.");
+        analysisThreads.Value = 2;
         input.Text = "1. e4 e5 2. Nf3 *";
         analyze.PerformClick();
         await WaitUntilAsync(() => analyze.Enabled, 60);
@@ -79,7 +82,7 @@ internal static class Program
         cancel.PerformClick();
         await WaitUntilAsync(() => analyze.Enabled, 10);
         if (!controls.OfType<Label>().Any(l => l.Text.Contains("cancelada"))) throw new Exception("Cancellation failed.");
-        Console.WriteLine("PASS: analysis layout, PGN navigation, board, explanation and cancellation");
+        Console.WriteLine("PASS: analysis layout, threads, PGN navigation, board, explanation and cancellation");
     }
 
     private static IEnumerable<Control> Descendants(Control parent) => parent.Controls.Cast<Control>()

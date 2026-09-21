@@ -71,6 +71,16 @@ TEST_CASE("quiescence sees a forced recapture and avoids losing the queen for a 
     CHECK(result.qnodes > 0);
 }
 
+TEST_CASE("pseudo-legal tactical move generation excludes quiet moves") {
+    auto board = Board::fromFen("4k3/8/8/8/8/8/4p3/3QK3 w - - 0 1");
+    const auto all = legalMoveList(board);
+    const auto tactical = pseudoLegalTacticalMoveList(board);
+    CHECK_FALSE(tactical.empty());
+    CHECK(tactical.size() < all.size());
+    for (const auto move : tactical)
+        CHECK((move.has(Capture) || move.promotion() != None));
+}
+
 TEST_CASE("iterative deepening callback and persistent transposition table") {
     Engine engine;
     SearchLimits limits;

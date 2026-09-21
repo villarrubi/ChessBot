@@ -48,13 +48,15 @@ def read_games(request: dict[str, Any]) -> tuple[list[chess.pgn.Game], bool]:
 def run_session(request: dict[str, Any], engine_path: Path, output: Path) -> dict[str, Any]:
     games, position_only = read_games(request)
     depth, multipv = int(request.get("depth", 4)), int(request.get("multipv", 3))
-    if not 1 <= depth <= 126 or not 1 <= multipv <= 256:
-        raise ValueError("Profundidad (1–126) o alternativas (1–256) fuera de rango.")
+    threads = int(request.get("threads", 1))
+    if not 1 <= depth <= 126 or not 1 <= multipv <= 256 or not 1 <= threads <= 256:
+        raise ValueError("Profundidad (1–126), alternativas (1–256) o hilos (1–256) fuera de rango.")
     output.mkdir(parents=True, exist_ok=True)
     results, annotated_games = [], []
     cache: dict[str, Any] = {}
     with chess.engine.SimpleEngine.popen_uci(str(engine_path.resolve(strict=True))) as engine:
-        engine.configure({"OwnBook": False, "NNUE": False})
+        engine.configure({"OwnBook": False, "NNUE": False, "Threads": threads,
+                          "Hash": 256, "SearchProfile": "Optimized"})
         for index, game in enumerate(games, 1):
             print(f"Analizando partida {index}/{len(games)}…", flush=True)
             board = game.board()
@@ -68,7 +70,9 @@ def run_session(request: dict[str, Any], engine_path: Path, output: Path) -> dic
             result, annotated = analyze_game(game, engine, engine_path,
                                              chess.engine.Limit(depth=depth), multipv,
                                              (50, 100, 200), None, True, cache, None,
-                                             progress=lambda ply, index=index: print(f"Analizando partida {index}/{len(games)} · jugada {ply}…", flush=True))
+                                             progress=lambda ply, stage, index=index: print(
+                                                 f"Analizando partida {index}/{len(games)} · jugada {ply} · {stage}…",
+                                                 flush=True))
             result["fen"] = game.board().fen()
             for record in result["moves"]:
                 record["mode"] = "position" if position_only else "game"
@@ -78,7 +82,8 @@ def run_session(request: dict[str, Any], engine_path: Path, output: Path) -> dic
                 annotated_games.append(annotated)
     payload = {"schema_version": 1, "generated_at": datetime.now(UTC).isoformat(),
                "source": request["kind"], "engine": {"path": str(engine_path.resolve()),
-               "options": {"OwnBook": False, "NNUE": False}, "multipv": multipv,
+               "options": {"OwnBook": False, "NNUE": False, "Threads": threads,
+                           "Hash": 256, "SearchProfile": "Optimized"}, "multipv": multipv,
                "limit": {"depth": depth, "nodes": None, "movetime_ms": None}},
                "games": results}
     (output / "analysis.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

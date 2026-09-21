@@ -6,7 +6,7 @@ ChessBot separa tres tareas: el motor calcula jugadas y puntuaciones; Python org
 
 1. **Importar PGN** abre y analiza un archivo, o pega el texto y pulsa **Analizar**. Un archivo puede contener varias partidas; el selector superior permite cambiar de partida.
 2. Para una posición, selecciona **FEN**, pega sus seis campos y pulsa **Analizar**. **Partida actual** toma una copia del historial de Jugar; una partida aún sin jugadas analiza la posición inicial.
-3. Elige profundidad y número de variantes. La profundidad admite hasta el máximo técnico de la búsqueda (126); las variantes pueden llegar a todas las jugadas legales (256 como máximo técnico). Una mayor profundidad o más variantes puede tardar mucho; **Cancelar** interrumpe Python y sus procesos de motor sin bloquear la interfaz.
+3. Elige profundidad, número de variantes e hilos. La profundidad admite hasta el máximo técnico de la búsqueda (126); las variantes pueden llegar a todas las jugadas legales (256 como máximo técnico). Análisis usa el perfil de búsqueda optimizado, una tabla hash de 256 MB y por defecto hasta ocho hilos. El estado muestra la profundidad alcanzada dentro de cada jugada. En la máquina de validación, la posición inicial con una variante y profundidad 20 tardó 33,1 s; cada variante adicional y cada jugada de una partida aumentan el trabajo. **Cancelar** interrumpe Python y sus procesos de motor sin bloquear la interfaz.
 4. Selecciona una fila o usa las flechas. El tablero muestra por defecto la posición posterior a la jugada seleccionada, de modo que una fila como `16…f6` ya refleja `f6`. Desmarca **Después de la jugada** para ver la posición anterior. La FEN inferior se puede copiar y **Girar** cambia la orientación.
 5. Pulsa **Gráfico de evaluación** para desplegar la evolución de la evaluación durante la partida. Se expresa desde la perspectiva de blancas: positivo favorece a blancas y negativo a negras; el punto seleccionado queda resaltado.
 6. **Cálculos del motor** muestra clasificación, pérdida, variantes SAN y componentes estáticos. **Explicar / preguntar** genera un comentario sobre la fila seleccionada.
@@ -66,7 +66,7 @@ También se calcula el desglose estático tras la mejor alternativa (`static_bes
 
 El analizador admite `--movetime-ms` o `--nodes` en lugar de profundidad; `--max-plies` limita la partida. Con motores externos usa `--no-static`; `--nnue-file` activa una red ChessBot para búsqueda y diagnósticos. Los artefactos JSON tienen `schema_version: 1`, cabeceras, FEN inicial y antes/después, historial, candidatos, profundidad, PV y evaluación. Los JSON antiguos sin FEN inicial no permiten reconstruir todo el historial en búsquedas adicionales.
 
-`tools/analysis_session.py` es el puente de la interfaz. Acepta `--request`, `--engine` y `--output-dir`; la petición JSON contiene `kind` (`pgn`, `fen` o `game`), `text`, `moves` (UCI para `game`), `depth` y `multipv`.
+`tools/analysis_session.py` es el puente de la interfaz. Acepta `--request`, `--engine` y `--output-dir`; la petición JSON contiene `kind` (`pgn`, `fen` o `game`), `text`, `moves` (UCI para `game`), `depth`, `multipv` y `threads`. Si la jugada realizada ya está entre las variantes calculadas, se reutiliza ese resultado en vez de repetir la búsqueda.
 
 ## Verificación
 

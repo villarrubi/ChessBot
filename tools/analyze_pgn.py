@@ -119,12 +119,28 @@ def analysis_limit(args: argparse.Namespace) -> chess.engine.Limit:
     return chess.engine.Limit(depth=args.depth)
 
 
+def streamed_analysis(engine: chess.engine.SimpleEngine, board: chess.Board,
+                      limit: chess.engine.Limit, *, multipv: int | None = None,
+                      root_moves: list[chess.Move] | None = None,
+                      on_depth: Callable[[int], None] | None = None
+                      ) -> dict[str, Any] | list[dict[str, Any]]:
+    with engine.analysis(board, limit, multipv=multipv, root_moves=root_moves,
+                         info=chess.engine.INFO_ALL) as analysis:
+        last_depth = 0
+        for update in analysis:
+            current_depth = update.get("depth")
+            if on_depth and isinstance(current_depth, int) and current_depth > last_depth:
+                last_depth = current_depth
+                on_depth(current_depth)
+        return analysis.multipv if multipv is not None else analysis.info
+
+
 def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine_path: Path,
                  limit: chess.engine.Limit, multipv: int, thresholds: tuple[int, int, int],
                  max_plies: int | None, include_static: bool,
                  static_cache: dict[str, dict[str, Any] | None],
                  nnue_file: Path | None,
-                 progress: Callable[[int], None] | None = None) -> tuple[dict[str, Any], chess.pgn.Game]:
+                 progress: Callable[[int, str], None] | None = None) -> tuple[dict[str, Any], chess.pgn.Game]:
     board = game.board()
     annotated = chess.pgn.Game()
     annotated.setup(game.board())
@@ -138,18 +154,27 @@ def analyze_game(game: chess.pgn.Game, engine: chess.engine.SimpleEngine, engine
         if max_plies is not None and ply > max_plies:
             break
         if progress:
-            progress(ply)
+            progress(ply, "variantes")
         color = board.turn
         move_number = board.fullmove_number
         fen_before = board.fen()
         san = board.san(move)
-        candidates_raw = engine.analyse(board, limit, multipv=multipv,
-                                        info=chess.engine.INFO_ALL)
+        candidates_raw = streamed_analysis(
+            engine, board, limit, multipv=multipv,
+            on_depth=(lambda current: progress(ply, f"variantes · profundidad {current}"))
+            if progress else None)
         if isinstance(candidates_raw, dict):
             candidates_raw = [candidates_raw]
         candidates = [pv_data(board, info, color) for info in candidates_raw]
-        played_raw = engine.analyse(board, limit, root_moves=[move], info=chess.engine.INFO_ALL)
-        played = pv_data(board, played_raw, color)
+        played = next((candidate for candidate in candidates if candidate["move"] == move.uci()), None)
+        if played is None:
+            if progress:
+                progress(ply, "jugada realizada")
+            played_raw = streamed_analysis(
+                engine, board, limit, root_moves=[move],
+                on_depth=(lambda current: progress(
+                    ply, f"jugada realizada · profundidad {current}")) if progress else None)
+            played = pv_data(board, played_raw, color)
         best = candidates[0]
         classification, loss, mate_note = classify(best["score"], played["score"], thresholds)
         static_before = static_evaluation(engine_path, board, include_static, nnue_file,

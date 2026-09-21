@@ -1,13 +1,13 @@
 # Resultados de validación
 
-Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con AMD Ryzen 7 7800X3D, MSVC 19.51.36252, CMake 4.4.3 y Python 3.12.7. Son resultados históricos, no una certificación del estado de cada clon; las cifras de rendimiento dependen del equipo. Para repetir las comprobaciones, consulta [desarrollo](development.md).
+Comprobaciones ejecutadas del 14 al 21 de septiembre de 2026 en Windows x64, con AMD Ryzen 7 7800X3D, MSVC 19.51.36252, CMake 4.4.3 y Python 3.12.7. Son resultados históricos, no una certificación del estado de cada clon; las cifras de rendimiento dependen del equipo. Para repetir las comprobaciones, consulta [desarrollo](development.md).
 
 | Comprobación | Resultado |
 | --- | --- |
 | Compilación Release y Debug | Correcta, sin avisos del código propio |
 | CTest Release | 3/3 pruebas, incluida PERFT completa |
 | CTest Debug sin etiqueta `slow` | 2/2 pruebas |
-| Suite doctest rápida | 38 casos y más de 29.400 aserciones: reglas, evaluación parametrizada, NNUE incremental, libro, mates, táctica, límites, null-move, MultiPV y transposiciones |
+| Suite doctest rápida | 41 casos y más de 29.500 aserciones: reglas, evaluación parametrizada, NNUE incremental, libro, mates, táctica, límites, null-move, MultiPV y transposiciones |
 | Restauración aleatoria | Hasta 40 partidas de 150 plies, comprobando todos los estados al retroceder |
 | Comparación Release con python-chess | 15.675 posiciones y 24 fixtures PERFT hasta profundidad 3 |
 | Comparación Debug con python-chess | 1.874 posiciones y 24 fixtures PERFT hasta profundidad 3 |
@@ -16,9 +16,9 @@ Comprobaciones ejecutadas el 14 y 15 de septiembre de 2026 en Windows x64, con A
 | Simetría de evaluación | 1.600 posiciones aleatorias reflejadas por color/tablero |
 | Partidas completas | 2 partidas UCI de autojuego, ambas válidas y terminadas por triple repetición |
 | Evaluación posicional frente a básica | 13–3 en 16 partidas, profundidad 3, ocho aperturas con colores invertidos |
-| Benchmark Baseline | 567.651 nodos, 1.430 ms y ~396.958 NPS a profundidad 5 |
-| Benchmark Optimized | 330.683 nodos, 866 ms y ~381.851 NPS; mismas jugadas/puntuaciones, 41,7 % menos nodos |
-| Partidas de búsqueda | Optimized 30,5–33,5 Baseline en 64 partidas a 50 ms; −16 Elo, IC 95 % [−64, +31] |
+| Benchmark Baseline | 567.651 nodos, 1.415 ms y ~401.166 NPS a profundidad 5 |
+| Benchmark Optimized actual | 33.351 nodos y 42 ms; 94,1 % menos nodos que Baseline |
+| Partidas de búsqueda actuales | Comprobación corta: Optimized 10–6 Baseline en 16 partidas a 20 ms; 5 victorias, 10 tablas y 1 derrota |
 | Análisis de PGN | JSON, PGN anotado, informe Markdown, MultiPV, `searchmoves` y explicación con búsqueda adicional correctos |
 | Runner de fase 7 | Escenarios A–F, importadores JSON/PGN/EPD/FEN/UCI/Polyglot, libro y metadatos correctos |
 | Pipeline de fase 8 | Dataset de 2.528 posiciones/126 partidas, particiones sin solapamiento, ajuste, carga y puertas de promoción correctos |
@@ -82,6 +82,8 @@ La campaña final usó 32 posiciones reproducibles de `tests/positions/phase5_op
 ```
 
 `Optimized` obtuvo 10 victorias, 41 tablas y 13 derrotas: 30,5/64 (47,7 %). La aproximación normal sobre los resultados por pareja da −16 Elo y un intervalo del 95 % de [−64, +31]. El intervalo incluye paridad y el punto estimado no es favorable, por lo que el perfil permanece disponible para experimentar pero `Baseline` sigue predeterminado. Esto deja abierto únicamente el criterio de promoción estadística de la fase 5.
+
+El 21 de septiembre se revisó `Optimized` para el análisis interactivo: candidatos pseudo-legales validados durante la búsqueda, quietud táctica, poda delta, razoring, poda por evaluación estática y movimientos tardíos, null-move desde profundidad 3, LMR graduada, reducción iterativa interna y reutilización segura de transposiciones lejos del límite de 50 jugadas. Lazy SMP publica los nodos por lotes y diversifica los ayudantes omitiendo iteraciones. El benchmark bajó de 567.651 a 33.351 nodos. Una comprobación nueva de 16 partidas a 20 ms terminó 5–10–1 para el perfil revisado, equivalente a 10–6 puntos; por su tamaño reducido no sustituye una campaña larga. `Baseline` permanece como referencia reproducible, mientras la pestaña Análisis usa explícitamente el perfil rápido. En la posición inicial, una variante a profundidad 20 y ocho hilos pasó de 144,5 s al inicio de esta revisión a 33,1 s.
 
 ## Análisis de fase 6
 

@@ -95,6 +95,17 @@ MoveList legalMoveList(Board &board) {
     candidates.resize(count);
     return candidates;
 }
+MoveList pseudoLegalTacticalMoveList(const Board &board) {
+    auto candidates = pseudoLegalMoveList(board);
+    std::size_t count = 0;
+    for (const auto move : candidates) {
+        if (!move.has(Capture) && move.promotion() == None)
+            continue;
+        candidates[count++] = move;
+    }
+    candidates.resize(count);
+    return candidates;
+}
 std::vector<Move> legalMoves(Board &board) {
     const auto moves = legalMoveList(board);
     return {moves.begin(), moves.end()};

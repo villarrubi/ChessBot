@@ -17,14 +17,16 @@ go depth 8
 1. Comprobar parada, límites, tablas y terminales. Jaque mate tiene prioridad sobre una reclamación de tablas.
 2. Consultar la tabla de transposición y ordenar mediante movimiento TT, promociones, MVV-LVA, killers e historial.
 3. Buscar el primer movimiento con ventana completa y los siguientes con PVS. Una mejora dentro de la ventana provoca una búsqueda completa.
-4. En profundidad cero, entrar en quietud. En jaque se exploran todas las evasiones; fuera de jaque, capturas y promociones.
-5. A partir de profundidad 6, reducir jugadas tranquilas tardías que no dan jaque. Toda reducción que supera alfa se repite a profundidad completa.
-6. A partir de profundidad 6, probar null-move únicamente fuera de jaque, con evaluación al menos beta y material no peón. No se permite otro null-move consecutivo.
-7. Guardar mejor movimiento, profundidad, cota y puntuación de mate normalizada.
+4. En profundidad cero, entrar en quietud. En jaque se exploran todas las evasiones; fuera de jaque se generan directamente capturas y promociones, con poda delta de capturas que no pueden alcanzar alfa. En el perfil optimizado los candidatos pseudo-legales se validan al buscarlos, evitando hacer y deshacer cada movimiento dos veces.
+5. A partir de profundidad 3, reducir jugadas tranquilas tardías que no dan jaque. La reducción crece con profundidad y orden; toda jugada que supera alfa se repite a profundidad completa.
+6. A partir de profundidad 3, probar null-move únicamente fuera de jaque, con evaluación al menos beta y material no peón. No se permite otro null-move consecutivo.
+7. En nodos de ventana estrecha aplicar razoring, poda por evaluación estática, futilidad y poda de movimientos tranquilos tardíos con márgenes dependientes de profundidad.
+8. Aplicar una reducción iterativa interna de un ply en nodos profundos sin movimiento de transposición y reutilizar entradas alejadas del límite de 50 jugadas aunque su reloj no sea idéntico.
+9. Guardar mejor movimiento, profundidad, cota y puntuación de mate normalizada.
 
 Null-move queda desactivado en finales de solo rey y peones, donde el zugzwang es frecuente. Las posiciones artificiales creadas por esa poda no se usan para declarar triple repetición o cincuenta movimientos. Hacer y deshacer el pase restaura hash, turno, en passant, relojes e historial.
 
-Las podas de futilidad y razoring, las extensiones generales de jaque, SEE como criterio de poda, extensiones singulares y reducciones iterativas internas se probaron durante los experimentos iniciales y no forman parte del perfil final: las campañas cortas mostraron cambios de fuerza desfavorables o no aportaron evidencia suficiente. Se conserva la quietud completa para capturas y evasiones.
+Las extensiones generales de jaque, SEE como criterio de poda, extensiones singulares y reducciones iterativas internas no forman parte del perfil. Las podas nuevas solo se activan en `Optimized`; `Baseline` conserva la referencia completa para comparaciones y regresiones.
 
 ## MultiPV y movimientos de raíz
 
@@ -53,7 +55,7 @@ El límite blando decide si se inicia otra iteración y el duro interrumpe la ac
 
 ## Búsqueda paralela
 
-La opción UCI `Threads`, entre 1 y 256, activa Lazy SMP. Cada trabajador mantiene su tablero, acumulador NNUE, PV, killers e historial, diversifica el orden de movimientos de raíz y comparte una tabla de transposición protegida por bloqueos segmentados. La señal de parada, el reloj y el contador global de nodos coordinan todos los trabajadores. Las métricas finales agregan el trabajo de todos ellos.
+La opción UCI `Threads`, entre 1 y 256, activa Lazy SMP. Cada trabajador mantiene su tablero, acumulador NNUE, PV, killers e historial y comparte una tabla de transposición protegida por bloqueos segmentados. Los ayudantes omiten distintas iteraciones intermedias para reducir trabajo duplicado. El contador global se publica por lotes en búsquedas por profundidad para evitar serializar cada nodo; los límites explícitos de nodos conservan contabilidad exacta. La señal de parada y el reloj coordinan todos los trabajadores, y las métricas finales agregan su trabajo.
 
 `Threads=1` conserva la ruta monohilo y es la configuración predeterminada para pruebas reproducibles. Valores mayores aprovechan varios núcleos; la mejora depende de la posición, la duración y la CPU.
 
@@ -61,7 +63,7 @@ La opción UCI `Threads`, entre 1 y 256, activa Lazy SMP. Cada trabajador mantie
 
 `SearchResult` registra profundidad, profundidad selectiva, nodos, quietud, tiempo, TT, cortes beta, cortes con el primer movimiento, movimientos generados, ramificación máxima, reintentos de aspiración, intentos/cortes null-move, reducciones/rebúsquedas LMR y podas de futilidad. `AnalysisDetail=Full` publica estos contadores en líneas `info string search_metrics`.
 
-En la máquina de validación, `bench 5 Baseline` produjo 567.651 nodos en 1.430 ms. `bench 5 Optimized` produjo 330.683 nodos en 866 ms con la misma jugada y puntuación en las cuatro posiciones: 41,7 % menos nodos y 39,4 % menos tiempo. El NPS fue similar; la mejora proviene de explorar menos trabajo.
+En la máquina de validación, `bench 5 Baseline` produjo 567.651 nodos en 1.415 ms. La revisión actual de `Optimized` produjo 33.351 nodos en 42 ms: 94,1 % menos nodos. Tres de las cuatro posiciones conservaron jugada y puntuación; la posición inicial cambió de `e3` a `d4` con una diferencia de 6 cp. Una comprobación corta de 16 partidas a 20 ms dio 5 victorias, 10 tablas y 1 derrota para `Optimized`; es una señal favorable, no una estimación definitiva de fuerza.
 
 ```powershell
 .\build\Release\chessbot.exe bench 5 Baseline

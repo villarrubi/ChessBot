@@ -18,6 +18,8 @@ internal sealed class AnalysisTab : TabPage
         PlaceholderText = "Pega aquí una partida PGN o una posición FEN." };
     private readonly NumericUpDown depth = new() { Minimum = 1, Maximum = 126, Value = 4, Width = 55 };
     private readonly NumericUpDown multipv = new() { Minimum = 1, Maximum = 256, Value = 3, Width = 55 };
+    private readonly NumericUpDown threads = new() { Name = "analysisThreads", Minimum = 1, Maximum = 256,
+        Value = Math.Clamp(Environment.ProcessorCount / 2, 1, 8), Width = 55 };
     private readonly ComboBox games = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
     private readonly ComboBox provider = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 135 };
     private readonly ComboBox model = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 150 };
@@ -75,6 +77,8 @@ internal sealed class AnalysisTab : TabPage
         toolbar.Controls.Add(depth);
         toolbar.Controls.Add(Caption("Variantes"));
         toolbar.Controls.Add(multipv);
+        toolbar.Controls.Add(Caption("Hilos"));
+        toolbar.Controls.Add(threads);
         toolbar.Controls.Add(ActionButton("Analizar", () => AnalyzeAsync(source.SelectedIndex == 0 ? "pgn" : "fen")));
         toolbar.Controls.Add(cancel);
         toolbar.Controls.Add(ActionButton("Resultados", ExportAsync));
@@ -143,6 +147,7 @@ internal sealed class AnalysisTab : TabPage
         layout.Controls.Add(status, 0, 3);
         Controls.Add(layout);
         lockedControls.AddRange([input, source, depth, multipv, games, grid, provider, model, question, alternative, after]);
+        lockedControls.Add(threads);
         cancel.Click += (_, _) => cancellation?.Cancel();
         games.SelectedIndexChanged += (_, _) => LoadGame();
         grid.CurrentCellChanged += (_, _) => SelectMove();
@@ -181,7 +186,7 @@ internal sealed class AnalysisTab : TabPage
         string directory = Path.Combine(root, "data", "analysis", DateTime.Now.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N")[..6]);
         string request = Path.Combine(directory, "request.json");
         string requestJson = JsonSerializer.Serialize(new { kind, text = input.Text, moves,
-            depth = (int)depth.Value, multipv = (int)multipv.Value });
+            depth = (int)depth.Value, multipv = (int)multipv.Value, threads = (int)threads.Value });
         await RunTaskAsync("Calculando variantes…", async token =>
         {
             Directory.CreateDirectory(directory);

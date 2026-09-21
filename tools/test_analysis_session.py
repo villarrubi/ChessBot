@@ -17,7 +17,10 @@ engine = args.engine.resolve(strict=True)
 
 with tempfile.TemporaryDirectory() as directory:
     output = Path(directory)
-    payload = run_session({"kind": "game", "moves": ["e2e4", "e7e5"], "depth": 2}, engine, output)
+    payload = run_session({"kind": "game", "moves": ["e2e4", "e7e5"], "depth": 2,
+                           "threads": 2}, engine, output)
+    assert payload["engine"]["options"]["Threads"] == 2
+    assert payload["engine"]["options"]["SearchProfile"] == "Optimized"
     records = payload["games"][0]["moves"]
     assert len(records) == 2 and records[1]["color"] == "black"
     assert records[1]["history_uci"] == ["e2e4"]
