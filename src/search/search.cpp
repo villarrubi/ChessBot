@@ -288,7 +288,7 @@ class Searcher {
     std::vector<RootVariation> searchVariations(int depth) {
         std::vector<RootVariation> variations;
         const int requested =
-            std::min(std::clamp(limits_.multiPv, 1, 10), static_cast<int>(rootMoves_.size()));
+            std::min(std::max(limits_.multiPv, 1), static_cast<int>(rootMoves_.size()));
         for (int index = 0; index < requested && !stopped(); ++index) {
             RootVariation variation;
             if (index == 0 && requested == 1 && optimized() && depth >= 4 && result_.completed) {

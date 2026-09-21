@@ -69,7 +69,7 @@ void UciProtocol::identify() {
     writeLine("option name BookPolicy type combo default weighted var best var weighted var random "
               "var explore");
     writeLine("option name BookSeed type spin default 1 min 0 max 2000000000");
-    writeLine("option name MultiPV type spin default 1 min 1 max 10");
+    writeLine("option name MultiPV type spin default 1 min 1 max 256");
     writeLine("option name SearchProfile type combo default Baseline var Baseline var Optimized");
     writeLine("option name AnalysisDetail type combo default Basic var Basic var Full");
     writeLine("option name Evaluation type combo default Positional var Basic var Positional");
@@ -114,7 +114,7 @@ void UciProtocol::setOption(std::string_view arguments) {
     else if (name == "Threads")
         engine_.setThreads(parseInt(value, 1, MaxSearchThreads, "Threads"));
     else if (name == "MultiPV") {
-        multiPv_ = parseInt(value, 1, 10, "MultiPV");
+        multiPv_ = parseInt(value, 1, 256, "MultiPV");
     } else if (name == "OwnBook") {
         if (value != "true" && value != "false")
             throw std::invalid_argument("OwnBook must be true or false");

@@ -235,8 +235,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.depth is None and args.movetime_ms is None and args.nodes is None:
         args.depth = 4
-    if args.multipv < 1 or args.multipv > 10:
-        parser.error("multipv must be between 1 and 10")
+    if args.multipv < 1 or args.multipv > 256:
+        parser.error("multipv must be between 1 and 256")
     if ((args.depth is not None and args.depth < 1) or
             (args.movetime_ms is not None and args.movetime_ms < 1) or
             (args.nodes is not None and args.nodes < 1)):

@@ -6,9 +6,10 @@ ChessBot separa tres tareas: el motor calcula jugadas y puntuaciones; Python org
 
 1. **Importar PGN** abre y analiza un archivo, o pega el texto y pulsa **Analizar**. Un archivo puede contener varias partidas; el selector superior permite cambiar de partida.
 2. Para una posición, selecciona **FEN**, pega sus seis campos y pulsa **Analizar**. **Partida actual** toma una copia del historial de Jugar; una partida aún sin jugadas analiza la posición inicial.
-3. Elige profundidad y número de variantes. Una mayor profundidad puede tardar mucho; **Cancelar** interrumpe Python y sus procesos de motor sin bloquear la interfaz.
-4. Selecciona una fila o usa las flechas. El tablero muestra la posición anterior; **Después de la jugada** cambia a la posterior. La FEN inferior se puede copiar y **Girar** cambia la orientación.
-5. **Cálculos del motor** muestra clasificación, pérdida, variantes SAN y componentes estáticos. **Explicar / preguntar** genera un comentario sobre la fila seleccionada.
+3. Elige profundidad y número de variantes. La profundidad admite hasta el máximo técnico de la búsqueda (126); las variantes pueden llegar a todas las jugadas legales (256 como máximo técnico). Una mayor profundidad o más variantes puede tardar mucho; **Cancelar** interrumpe Python y sus procesos de motor sin bloquear la interfaz.
+4. Selecciona una fila o usa las flechas. El tablero muestra por defecto la posición posterior a la jugada seleccionada, de modo que una fila como `16…f6` ya refleja `f6`. Desmarca **Después de la jugada** para ver la posición anterior. La FEN inferior se puede copiar y **Girar** cambia la orientación.
+5. Pulsa **Gráfico de evaluación** para desplegar la evolución de la evaluación durante la partida. Se expresa desde la perspectiva de blancas: positivo favorece a blancas y negativo a negras; el punto seleccionado queda resaltado.
+6. **Cálculos del motor** muestra clasificación, pérdida, variantes SAN y componentes estáticos. **Explicar / preguntar** genera un comentario sobre la fila seleccionada.
 
 El análisis usa ChessBot con evaluación manual y sin libro. No hereda el Elo de un rival Stockfish de la pestaña Jugar ni carga automáticamente una red entrenada. Una FEN aislada no contiene las repeticiones anteriores; la opción Partida actual conserva el historial disponible. Una posición terminal se muestra sin inventar una jugada recomendada.
 

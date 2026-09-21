@@ -50,9 +50,13 @@ internal static class Program
         if (grid.Rows.Count != 3) throw new Exception("PGN did not populate the analysis grid.");
         grid.CurrentCell = grid.Rows[1].Cells[0];
         CheckBox after = controls.OfType<CheckBox>().Single();
-        after.Checked = true;
+        if (!after.Checked) throw new Exception("Analysis should show the position after the selected move by default.");
         string boardFen = controls.OfType<ChessBoard>().Single().Position;
         if (!boardFen.Contains("4p3") || !boardFen.Contains(" w ")) throw new Exception("Wrong board after e5.");
+        Button chartToggle = controls.OfType<Button>().Single(b => b.Text.StartsWith("Gráfico de evaluación"));
+        EvaluationChart chart = controls.OfType<EvaluationChart>().Single();
+        chartToggle.PerformClick();
+        if (!chart.Visible) throw new Exception("Evaluation chart did not expand.");
         ComboBox provider = controls.OfType<ComboBox>().Single(c => c.Items.Contains("Solo motor"));
         provider.SelectedIndex = 1;
         Button explain = controls.OfType<Button>().Single(b => b.Text == "Explicar / preguntar");
@@ -67,7 +71,7 @@ internal static class Program
             form.DrawToBitmap(image, new Rectangle(Point.Empty, form.Size));
             image.Save(Path.Combine(output, "analysis-populated.png"));
         }
-        NumericUpDown depth = controls.OfType<NumericUpDown>().Single(n => n.Maximum == 12);
+        NumericUpDown depth = controls.OfType<NumericUpDown>().Single(n => n.Maximum == 126);
         depth.Value = 12;
         analyze.PerformClick();
         Button cancel = controls.OfType<Button>().Single(b => b.Text == "Cancelar");

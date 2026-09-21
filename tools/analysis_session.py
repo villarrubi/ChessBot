@@ -48,8 +48,8 @@ def read_games(request: dict[str, Any]) -> tuple[list[chess.pgn.Game], bool]:
 def run_session(request: dict[str, Any], engine_path: Path, output: Path) -> dict[str, Any]:
     games, position_only = read_games(request)
     depth, multipv = int(request.get("depth", 4)), int(request.get("multipv", 3))
-    if not 1 <= depth <= 12 or not 1 <= multipv <= 10:
-        raise ValueError("Profundidad (1–12) o alternativas (1–10) fuera de rango.")
+    if not 1 <= depth <= 126 or not 1 <= multipv <= 256:
+        raise ValueError("Profundidad (1–126) o alternativas (1–256) fuera de rango.")
     output.mkdir(parents=True, exist_ok=True)
     results, annotated_games = [], []
     cache: dict[str, Any] = {}

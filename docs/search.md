@@ -28,7 +28,7 @@ Las podas de futilidad y razoring, las extensiones generales de jaque, SEE como 
 
 ## MultiPV y movimientos de raíz
 
-`SearchLimits.multiPv` solicita entre 1 y 10 alternativas ordenadas. Cada `RootVariation` contiene jugada, puntuación y PV. `SearchLimits.rootMoves` limita las candidatas; UCI lo expone mediante `go ... searchmoves`. Esto permite valorar la jugada de una partida con el mismo límite usado para buscar la mejor alternativa.
+`SearchLimits.multiPv` solicita alternativas ordenadas hasta cubrir todas las jugadas legales de la posición (el protocolo UCI admite 1–256). Cada `RootVariation` contiene jugada, puntuación y PV. `SearchLimits.rootMoves` limita las candidatas; UCI lo expone mediante `go ... searchmoves`. Esto permite valorar la jugada de una partida con el mismo límite usado para buscar la mejor alternativa.
 
 ```text
 setoption name MultiPV value 3

@@ -16,8 +16,8 @@ internal sealed class AnalysisTab : TabPage
     private readonly ComboBox source = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 90 };
     private readonly TextBox input = new() { Multiline = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill,
         PlaceholderText = "Pega aquí una partida PGN o una posición FEN." };
-    private readonly NumericUpDown depth = new() { Minimum = 1, Maximum = 12, Value = 4, Width = 48 };
-    private readonly NumericUpDown multipv = new() { Minimum = 1, Maximum = 10, Value = 3, Width = 45 };
+    private readonly NumericUpDown depth = new() { Minimum = 1, Maximum = 126, Value = 4, Width = 55 };
+    private readonly NumericUpDown multipv = new() { Minimum = 1, Maximum = 256, Value = 3, Width = 55 };
     private readonly ComboBox games = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill };
     private readonly ComboBox provider = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 135 };
     private readonly ComboBox model = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 150 };
@@ -32,7 +32,9 @@ internal sealed class AnalysisTab : TabPage
     private readonly TextBox question = new() { Dock = DockStyle.Fill, PlaceholderText = "¿Por qué prefiere esta jugada?" };
     private readonly TextBox alternative = new() { Width = 95, PlaceholderText = "Nf3 / g1f3" };
     private readonly TextBox fen = new() { Dock = DockStyle.Fill, ReadOnly = true };
-    private readonly CheckBox after = new() { Text = "Después de la jugada", AutoSize = true };
+    private readonly CheckBox after = new() { Text = "Después de la jugada", AutoSize = true, Checked = true };
+    private readonly Button chartToggle = new() { Text = "Gráfico de evaluación ▾", AutoSize = true };
+    private readonly EvaluationChart evaluationChart = new() { Dock = DockStyle.Fill, Visible = false };
     private readonly Label status = new() { Text = "Importa un PGN, pega una FEN o carga tu partida actual.", AutoSize = true, Dock = DockStyle.Fill };
     private readonly Button cancel = new() { Text = "Cancelar", AutoSize = true, Enabled = false };
     private readonly List<Control> lockedControls = [];
@@ -42,6 +44,8 @@ internal sealed class AnalysisTab : TabPage
     private string? outputDirectory;
     private CancellationTokenSource? cancellation;
     private bool loading;
+    private TableLayoutPanel? rightLayout;
+    private bool chartExpanded;
 
     public AnalysisTab(string projectRoot, string enginePath, string pythonPath, Func<string[]> gameMoves) : base("Análisis")
     {
@@ -95,10 +99,12 @@ internal sealed class AnalysisTab : TabPage
         left.Controls.Add(fen, 0, 2);
         content.Controls.Add(left, 0, 0);
 
-        TableLayoutPanel right = new() { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 6, Padding = new Padding(8, 0, 0, 0) };
+        TableLayoutPanel right = new() { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 8, Padding = new Padding(8, 0, 0, 0) };
         right.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         right.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         right.RowStyles.Add(new RowStyle(SizeType.Absolute, 132));
+        right.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        right.RowStyles.Add(new RowStyle(SizeType.Absolute, 0));
         right.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         right.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         right.RowStyles.Add(new RowStyle(SizeType.AutoSize));
@@ -110,31 +116,36 @@ internal sealed class AnalysisTab : TabPage
             grid.Columns[index].SortMode = DataGridViewColumnSortMode.NotSortable;
         }
         right.Controls.Add(grid, 0, 1);
+        right.Controls.Add(chartToggle, 0, 2);
+        right.Controls.Add(evaluationChart, 0, 3);
         TabPage factsPage = new("Cálculos del motor");
         factsPage.Controls.Add(evidence);
         TabPage aiPage = new("Explicación IA");
         aiPage.Controls.Add(answer);
         explanations.TabPages.AddRange([factsPage, aiPage]);
-        right.Controls.Add(explanations, 0, 2);
+        right.Controls.Add(explanations, 0, 4);
         FlowLayoutPanel aiSettings = Flow();
         aiSettings.Controls.Add(provider);
         aiSettings.Controls.Add(model);
         aiSettings.Controls.Add(ActionButton("Detectar IA", DetectModelsAsync));
-        right.Controls.Add(aiSettings, 0, 3);
-        right.Controls.Add(question, 0, 4);
+        right.Controls.Add(aiSettings, 0, 5);
+        right.Controls.Add(question, 0, 6);
         FlowLayoutPanel askRow = Flow();
         askRow.Controls.Add(Caption("Alternativa"));
         askRow.Controls.Add(alternative);
         askRow.Controls.Add(ActionButton("Explicar / preguntar", ExplainAsync));
-        right.Controls.Add(askRow, 0, 5);
+        right.Controls.Add(askRow, 0, 7);
         content.Controls.Add(right, 1, 0);
+        rightLayout = right;
+        lockedControls.Add(chartToggle);
+        chartToggle.Click += (_, _) => SetChartExpanded(!chartExpanded);
         layout.Controls.Add(content, 0, 2);
         layout.Controls.Add(status, 0, 3);
         Controls.Add(layout);
         lockedControls.AddRange([input, source, depth, multipv, games, grid, provider, model, question, alternative, after]);
         cancel.Click += (_, _) => cancellation?.Cancel();
         games.SelectedIndexChanged += (_, _) => LoadGame();
-        grid.SelectionChanged += (_, _) => SelectMove();
+        grid.CurrentCellChanged += (_, _) => SelectMove();
         after.CheckedChanged += (_, _) => UpdateBoard();
         Disposed += (_, _) => cancellation?.Cancel();
     }
@@ -196,6 +207,7 @@ internal sealed class AnalysisTab : TabPage
         if (games.SelectedIndex < 0) return;
         JsonElement game = payload.GetProperty("games")[games.SelectedIndex];
         records = game.GetProperty("moves").EnumerateArray().ToArray();
+        evaluationChart.SetRecords(records);
         loading = true;
         grid.Rows.Clear();
         foreach (JsonElement record in records)
@@ -220,6 +232,7 @@ internal sealed class AnalysisTab : TabPage
             fen.Text = board.Position;
             evidence.Text = "No hay jugadas que analizar. La posición es terminal o el PGN no contiene movimientos.";
             answer.Clear();
+            evaluationChart.SetRecords([]);
         }
     }
 
@@ -253,7 +266,20 @@ internal sealed class AnalysisTab : TabPage
         evidence.Text = text.ToString();
         answer.Text = "Pulsa Explicar / preguntar para comentar esta posición con la IA local.";
         alternative.Clear();
+        evaluationChart.SelectedIndex = SelectedIndex;
         UpdateBoard();
+    }
+
+    private void SetChartExpanded(bool expanded)
+    {
+        chartExpanded = expanded;
+        evaluationChart.Visible = expanded;
+        chartToggle.Text = expanded ? "Gráfico de evaluación ▴" : "Gráfico de evaluación ▾";
+        if (rightLayout is not null)
+        {
+            rightLayout.RowStyles[3] = new RowStyle(SizeType.Absolute, expanded ? 180 : 0);
+            rightLayout.PerformLayout();
+        }
     }
 
     private void UpdateBoard()
@@ -388,4 +414,128 @@ internal sealed class AnalysisTab : TabPage
         "pawn_structure" => "Estructura de peones", "passed_pawns" => "Peones pasados", "bishop_pair" => "Pareja de alfiles",
         "rook_activity" => "Actividad de torres", "king_safety" => "Seguridad del rey", "space" => "Espacio", "tempo" => "Tempo", _ => null
     };
+}
+
+internal sealed class EvaluationChart : Control
+{
+    private double?[] values = [];
+    private string[] labels = [];
+    private int selectedIndex = -1;
+
+    public EvaluationChart()
+    {
+        BackColor = Color.White;
+        MinimumSize = new Size(0, 170);
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                 ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+    }
+
+    [System.ComponentModel.DesignerSerializationVisibility(
+        System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public int SelectedIndex
+    {
+        get => selectedIndex;
+        set
+        {
+            selectedIndex = value;
+            Invalidate();
+        }
+    }
+
+    public void SetRecords(JsonElement[] records)
+    {
+        values = records.Select(ScoreFromWhitePerspective).ToArray();
+        labels = records.Select(record =>
+        {
+            string prefix = record.GetProperty("move_number").GetInt32() +
+                            (record.GetProperty("color").GetString() == "white" ? "." : "…");
+            return prefix + record.GetProperty("move_san").GetString();
+        }).ToArray();
+        selectedIndex = -1;
+        Invalidate();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        RectangleF plot = new(42, 14, Math.Max(1, ClientSize.Width - 56), Math.Max(1, ClientSize.Height - 42));
+        using Font small = new("Segoe UI", 8);
+        using Font title = new("Segoe UI", 8, FontStyle.Bold);
+        using Pen axis = new(Color.FromArgb(180, 188, 184));
+        using Pen grid = new(Color.FromArgb(225, 230, 227));
+        using Pen zero = new(Color.FromArgb(130, 145, 138)) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
+        using Brush text = new SolidBrush(Color.FromArgb(65, 75, 70));
+        using Brush lineBrush = new SolidBrush(Color.FromArgb(42, 79, 70));
+        using Pen line = new(Color.FromArgb(42, 79, 70), 2.2f);
+
+        e.Graphics.DrawString("Evaluación desde la perspectiva de blancas (peones)", title, text, 42, 0);
+        if (values.Length == 0)
+        {
+            e.Graphics.DrawString("Analiza una partida para ver la evolución.", small, text, plot.Left, plot.Top + 20);
+            return;
+        }
+
+        double maximum = Math.Max(1, values.Where(value => value.HasValue)
+            .Select(value => Math.Abs(value!.Value)).DefaultIfEmpty(1).Max());
+        maximum = Math.Ceiling(maximum * 1.1);
+        float zeroY = ValueY(0, maximum, plot);
+        e.Graphics.DrawLine(axis, plot.Left, plot.Bottom, plot.Right, plot.Bottom);
+        e.Graphics.DrawLine(axis, plot.Left, plot.Top, plot.Left, plot.Bottom);
+        e.Graphics.DrawLine(zero, plot.Left, zeroY, plot.Right, zeroY);
+        e.Graphics.DrawLine(grid, plot.Left, ValueY(maximum, maximum, plot), plot.Right, ValueY(maximum, maximum, plot));
+        e.Graphics.DrawLine(grid, plot.Left, ValueY(-maximum, maximum, plot), plot.Right, ValueY(-maximum, maximum, plot));
+        e.Graphics.DrawString($"+{maximum:0.0}", small, text, 2, plot.Top - 5);
+        e.Graphics.DrawString("0.0", small, text, 14, zeroY - 7);
+        e.Graphics.DrawString($"-{maximum:0.0}", small, text, 2, plot.Bottom - 8);
+
+        PointF? previous = null;
+        for (int index = 0; index < values.Length; index++)
+        {
+            if (!values[index].HasValue)
+            {
+                previous = null;
+                continue;
+            }
+            PointF point = new(ValueX(index, values.Length, plot), ValueY(values[index]!.Value, maximum, plot));
+            if (previous.HasValue) e.Graphics.DrawLine(line, previous.Value, point);
+            float radius = index == selectedIndex ? 5 : 3;
+            e.Graphics.FillEllipse(lineBrush, point.X - radius, point.Y - radius, radius * 2, radius * 2);
+            if (index == selectedIndex)
+            {
+                e.Graphics.DrawLine(zero, point.X, plot.Top, point.X, plot.Bottom);
+                string score = values[index]!.Value.ToString("+0.00;-0.00;0.00");
+                string caption = labels[index] + "  " + score;
+                e.Graphics.DrawString(caption, small, text,
+                    Math.Clamp(point.X - 35, plot.Left, Math.Max(plot.Left, plot.Right - 120)),
+                    Math.Max(plot.Top, point.Y - 25));
+            }
+            previous = point;
+        }
+        if (labels.Length > 0)
+        {
+            e.Graphics.DrawString(labels[0], small, text, plot.Left, plot.Bottom + 5);
+            SizeF lastSize = e.Graphics.MeasureString(labels[^1], small);
+            e.Graphics.DrawString(labels[^1], small, text, Math.Max(plot.Left, plot.Right - lastSize.Width), plot.Bottom + 5);
+        }
+    }
+
+    private static float ValueX(int index, int count, RectangleF plot) =>
+        count == 1 ? plot.Left + plot.Width / 2 : plot.Left + index * plot.Width / (count - 1);
+
+    private static float ValueY(double value, double maximum, RectangleF plot) =>
+        plot.Top + (float)((maximum - Math.Clamp(value, -maximum, maximum)) / (maximum * 2) * plot.Height);
+
+    private static double? ScoreFromWhitePerspective(JsonElement record)
+    {
+        JsonElement score = record.GetProperty("played").GetProperty("score");
+        double value;
+        if (score.GetProperty("mate").ValueKind != JsonValueKind.Null)
+            value = Math.Sign(score.GetProperty("mate").GetInt32()) * 10;
+        else if (score.GetProperty("cp").ValueKind != JsonValueKind.Null)
+            value = score.GetProperty("cp").GetInt32() / 100.0;
+        else
+            return null;
+        return record.GetProperty("color").GetString() == "black" ? -value : value;
+    }
 }
